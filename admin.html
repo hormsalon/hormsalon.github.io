@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#A4A195">
+<meta name="robots" content="noindex">
+<title>HORM SALON — หลังบ้าน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500&family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --greige: #A4A195;
+    --greige-deep: #8C897D;
+    --cream: #F4F3EE;
+    --paper: #FAF9F6;
+    --ink: #3B3A35;
+    --muted: #8A877C;
+    --faint: #C4C1B6;
+    --line: #E4E2DA;
+    --soft: #EDEBE4;
+    --danger: #A65A4E;
+    --danger-bg: #F6E9E6;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: 'IBM Plex Sans Thai', system-ui, sans-serif; font-weight: 300;
+    font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; }
+  header {
+    background: var(--greige); color: var(--cream);
+    padding: 18px 16px; padding-top: calc(18px + env(safe-area-inset-top));
+    display: flex; align-items: center; gap: 12px;
+  }
+  header img { width: 92px; height: auto; display: block; }
+  header .t { flex: 1; font-size: 13px; letter-spacing: .06em; opacity: .9; }
+  header button { background: transparent; border: 1px solid rgba(244,243,238,.5); color: var(--cream); border-radius: 99px; font-family: inherit; font-size: 12.5px; padding: 5px 12px; cursor: pointer; }
+  main { padding: 8px 16px 48px; }
+  h2 { font-size: 16px; font-weight: 500; margin: 26px 0 4px; }
+  .hint { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+
+  .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 13px 14px; border-bottom: 1px solid var(--soft); }
+  .row:last-child { border-bottom: 0; }
+  .row .info { flex: 1; min-width: 0; cursor: pointer; }
+  .row .d { font-weight: 400; }
+  .row .d .today { font-size: 11px; background: var(--greige); color: var(--cream); padding: 1px 8px; border-radius: 99px; margin-left: 6px; vertical-align: 1px; }
+  .row .s { font-size: 12.5px; color: var(--muted); }
+  .row .s .chev { display: inline-block; transition: transform .2s; margin-left: 4px; }
+  .row.open .s .chev { transform: rotate(90deg); }
+  .row.closed .d { color: var(--muted); }
+  .tag { font-size: 11px; background: var(--soft); color: var(--greige-deep); padding: 1px 8px; border-radius: 99px; margin-left: 6px; vertical-align: 1px; white-space: nowrap; }
+  .reset { background: none; border: 0; padding: 0; color: var(--greige-deep); text-decoration: underline; font-family: inherit; font-size: 12px; cursor: pointer; margin-left: 6px; }
+  .warn { color: var(--danger); font-size: 12.5px; margin-top: 3px; }
+
+  .stepper { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+  .stepper button {
+    width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper);
+    color: var(--ink); font-size: 18px; line-height: 1; cursor: pointer; font-family: inherit; font-weight: 300;
+  }
+  .stepper button:disabled { opacity: .3; cursor: default; }
+  .stepper .v { width: 42px; text-align: center; line-height: 1.15; }
+  .stepper .v b { font-weight: 500; font-size: 17px; display: block; }
+  .stepper .v small { font-size: 10.5px; color: var(--muted); }
+
+  .bookings { background: var(--paper); border-bottom: 1px solid var(--soft); padding: 4px 14px 10px; }
+  .bk { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 13.5px; }
+  .bk:last-child { border-bottom: 0; }
+  .bk .tm { font-weight: 500; width: 46px; flex: 0 0 auto; }
+  .bk .who { flex: 1; min-width: 0; }
+  .bk .who a { color: var(--ink); }
+  .bk .meta { color: var(--muted); font-size: 12.5px; }
+  .bk.cancelled { opacity: .5; }
+  .bk.cancelled .tm, .bk.cancelled .who > div:first-child { text-decoration: line-through; }
+  .bk .x { align-self: center; background: none; border: 1px solid var(--line); border-radius: 99px; color: var(--danger); font-family: inherit; font-size: 12px; padding: 4px 10px; cursor: pointer; }
+  .empty { color: var(--muted); font-size: 13px; padding: 10px 0; }
+  .linkbox { margin-top: 12px; }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .codecard { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; font-size: 13.5px; }
+  .codecard .code { font-size: 30px; font-weight: 500; letter-spacing: .2em; text-align: center; margin: 6px 0 10px; color: var(--ink); }
+  .codecard ol { margin: 0; padding-left: 20px; color: var(--ink); line-height: 1.8; }
+  .codecard .cmd { background: var(--soft); border-radius: 6px; padding: 1px 8px; font-weight: 500; white-space: nowrap; }
+  .rm { background: none; border: 1px solid var(--line); border-radius: 99px; color: var(--danger); font-family: inherit; font-size: 12px; padding: 4px 10px; cursor: pointer; }
+
+  details.panel summary { list-style: none; padding: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 400; }
+  details.panel summary::-webkit-details-marker { display: none; }
+  details.panel summary span { color: var(--muted); font-size: 12.5px; font-weight: 300; }
+  details.panel[open] summary { border-bottom: 1px solid var(--soft); }
+
+  /* Login */
+  .login { max-width: 340px; margin: 48px auto 0; text-align: center; }
+  .login h1 { font-weight: 500; font-size: 18px; margin: 0 0 4px; }
+  .login input {
+    width: 100%; font-family: inherit; font-size: 20px; letter-spacing: .12em; text-align: center;
+    padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--ink);
+    outline: none; margin: 18px 0 10px;
+  }
+  .login input:focus { border-color: var(--greige); }
+  .remember { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; color: var(--muted); margin: 0 0 14px; cursor: pointer; }
+  .remember input { width: 16px; height: 16px; margin: 0; accent-color: var(--greige-deep); }
+  .sync { font-size: 11.5px; opacity: .85; margin-left: 6px; letter-spacing: 0; }
+  .btn { border: 0; border-radius: 99px; background: var(--ink); color: var(--cream); font-family: inherit; font-size: 15px; padding: 13px 24px; cursor: pointer; width: 100%; }
+  .btn:disabled { opacity: .4; }
+  .err { color: var(--danger); font-size: 13px; min-height: 20px; margin-top: 8px; }
+
+  .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink); color: var(--cream); padding: 10px 18px; border-radius: 99px; font-size: 13.5px; z-index: 30; display: none; max-width: calc(100% - 32px); text-align: center; }
+  .loading { color: var(--muted); text-align: center; padding: 40px 0; font-size: 13.5px; }
+  .busy { opacity: .55; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="data:image/jpeg;base64,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" alt="HORM SALON">
+    <div class="t">หลังบ้าน <span id="sync" class="sync"></span></div>
+    <button id="btn-logout" style="display:none">ออกจากระบบ</button>
+  </header>
+
+  <main>
+    <div id="login" class="login" style="display:none">
+      <h1>เข้าสู่ระบบหลังบ้าน</h1>
+      <div class="hint">ใส่รหัสผ่านหลังบ้านของร้าน</div>
+      <input id="pin" type="password" autocomplete="current-password" maxlength="64" placeholder="••••••">
+      <label class="remember"><input type="checkbox" id="remember" checked> จำรหัสในเครื่องนี้ (ไม่ต้องใส่ใหม่ทุกครั้ง)</label>
+      <button class="btn" id="btn-login">เข้าสู่ระบบ</button>
+      <div class="err" id="login-err"></div>
+    </div>
+
+    <div id="app" style="display:none">
+      <h2>จำนวนช่างรายวัน</h2>
+      <p class="hint">กด − / + เพื่อปรับจำนวนช่างที่มาทำงานในวันนั้น (0 = ร้านหยุด) ระบบจะเปิดคิวให้ลูกค้าจองตามนี้ทันที · แตะที่วันที่เพื่อดูรายชื่อคิว</p>
+      <div class="panel" id="days"><div class="loading">กำลังโหลด…</div></div>
+
+      <h2>ค่าปกติแต่ละวันในสัปดาห์</h2>
+      <p class="hint">ใช้กับทุกสัปดาห์ เช่น วันที่ช่างคนหนึ่งหยุดประจำ ตั้งเป็น 2 · วันที่ปรับเองด้านบนจะใช้ค่าที่ปรับเองก่อน</p>
+      <div class="panel" id="weekly"></div>
+      <p class="hint" style="margin-top:14px" id="cap-note"></p>
+
+      <h2>แจ้งเตือน LINE</h2>
+      <p class="hint">เมื่อมีคนจองคิว ระบบจะส่งแจ้งเตือนไปที่รายการด้านล่างทั้งหมด</p>
+      <div class="panel" id="line-list"></div>
+      <div class="linkbox" id="link-box">
+        <button class="btn ghost" id="btn-link-code">+ เพิ่มกลุ่ม LINE พนักงาน</button>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DOW = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+const DOW_FULL = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+const MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+const $ = (s) => document.querySelector(s);
+const state = { pin: '', data: null, open: null, saving: 0 };
+const pending = {}; // ค่าที่กดแล้วแต่ยังไม่ได้ส่งไปบันทึก { 'day:yyyy-mm-dd' | 'week': value }
+const timers = {};
+
+/* ---------- Server bridge ---------- */
+// ลิงก์ระบบหลังบ้านบน Google (หน้าเว็บบน GitHub Pages เรียกข้อมูลผ่านลิงก์นี้)
+const API_URL = 'https:' + '/' + '/script.google.com/macros/s/AKfycbyPNULeyrY5v92wrFAYpHOSFKHIPEZCTDeIobmWGp70yIaxwMAtQE_uoJ2NIYTypI-nBw/exec';
+const isGAS = typeof google !== 'undefined' && google.script && google.script.run;
+const useDemo = !isGAS && ['localhost', '127.0.0.1'].includes(location.hostname) && !location.search.includes('api=1');
+function call(fn, ...args) {
+  if (isGAS) {
+    return new Promise((res, rej) => {
+      google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](...args);
+    });
+  }
+  if (useDemo) return Demo[fn](...args);
+  // ส่งแบบ text/plain เพื่อไม่ให้เบราว์เซอร์ต้องขออนุญาต CORS ก่อน และไม่แนบ cookie ของ Google
+  return fetch(API_URL, { method: 'POST', body: JSON.stringify({ fn: fn, args: args }) })
+    .then((r) => r.json())
+    .then((r) => {
+      if (!r.ok) throw new Error(r.error || 'เกิดข้อผิดพลาด');
+      return r.data;
+    });
+}
+
+/* โหมดตัวอย่าง: ใช้เมื่อเปิดไฟล์นี้ตรงๆ โดยไม่ผ่าน Apps Script (PIN อะไรก็ได้) */
+const Demo = (() => {
+  const BEDS = 3, SERVICE = 45, LANES = 17;
+  const pad = (n) => String(n).padStart(2, '0');
+  const ymdOf = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const now = new Date();
+  const dates = [...Array(31)].map((_, i) => { const d = new Date(now); d.setDate(now.getDate() + i); return ymdOf(d); });
+  let weekly = [3, 2, 3, 3, 2, 3, 3];
+  let overrides = { [dates[3]]: 1 };
+  let line = [
+    { id: 'U-owner', type: 'owner', name: 'เจ้าของร้าน (ตั้งไว้ตอนติดตั้ง)' },
+    { id: 'C-staff', type: 'group', name: 'ทีม HORM', added: dates[0] },
+  ];
+  const names = ['มินท์', 'ฝน', 'แพรว', 'ปอนด์', 'นุ่น', 'เจน', 'บีม', 'ออม'];
+  const times = ['06:45', '08:15', '09:00', '09:00', '10:30', '12:00', '14:15', '16:30', '17:15'];
+  let bookings = [];
+  dates.slice(0, 8).forEach((d, di) => {
+    const n = [5, 3, 4, 3, 2, 1, 2, 0][di];
+    for (let i = 0; i < n; i++) {
+      const k = i % 3 === 1 ? 1 : 0, p = i === 2 ? 2 : 1;
+      bookings.push({ id: `HM${d.slice(2).replace(/-/g, '')}-${String.fromCharCode(65 + i)}${di}Q`, date: d, time: times[(i * 2 + di) % times.length],
+        name: names[(i + di) % names.length], phone: '08' + String(10000000 + i * 1234567 + di).slice(0, 8),
+        people: p, moisture: p - k, keratin: k, total: p * 290 + k * 50, status: 'ยืนยัน' });
+    }
+  });
+  const staffFor = (d) => (d in overrides ? overrides[d] : weekly[new Date(d + 'T00:00').getDay()]);
+  const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3);
+  const overview = () => ({
+    beds: BEDS, maxStaff: 3, weekly: weekly.slice(), line: line.slice(),
+    days: dates.map((d) => {
+      const staff = staffFor(d), cap = Math.min(BEDS, staff);
+      const act = bookings.filter((b) => b.date === d && b.status !== 'ยกเลิก');
+      const used = {};
+      act.forEach((b) => { for (let x = toMin(b.time); x < toMin(b.time) + SERVICE; x += 5) used[x] = (used[x] || 0) + b.people; });
+      const peak = Math.max(0, ...Object.values(used));
+      return { date: d, staff, isOverride: d in overrides, capacity: cap, maxQueue: cap * LANES,
+        booked: act.reduce((s, b) => s + b.people, 0), overbooked: peak > cap,
+        bookings: bookings.filter((b) => b.date === d).sort((a, b) => a.time.localeCompare(b.time)) };
+    }),
+  });
+  const delay = (v) => new Promise((r) => setTimeout(() => r(JSON.parse(JSON.stringify(v))), 1200));
+  return {
+    adminGetOverview: () => delay(overview()),
+    adminSetWeekly: (pin, w) => { weekly = w; return delay(overview()); },
+    adminSetDay: (pin, d, n) => { if (n === null) delete overrides[d]; else overrides[d] = n; return delay(overview()); },
+    adminCancelBooking: (pin, id) => { bookings.find((b) => b.id === id).status = 'ยกเลิก'; return delay(overview()); },
+    adminCreateLinkCode: () => delay({ code: '482913', minutes: 15 }),
+    adminRemoveRecipient: (pin, id) => { line = line.filter((r) => r.id !== id); return delay(overview()); },
+  };
+})();
+
+/* ---------- Helpers ---------- */
+function parseDate(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+function dateLabel(s) { const d = parseDate(s); return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`; }
+function fmtPhone(p) { return p.length === 10 ? `${p.slice(0, 3)}-${p.slice(3, 6)}-${p.slice(6)}` : p; }
+// ไม่เขียน entity หรือเครื่องหมายคำพูดใน regex ตรงๆ เพราะ Apps Script ประมวลผลสคริปต์แล้วโค้ดพัง
+const ESC_MAP = { 38: 'amp', 60: 'lt', 62: 'gt', 34: 'quot', 39: '#39' };
+const ESC_RE = new RegExp('[&<>' + String.fromCharCode(34, 39) + ']', 'g');
+function esc(s) { return String(s).replace(ESC_RE, (c) => String.fromCharCode(38) + ESC_MAP[c.charCodeAt(0)] + ';'); }
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toast.t); toast.t = setTimeout(() => (t.style.display = 'none'), 2600);
+}
+function errMsg(e) { return ((e && e.message) || '').replace(/^Error: /, '') || 'เกิดข้อผิดพลาด กรุณาลองใหม่'; }
+// remember = true เก็บรหัสไว้ในเครื่องนี้ (ไม่ต้องใส่ใหม่), false เก็บแค่จนปิดแท็บ
+const store = {
+  get() {
+    try { return localStorage.getItem('horm_pin') || sessionStorage.getItem('horm_pin') || ''; } catch (e) { return ''; }
+  },
+  set(v, remember) {
+    try {
+      localStorage.removeItem('horm_pin'); sessionStorage.removeItem('horm_pin');
+      if (v) (remember ? localStorage : sessionStorage).setItem('horm_pin', v);
+    } catch (e) {}
+  },
+  getData() { try { return JSON.parse(sessionStorage.getItem('horm_data') || 'null'); } catch (e) { return null; } },
+  setData(d) { try { sessionStorage.setItem('horm_data', JSON.stringify(d)); } catch (e) {} },
+};
+function stepperHTML(value, max, attrs) {
+  return `<div class="stepper" ${attrs}>
+    <button type="button" data-d="-1" ${value <= 0 ? 'disabled' : ''} aria-label="ลด">−</button>
+    <div class="v"><b>${value}</b><small>ช่าง</small></div>
+    <button type="button" data-d="1" ${value >= max ? 'disabled' : ''} aria-label="เพิ่ม">+</button>
+  </div>`;
+}
+
+/* ---------- Render ---------- */
+function renderDays() {
+  const { days, maxStaff } = state.data;
+  let html = '';
+  days.forEach((d, i) => {
+    const closed = d.capacity === 0;
+    const sub = closed
+      ? 'ร้านหยุด · ไม่เปิดให้จอง'
+      : `รับพร้อมกัน ${d.capacity} คน · สูงสุด ${d.maxQueue} คิว · จองแล้ว ${d.booked}`;
+    const open = state.open === d.date;
+    html += `<div class="row${closed ? ' closed' : ''}${open ? ' open' : ''}" data-date="${d.date}">
+      <div class="info" data-toggle="${d.date}">
+        <div class="d">${dateLabel(d.date)}${i === 0 ? '<span class="today">วันนี้</span>' : ''}${d.isOverride ? '<span class="tag">ปรับเอง</span><button class="reset" data-reset="' + d.date + '">ใช้ค่าปกติ</button>' : ''}</div>
+        <div class="s">${sub}${d.bookings.length ? '<span class="chev">›</span>' : ''}</div>
+        ${d.overbooked ? '<div class="warn">คิวที่จองไว้เกินจำนวนช่าง กรุณาติดต่อลูกค้าเพื่อเลื่อนคิว</div>' : ''}
+      </div>
+      ${stepperHTML(d.staff, maxStaff, 'data-day="' + d.date + '"')}
+    </div>`;
+    if (open) html += `<div class="bookings">${bookingsHTML(d.date)}</div>`;
+  });
+  $('#days').innerHTML = html;
+}
+
+function bookingsHTML(date) {
+  const day = state.data.days.find((x) => x.date === date);
+  const list = (day && day.bookings) || [];
+  if (!list.length) return '<div class="empty">ยังไม่มีคิว</div>';
+  return list.map((b) => {
+    const cancelled = b.status === 'ยกเลิก';
+    const sh = [b.moisture && `Moisture ×${b.moisture}`, b.keratin && `Keratin ×${b.keratin}`].filter(Boolean).join(', ');
+    return `<div class="bk${cancelled ? ' cancelled' : ''}">
+      <div class="tm">${esc(b.time)}</div>
+      <div class="who">
+        <div>${esc(b.name)} · <a href="tel:${esc(b.phone)}">${fmtPhone(esc(b.phone))}</a></div>
+        <div class="meta">${b.people} ท่าน · ${sh} · ${b.total.toLocaleString('en-US')} บาท${cancelled ? ' · ยกเลิกแล้ว' : ''}</div>
+      </div>
+      ${cancelled ? '' : '<button class="x" data-cancel="' + esc(b.id) + '" data-date="' + date + '">ยกเลิก</button>'}
+    </div>`;
+  }).join('');
+}
+
+function renderWeekly() {
+  const { weekly, maxStaff, beds } = state.data;
+  const order = [1, 2, 3, 4, 5, 6, 0];
+  $('#weekly').innerHTML = order.map((i) => `<div class="row">
+    <div class="info" style="cursor:default"><div class="d">วัน${DOW_FULL[i]}</div>
+    <div class="s">${weekly[i] === 0 ? 'ร้านหยุดทุกสัปดาห์' : 'รับพร้อมกัน ' + Math.min(beds, weekly[i]) + ' คน'}</div></div>
+    ${stepperHTML(weekly[i], maxStaff, 'data-week="' + i + '"')}
+  </div>`).join('');
+  $('#cap-note').textContent = `ร้านมี ${beds} เตียง · รับลูกค้าพร้อมกันได้ไม่เกินจำนวนช่างและจำนวนเตียง`;
+}
+
+function renderLine() {
+  const list = state.data.line || [];
+  const label = { owner: 'เจ้าของ', group: 'กลุ่ม', room: 'แชทรวม', user: 'แชทส่วนตัว' };
+  $('#line-list').innerHTML = list.length ? list.map((r) => `<div class="row">
+    <div class="info" style="cursor:default"><div class="d">${esc(r.name)}</div>
+    <div class="s">${label[r.type] || ''}${r.added ? ' · เชื่อมต่อเมื่อ ' + esc(r.added) : ''}</div></div>
+    ${r.type === 'owner' ? '' : '<button class="rm" data-line-remove="' + esc(r.id) + '">หยุดแจ้งเตือน</button>'}
+  </div>`).join('') : '<div class="row"><div class="s">ยังไม่มีผู้รับแจ้งเตือน</div></div>';
+}
+
+function render() { renderDays(); renderWeekly(); renderLine(); }
+
+/* ---------- Actions ----------
+   กดแล้วหน้าจอเปลี่ยนทันที (optimistic) แล้วค่อยส่งไปบันทึกเบื้องหลัง
+   กดหลายครั้งติดกันจะรวมเป็นการบันทึกครั้งเดียว และส่งทีละคำขอตามลำดับ */
+let chain = Promise.resolve();
+function enqueue(fn) { chain = chain.then(fn, fn); return chain; }
+
+function setSync() {
+  const busy = state.saving > 0 || Object.keys(timers).length > 0;
+  $('#sync').textContent = busy ? 'กำลังบันทึก…' : '';
+}
+
+function lanes() {
+  const d = state.data.days.find((x) => x.capacity > 0);
+  return state.data.lanes || (d ? d.maxQueue / d.capacity : 0);
+}
+
+function setDayStaff(d, staff, isOverride) {
+  d.staff = staff;
+  d.isOverride = isOverride;
+  d.capacity = Math.min(state.data.beds, staff);
+  d.maxQueue = d.capacity * lanes();
+}
+
+/* ใส่ค่าที่กดค้างไว้ทับข้อมูลจากเซิร์ฟเวอร์ ตัวเลขบนจอจะได้ไม่เด้งกลับ */
+function applyPending() {
+  const w = pending.week;
+  if (w) state.data.weekly = w.slice();
+  state.data.days.forEach((d) => {
+    const k = 'day:' + d.date;
+    if (k in pending) {
+      if (pending[k] === null) setDayStaff(d, state.data.weekly[parseDate(d.date).getDay()], false);
+      else setDayStaff(d, pending[k], true);
+    } else if (w && !d.isOverride) {
+      setDayStaff(d, w[parseDate(d.date).getDay()], false);
+    }
+  });
+}
+
+function receive(data) {
+  state.data = data;
+  applyPending();
+  store.setData(state.data);
+  render();
+}
+
+async function send(fn, ...args) {
+  state.saving++; setSync();
+  try {
+    const data = await call(fn, state.pin, ...args);
+    receive(data);
+    return true;
+  } catch (e) {
+    toast(errMsg(e));
+    if (/รหัส/.test(errMsg(e))) logout();
+    else refresh();
+    return false;
+  } finally {
+    state.saving--; setSync();
+  }
+}
+
+function schedule(key, value, fn) {
+  pending[key] = value;
+  applyPending(); render();
+  clearTimeout(timers[key]);
+  timers[key] = setTimeout(() => {
+    delete timers[key];
+    const v = pending[key];
+    enqueue(async () => {
+      const ok = await send(fn, ...(key === 'week' ? [v] : [key.slice(4), v]));
+      if (pending[key] === v) delete pending[key];
+      if (ok) toast('บันทึกแล้ว');
+    });
+  }, 500);
+  setSync();
+}
+
+async function refresh() {
+  if (!state.pin || state.saving || Object.keys(timers).length) return;
+  try { receive(await call('adminGetOverview', state.pin)); } catch (e) { /* เงียบไว้ ลองใหม่รอบหน้า */ }
+}
+
+document.addEventListener('click', (e) => {
+  const reset = e.target.closest('[data-reset]');
+  if (reset) {
+    e.stopPropagation();
+    schedule('day:' + reset.dataset.reset, null, 'adminSetDay');
+    return;
+  }
+
+  const btn = e.target.closest('.stepper button');
+  if (btn && !btn.disabled) {
+    const st = btn.parentElement, delta = +btn.dataset.d;
+    if (st.dataset.day) {
+      const d = state.data.days.find((x) => x.date === st.dataset.day);
+      const next = d.staff + delta;
+      if (delta < 0 && d.booked && !confirm(dateLabel(d.date) + ' มีคิวจองแล้ว ' + d.booked + ' ท่าน\nยืนยันลดจำนวนช่างเหลือ ' + next + ' คน?')) return;
+      schedule('day:' + d.date, next, 'adminSetDay');
+    } else if (st.dataset.week) {
+      const w = (pending.week || state.data.weekly).slice();
+      w[+st.dataset.week] += delta;
+      schedule('week', w, 'adminSetWeekly');
+    }
+    return;
+  }
+
+  const cancel = e.target.closest('[data-cancel]');
+  if (cancel) {
+    if (!confirm('ยืนยันยกเลิกคิวนี้? เวลานี้จะว่างให้ลูกค้าคนอื่นจองได้')) return;
+    const d = state.data.days.find((x) => x.date === cancel.dataset.date);
+    const b = d.bookings.find((x) => x.id === cancel.dataset.cancel);
+    if (b.status !== 'ยกเลิก') d.booked -= b.people;
+    b.status = 'ยกเลิก';
+    render();
+    enqueue(async () => { if (await send('adminCancelBooking', b.id)) toast('ยกเลิกคิวแล้ว'); });
+    return;
+  }
+
+  const rm = e.target.closest('[data-line-remove]');
+  if (rm) {
+    if (!confirm('หยุดส่งแจ้งเตือนไปที่นี่?')) return;
+    const id = rm.dataset.lineRemove;
+    state.data.line = state.data.line.filter((r) => r.id !== id);
+    renderLine();
+    enqueue(async () => { if (await send('adminRemoveRecipient', id)) toast('หยุดแจ้งเตือนแล้ว'); });
+    return;
+  }
+
+  if (e.target.closest('#btn-link-code')) {
+    const btn = $('#btn-link-code');
+    btn.disabled = true; btn.textContent = 'กำลังสร้างรหัส…';
+    call('adminCreateLinkCode', state.pin).then((r) => {
+      $('#link-box').innerHTML = `<div class="codecard">
+        <div style="color:var(--muted);text-align:center">รหัสเชื่อมต่อ (ใช้ได้ ${r.minutes} นาที ครั้งเดียว)</div>
+        <div class="code">${r.code}</div>
+        <ol>
+          <li>เปิดกลุ่ม LINE ของพนักงาน → เชิญ → ค้นหา <b>HORM SALON</b> แล้วเชิญเข้ากลุ่ม</li>
+          <li>พิมพ์ในกลุ่ม: <span class="cmd">เปิดแจ้งเตือน ${r.code}</span></li>
+          <li>รอบอทตอบว่า "เปิดแจ้งเตือนคิวแล้ว" แล้วกดรีเฟรชหน้านี้</li>
+        </ol>
+      </div>`;
+    }).catch((err) => {
+      toast(errMsg(err));
+      btn.disabled = false; btn.textContent = '+ เพิ่มกลุ่ม LINE พนักงาน';
+    });
+    return;
+  }
+
+  const tog = e.target.closest('[data-toggle]');
+  if (tog) {
+    const date = tog.dataset.toggle;
+    const d = state.data.days.find((x) => x.date === date);
+    if (!d.bookings.length && state.open !== date) return;
+    state.open = state.open === date ? null : date;
+    renderDays();
+  }
+});
+
+/* ---------- Login ---------- */
+function showApp() {
+  $('#login').style.display = 'none'; $('#app').style.display = 'block';
+  $('#btn-logout').style.display = 'block';
+}
+
+async function login(pin, remember) {
+  $('#btn-login').disabled = true; $('#login-err').textContent = '';
+  const cached = store.getData();
+  if (cached && pin === store.get()) { state.data = cached; showApp(); render(); }
+  try {
+    const data = await call('adminGetOverview', pin);
+    state.pin = pin; store.set(pin, remember);
+    showApp(); receive(data);
+  } catch (e) {
+    store.set(''); state.data = null;
+    $('#app').style.display = 'none'; $('#btn-logout').style.display = 'none';
+    $('#login').style.display = 'block';
+    $('#login-err').textContent = errMsg(e);
+  } finally {
+    $('#btn-login').disabled = false;
+  }
+}
+function logout() {
+  store.set(''); store.setData(null); state.pin = '';
+  $('#app').style.display = 'none'; $('#btn-logout').style.display = 'none';
+  $('#login').style.display = 'block'; $('#pin').value = '';
+}
+$('#btn-login').onclick = () => {
+  const p = $('#pin').value.trim();
+  if (p) login(p, $('#remember').checked); else $('#login-err').textContent = 'กรุณาใส่รหัส';
+};
+$('#pin').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#btn-login').click(); });
+$('#btn-logout').onclick = logout;
+
+// อัปเดตคิวใหม่ทุก 1 นาที และทุกครั้งที่กลับมาเปิดหน้านี้
+setInterval(refresh, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+
+const saved = store.get();
+let remembered = false;
+try { remembered = !!localStorage.getItem('horm_pin'); } catch (e) {}
+if (saved) login(saved, remembered); else $('#login').style.display = 'block';
+</script>
+</body>
+</html>
