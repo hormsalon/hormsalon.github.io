@@ -123,15 +123,20 @@
   .times { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .time {
     border: 1px solid var(--line); background: #fff; border-radius: 10px;
-    padding: 10px 0; text-align: center; font-family: inherit; font-size: 14px;
-    color: var(--ink); cursor: pointer; font-weight: 400;
+    padding: 8px 0 7px; text-align: center; font-family: inherit; font-size: 14px;
+    color: var(--ink); cursor: pointer; font-weight: 400; line-height: 1.25;
     transition: background .2s, border-color .2s, color .2s;
   }
+  .time b { display: block; font-weight: 500; font-size: 14.5px; }
+  .time small { display: block; font-size: 11px; color: var(--muted); }
   .time.sel { background: var(--greige); border-color: var(--greige); color: var(--cream); }
+  .time.sel small { color: var(--cream); opacity: .9; }
   .time:disabled {
     background: transparent; color: #C4C1B6; border-style: dashed; cursor: default;
     text-decoration: line-through;
   }
+  .time:disabled b { font-weight: 400; }
+  .time:disabled small { color: #C4C1B6; }
   .time-state { color: var(--muted); font-size: 13.5px; padding: 18px 0; text-align: center; }
 
   /* Form */
@@ -468,6 +473,12 @@ const fmt = (n) => n.toLocaleString('en-US');
 function parseDate(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
 function ymd(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 function thaiDate(s) { const d = parseDate(s); return `วัน${DOW_FULL[d.getDay()]}ที่ ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear() + 543}`; }
+// เวลาจบของรอบ = เวลาเริ่ม + เวลาที่ใช้ต่อคิว (เช่น 10:30 → 11:15)
+function endTime(t) {
+  const m = +t.slice(0, 2) * 60 + +t.slice(3) + ((state.cfg && state.cfg.service) || 45);
+  return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+}
+function timeRange(t) { return t + ' – ' + endTime(t) + ' น.'; }
 function fmtPhone(p) { return p.length === 10 ? `${p.slice(0, 3)}-${p.slice(3, 6)}-${p.slice(6)}` : p; }
 // ไม่เขียน entity หรือเครื่องหมายคำพูดใน regex ตรงๆ เพราะ Apps Script ประมวลผลสคริปต์แล้วโค้ดพัง
 const ESC_MAP = { 38: 'amp', 60: 'lt', 62: 'gt', 34: 'quot', 39: '#39' };
@@ -528,7 +539,7 @@ function renderTimes() {
     list.forEach((t) => {
       const ok = slots[t] >= n;
       if (ok) anyFree = true;
-      html += `<button type="button" class="time${t === state.time ? ' sel' : ''}" data-t="${t}" ${ok ? '' : 'disabled'}>${t}</button>`;
+      html += `<button type="button" class="time${t === state.time ? ' sel' : ''}" data-t="${t}" ${ok ? '' : 'disabled'}><b>${t}</b><small>ถึง ${endTime(t)}</small></button>`;
     });
     html += '</div>';
   });
@@ -542,7 +553,7 @@ function renderBar() {
   $('#sum-total').textContent = fmt(total());
   const parts = [`${people()} ท่าน`];
   if (state.date) { const d = parseDate(state.date); parts.push(`${d.getDate()} ${MON[d.getMonth()]}`); }
-  if (state.time) parts.push(`${state.time} น.`);
+  if (state.time) parts.push(timeRange(state.time));
   $('#sum-text').textContent = state.date && state.time ? parts.join(' · ') : 'เลือกวันและเวลา';
   $('#btn-next').disabled = !(state.date && state.time);
 }
@@ -576,7 +587,7 @@ function summaryRows(b) {
   const row = (label, value, cls) => '<div' + (cls ? ' class="' + cls + '"' : '') + '><span>' + label + '</span><span>' + value + '</span></div>';
   return [
     row('วันที่', thaiDate(b.date)),
-    row('เวลา', b.time + ' น.'),
+    row('เวลา', timeRange(b.time)),
     row('ชื่อ', esc(b.name)),
     row('เบอร์ติดต่อ', fmtPhone(b.phone)),
     row('บริการ', 'สระ ไดร์ ' + (b.moisture + b.keratin) + ' ท่าน<br>' + shampooText(b)),
@@ -588,7 +599,7 @@ function lineText(b) {
   return [
     'จองคิว HORM SALON',
     `รหัส: ${b.id}`,
-    `${thaiDate(b.date)} เวลา ${b.time} น.`,
+    `${thaiDate(b.date)} เวลา ${timeRange(b.time)}`,
     `ชื่อ: ${b.name}`,
     `เบอร์: ${fmtPhone(b.phone)}`,
     `สระ ไดร์ ${b.people} ท่าน (${[b.moisture && 'Moisture ×' + b.moisture, b.keratin && 'Keratin ×' + b.keratin].filter(Boolean).join(', ')})`,
@@ -716,7 +727,7 @@ $('#m-list').addEventListener('click', async (e) => {
   const btn = e.target.closest('[data-mcancel]');
   if (!btn) return;
   const b = manage.list.find((x) => x.id === btn.dataset.mcancel);
-  if (!confirm('ยืนยันยกเลิกคิว ' + thaiDate(b.date) + ' เวลา ' + b.time + ' น.?')) return;
+  if (!confirm('ยืนยันยกเลิกคิว ' + thaiDate(b.date) + ' เวลา ' + timeRange(b.time) + '?')) return;
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>กำลังยกเลิก…';
   try {
     const updated = await call('cancelBookingByCustomer', b.id, manage.phone);
