@@ -132,6 +132,79 @@
   .modal .slipimg { width: 100%; max-height: 58vh; object-fit: contain; border-radius: 10px; border: 1px solid var(--line); display: block; background: #fff; min-height: 120px; }
   .modal .acts { display: grid; gap: 8px; margin-top: 12px; }
   .btn.ok { background: #4F6B47; }
+  .btn.small { width: auto; padding: 8px 14px; font-size: 13px; }
+
+  /* แท็บ */
+  .tabs { position: sticky; top: 0; z-index: 5; display: flex; gap: 6px; background: var(--paper); padding: 10px 0 8px; margin: 0 0 4px; }
+  .tabs button { flex: 1; border: 1px solid var(--line); background: #fff; border-radius: 99px; padding: 9px 0; font-family: inherit; font-size: 14px; color: var(--ink); cursor: pointer; }
+  .tabs button.on { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+  .quick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 4px; }
+  .quick .btn { padding: 12px 8px; font-size: 14px; }
+  .bk .done { align-self: center; background: #4F6B47; border: 0; border-radius: 99px; color: #fff; font-family: inherit; font-size: 12px; padding: 5px 10px; cursor: pointer; margin-right: 4px; white-space: nowrap; }
+  .st.ok { background: #E6EEE3; color: #4F6B47; }
+  .bk.donebk { opacity: .7; }
+
+  /* ฟอร์มในกล่อง */
+  .fl { display: block; font-size: 13px; color: var(--muted); margin: 8px 0; }
+  .fl input, .abrow input, .abrow select, .frow select, .slotbox select, .row.sty input {
+    display: block; width: 100%; font-family: inherit; font-size: 15px; padding: 9px 10px; border: 1px solid var(--line);
+    border-radius: 10px; background: #fff; color: var(--ink); margin-top: 4px;
+  }
+  .abrow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+  .abrow select { flex: 1 1 130px; width: auto; margin: 0; }
+  .abrow input { width: auto; margin: 0; }
+  .mini { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--muted); }
+  .mini button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); font-family: inherit; cursor: pointer; }
+  .mini b { min-width: 16px; text-align: center; color: var(--ink); }
+  .frow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+  .frow select { width: 48%; margin: 0; }
+  .seg { display: flex; gap: 8px; margin: 10px 0; }
+  .seg label { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 9px; text-align: center; font-size: 14px; background: #fff; cursor: pointer; }
+  .seg input { accent-color: var(--ink); }
+  .due, .paid { margin: 12px 0 4px; font-size: 14px; }
+  .due b { font-size: 20px; font-weight: 500; }
+  .paid { color: #4F6B47; }
+  .loy { font-size: 13px; min-height: 4px; }
+  .loy .lbox { border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 9px 12px; margin: 2px 0 8px; color: var(--ink); }
+  .loy .lbox.has { border-color: #A9BFA2; background: #F3F7F1; }
+  .loy .lbox .muted { display: block; }
+  .shrow { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 6px 4px; font-size: 14px; }
+  .shrow .mini button { width: 32px; height: 32px; font-size: 16px; }
+  .slotbox { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 10px 0; background: #fff; }
+  .slotbox .top { display: flex; gap: 8px; align-items: center; }
+  .slotbox select { flex: 1; width: auto; margin: 0; }
+  .freebox { border: 1px solid #A9BFA2; background: #F3F7F1; border-radius: 12px; padding: 10px 12px; margin: 10px 0; }
+  .linkish { background: none; border: 0; color: var(--greige-deep); text-decoration: underline; font-family: inherit; font-size: 13px; padding: 4px 0; cursor: pointer; }
+  .chk { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; white-space: nowrap; }
+  .muted { color: var(--muted); font-size: 12.5px; }
+
+  /* ยอดขาย */
+  .ranges { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 8px; }
+  .ranges button { border: 1px solid var(--line); background: #fff; border-radius: 99px; padding: 6px 12px; font-family: inherit; font-size: 13px; cursor: pointer; color: var(--ink); }
+  .ranges button.on { background: var(--greige); color: var(--cream); border-color: var(--greige); }
+  .daterow { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+  .daterow input { flex: 1; font-family: inherit; font-size: 14px; padding: 7px 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .card small { display: block; color: var(--muted); font-size: 12px; }
+  .card b { display: block; font-size: 19px; font-weight: 500; margin: 2px 0; }
+  .sub-h { font-size: 15px; font-weight: 500; margin: 20px 0 8px; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .tbl th, .tbl td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--soft); }
+  .tbl th { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .tbl td:not(:first-child), .tbl th:not(:first-child) { text-align: right; }
+  .bill { padding: 11px 14px; border-bottom: 1px solid var(--soft); font-size: 13.5px; position: relative; }
+  .bill:last-child { border-bottom: 0; }
+  .bill .bh { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+  .bill .bh b { font-weight: 500; }
+  .bill .bl { color: var(--ink); font-size: 12.5px; }
+  .bill .x { margin-top: 6px; }
+  .bill.void { opacity: .5; }
+  .bill.void .bh { text-decoration: line-through; }
+  .row.sty { flex-wrap: wrap; }
+  .row.sty input[data-sty-name] { flex: 1 1 140px; width: auto; margin: 0; }
+  .row.sty .pct { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; }
+  .row.sty .pct input { width: 70px; margin: 0; text-align: right; }
   .btn.danger { background: var(--danger); }
 </style>
 </head>
@@ -154,29 +227,65 @@
     </div>
 
     <div id="app" style="display:none">
-      <h2>รอตรวจสลิป <span class="tag" id="review-count" style="display:none"></span></h2>
-      <p class="hint">ตรวจว่าเงินเข้าบัญชีร้านครบตามยอด แล้วกด "ยืนยัน" · ถ้าไม่ถูกต้องกด "ไม่ผ่าน" (คิวจะถูกยกเลิก และลูกค้าเห็นเหตุผล)</p>
-      <div class="panel" id="review"></div>
+      <nav class="tabs"><button data-tab="q" class="on">คิว</button><button data-tab="sales">ยอดขาย</button><button data-tab="set">ตั้งค่า</button></nav>
 
-      <h2>จำนวนช่างรายวัน</h2>
-      <p class="hint">กด − / + เพื่อปรับจำนวนช่างที่มาทำงานในวันนั้น (0 = ร้านหยุด) ระบบจะเปิดคิวให้ลูกค้าจองตามนี้ทันที · แตะที่วันที่เพื่อดูรายชื่อคิว</p>
-      <div class="panel" id="days"><div class="loading">กำลังโหลด…</div></div>
+      <section id="tab-q">
+        <div class="quick">
+          <button class="btn" id="btn-add-bk">+ เพิ่มคิว (โทรจอง)</button>
+          <button class="btn ghost" id="btn-walkin">+ บันทึกขาย walk-in</button>
+        </div>
 
-      <h2>ค่าปกติแต่ละวันในสัปดาห์</h2>
-      <p class="hint">ใช้กับทุกสัปดาห์ เช่น วันที่ช่างคนหนึ่งหยุดประจำ ตั้งเป็น 2 · วันที่ปรับเองด้านบนจะใช้ค่าที่ปรับเองก่อน</p>
-      <div class="panel" id="weekly"></div>
-      <p class="hint" style="margin-top:14px" id="cap-note"></p>
+        <div id="review-wrap">
+          <h2>รอตรวจสลิป <span class="tag" id="review-count" style="display:none"></span></h2>
+          <p class="hint">ตรวจว่าเงินเข้าบัญชีร้านครบตามยอด แล้วกด "ยืนยัน" · ถ้าไม่ถูกต้องกด "ไม่ผ่าน" (คิวจะถูกยกเลิก และลูกค้าเห็นเหตุผล)</p>
+          <div class="panel" id="review"></div>
+        </div>
 
-      <h2>แจ้งเตือน LINE</h2>
-      <p class="hint">เมื่อมีลูกค้าจองและแนบสลิป ระบบจะส่งแจ้งเตือนไปที่รายการด้านล่างทั้งหมด</p>
-      <div class="panel" id="line-list"></div>
-      <div class="linkbox" id="link-box">
-        <button class="btn ghost" id="btn-link-code">+ เพิ่มกลุ่ม LINE พนักงาน</button>
-      </div>
+        <h2>คิว &amp; จำนวนช่างรายวัน</h2>
+        <p class="hint">แตะวันที่เพื่อดูคิว · ลูกค้าทำเสร็จกด <b>เสร็จแล้ว</b> เลือกช่าง ยอดจะเข้าหน้ายอดขาย · กด − / + ปรับจำนวนช่างที่มาทำงาน (0 = ร้านหยุด)</p>
+        <div class="panel" id="days"><div class="loading">กำลังโหลด…</div></div>
+      </section>
+
+      <section id="tab-sales" style="display:none">
+        <h2>ยอดขาย &amp; ค่าคอม</h2>
+        <div class="ranges">
+          <button data-range="today">วันนี้</button><button data-range="yesterday">เมื่อวาน</button><button data-range="7d">7 วัน</button>
+          <button data-range="month">เดือนนี้</button><button data-range="lastmonth">เดือนก่อน</button>
+        </div>
+        <div class="daterow"><input type="date" id="s-from"> ถึง <input type="date" id="s-to"></div>
+        <div id="sales-body"></div>
+      </section>
+
+      <section id="tab-set" style="display:none">
+        <h2>ช่าง &amp; ค่าคอม</h2>
+        <p class="hint">ค่าคอม = ยอดที่ช่างทำ × % · แก้ % ภายหลังไม่กระทบยอดที่บันทึกไปแล้ว · ช่างที่ออกแล้วให้เอาติ๊ก "ทำงานอยู่" ออก (ไม่ต้องลบ ประวัติจะได้ไม่หาย)</p>
+        <div class="panel" id="stylists"></div>
+        <div class="linkbox"><button class="btn ghost" id="btn-add-stylist">+ เพิ่มช่าง</button></div>
+        <label class="remember" style="justify-content:flex-start;margin:12px 0"><input type="checkbox" id="free-full"> ลูกค้าใช้สิทธิ์สระฟรี: ช่างได้ค่าคอมจากราคาปกติ (ไม่ติ๊ก = ไม่ได้ค่าคอมครั้งฟรี)</label>
+        <button class="btn" id="btn-save-stylists">บันทึกช่าง &amp; ค่าคอม</button>
+
+        <h2>สะสมแต้ม (สระครบ 10 ครั้ง ฟรี 1 ครั้ง)</h2>
+        <p class="hint">ระบบนับให้เองทุกครั้งที่กด "เสร็จแล้ว" / บันทึก walk-in ที่มีเบอร์โทร · ลูกค้าที่มีบัตรสะสมกระดาษเดิม ค้นหาเบอร์แล้วปรับแต้มเพิ่มได้</p>
+        <div class="daterow"><input id="loy-phone" type="tel" inputmode="numeric" placeholder="เบอร์โทรลูกค้า"><button class="btn ghost small" id="loy-find">ค้นหา</button></div>
+        <div id="loy"></div>
+
+        <h2>จำนวนช่างปกติแต่ละวันในสัปดาห์</h2>
+        <p class="hint">ใช้กับทุกสัปดาห์ เช่น วันที่ช่างคนหนึ่งหยุดประจำ ตั้งเป็น 2 · วันที่ปรับเองในแท็บคิวจะไม่ถูกเปลี่ยน</p>
+        <div class="panel" id="weekly"></div>
+        <p class="hint" style="margin-top:14px" id="cap-note"></p>
+
+        <h2>แจ้งเตือน LINE</h2>
+        <p class="hint">เมื่อมีลูกค้าจองออนไลน์ (แนบสลิปแล้ว หรือใช้สิทธิ์ฟรี) ระบบจะส่งแจ้งเตือนไปที่รายการด้านล่างทั้งหมด</p>
+        <div class="panel" id="line-list"></div>
+        <div class="linkbox" id="link-box">
+          <button class="btn ghost" id="btn-link-code">+ เพิ่มกลุ่ม LINE พนักงาน</button>
+        </div>
+      </section>
     </div>
   </main>
 </div>
 <div class="toast" id="toast"></div>
+<div class="modal" id="dlg"><div class="box" id="dlg-box"></div></div>
 <div class="modal" id="slip-modal">
   <div class="box">
     <h3 id="sm-title"></h3>
@@ -275,7 +384,30 @@ const Demo = (() => {
   bookings.push({ id: 'HM-REVIEW1', date: dates[1], time: '09:45', name: 'ลูกค้าใหม่', phone: '0891112222', people: 1, moisture: 1, keratin: 0, total: 290, status: 'รอตรวจสลิป', hasSlip: true });
   bookings.push({ id: 'HM-REVIEW1', date: dates[1], time: '10:30', name: 'ลูกค้าใหม่', phone: '0891112222', people: 1, moisture: 0, keratin: 1, total: 340, status: 'รอตรวจสลิป', hasSlip: true });
   bookings.push({ id: 'HM-HOLD1', date: dates[2], time: '13:30', name: 'รอโอน', phone: '0893334444', people: 1, moisture: 1, keratin: 0, total: 290, status: 'รอชำระ' });
-  const ACTIVE = ['ยืนยัน', 'รอตรวจสลิป', 'รอชำระ'];
+  const ACTIVE = ['ยืนยัน', 'รอตรวจสลิป', 'รอชำระ', 'เสร็จแล้ว'];
+  bookings.push({ id: 'HM-PHONE1', date: dates[0], time: '06:45', name: 'โทรมา', phone: '0861234567', people: 2, moisture: 1, keratin: 1, free: 1, total: 340, status: 'ยืนยัน', channel: 'โทรจอง', note: 'ชำระที่ร้าน' });
+  let stylists = [{ id: 'sdemo1', name: 'มินท์', pct: 10, active: true }, { id: 'sdemo2', name: 'ฝน', pct: 12, active: true }];
+  let salesSettings = { freeCommissionFull: true };
+  let sales = [];
+  const loyAdj = {};
+  const SLOTS = []; for (let m = 360; m <= 1095; m += 45) SLOTS.push(pad(Math.floor(m / 60)) + ':' + pad(m % 60));
+  function addSales(lines, ctx) {
+    const g = 'S' + ctx.date.slice(2).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    lines.forEach((l, i) => {
+      const s = stylists.find((x) => x.id === l.stylistId);
+      const list = l.service === 'keratin' ? 340 : 290, amount = l.free ? list - 290 : list, base = l.free && salesSettings.freeCommissionFull ? list : amount;
+      sales.push({ id: g + '-' + (i + 1), date: ctx.date, time: ctx.time, bookingId: ctx.bookingId, name: ctx.name, phone: ctx.phone,
+        service: l.service === 'keratin' ? 'Keratin' : 'Moisture', list, free: !!l.free, amount, method: amount ? ctx.method : '-',
+        stylist: s.name, pct: s.pct, base, commission: Math.round(base * s.pct) / 100, status: 'ปกติ', note: '' });
+    });
+  }
+  function loy(phone) {
+    const mine = sales.filter((s) => s.phone === phone && s.status === 'ปกติ');
+    const paid = mine.filter((s) => !s.free).length, used = mine.filter((s) => s.free).length, adj = loyAdj[phone] || 0;
+    const reserved = bookings.filter((b) => b.phone === phone && b.free && ['ยืนยัน', 'รอตรวจสลิป', 'รอชำระ'].includes(b.status)).reduce((n, b) => n + b.free, 0);
+    const stamps = paid + adj, earned = Math.floor(stamps / 10);
+    return { phone, every: 10, stamps, progress: stamps % 10, earned, used, reserved, available: Math.max(0, earned - used - reserved), paid, adjust: adj, history: mine.slice(-5).reverse(), adjustments: [] };
+  }
   const review = () => {
     const g = {};
     bookings.filter((b) => b.status === 'รอตรวจสลิป').forEach((b) => {
@@ -289,6 +421,7 @@ const Demo = (() => {
   const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3);
   const overview = () => ({
     beds: BEDS, maxStaff: 3, weekly: weekly.slice(), line: line.slice(), review: review(),
+    stylists: stylists.slice(), salesSettings, loyaltyEvery: 10, prices: { base: 290, keratin: 50 }, slots: SLOTS, today: dates[0],
     days: dates.map((d) => {
       const staff = staffFor(d), cap = Math.min(BEDS, staff);
       const act = bookings.filter((b) => b.date === d && ACTIVE.includes(b.status));
@@ -300,7 +433,9 @@ const Demo = (() => {
         bookings: bookings.filter((b) => b.date === d).sort((a, b) => a.time.localeCompare(b.time)) };
     }),
   });
-  const delay = (v) => new Promise((r) => setTimeout(() => r(JSON.parse(JSON.stringify(v))), 1200));
+  const delay = (v) => new Promise((r) => setTimeout(() => r(JSON.parse(JSON.stringify(v))), 500));
+  loyAdj['0861234567'] = 10;
+  loyAdj['0899999999'] = 13; // เบอร์ตัวอย่างที่มีสิทธิ์ฟรี 1 ครั้ง
   return {
     adminGetOverview: () => delay(overview()),
     adminSetWeekly: (pin, w) => { weekly = w; return delay(overview()); },
@@ -311,6 +446,29 @@ const Demo = (() => {
     adminRejectPayment: (pin, id, reason) => { setStatus(id, 'ยกเลิก', 'สลิปไม่ผ่าน: ' + reason); return delay(overview()); },
     adminCreateLinkCode: () => delay({ code: '482913', minutes: 15 }),
     adminRemoveRecipient: (pin, id) => { line = line.filter((r) => r.id !== id); return delay(overview()); },
+    getAvailability: () => delay({ closed: false, capacity: 3, slots: Object.fromEntries(SLOTS.map((t, i) => [t, i % 4]))}),
+    adminSaveStylists: (pin, list, set) => { stylists = list.map((x, i) => Object.assign({ id: x.id || 'snew' + i + Date.now() % 1000, active: true }, x, { pct: +x.pct })); salesSettings = set; return delay(overview()); },
+    adminAddBooking: (pin, p) => {
+      const g = {};
+      p.items.forEach((it) => { const r = g[it.time] = g[it.time] || { moisture: 0, keratin: 0 }; r[it.shampoo]++; });
+      let freeLeft = p.useFree || 0;
+      Object.keys(g).sort().forEach((t) => { const r = g[t]; const f = Math.min(freeLeft, r.moisture + r.keratin); freeLeft -= f;
+        bookings.push({ id: 'HM-NEW' + bookings.length, date: p.date, time: t, name: p.name, phone: p.phone, people: r.moisture + r.keratin, moisture: r.moisture, keratin: r.keratin, free: f,
+          total: r.moisture * 290 + r.keratin * 340 - f * 290, status: 'ยืนยัน', channel: 'โทรจอง', note: 'ชำระที่ร้าน' }); });
+      return delay(overview());
+    },
+    adminCheckout: (pin, r) => {
+      const b = bookings.find((x) => x.id === r.bookingId && x.time === r.time);
+      const persons = []; for (let i = 0; i < b.moisture; i++) persons.push('moisture'); for (let i = 0; i < b.keratin; i++) persons.push('keratin');
+      addSales(persons.map((sh, i) => ({ service: sh, free: i < (b.free || 0), stylistId: r.stylists[i] })), { date: b.date, time: b.time, bookingId: b.id, name: b.name, phone: b.phone, method: b.channel === 'โทรจอง' ? r.method : 'โอน (จองออนไลน์)' });
+      b.status = 'เสร็จแล้ว';
+      return delay(overview());
+    },
+    adminQuickSale: (pin, r) => { addSales(r.lines.map((l) => ({ service: l.shampoo, free: l.free, stylistId: l.stylistId })), { date: dates[0], time: new Date().toTimeString().slice(0, 5), bookingId: '', name: r.name || 'walk-in', phone: r.phone, method: r.method }); return delay(overview()); },
+    adminVoidSale: (pin, g, reason) => { sales.forEach((s) => { if (s.id.indexOf(g + '-') === 0) { s.status = 'ยกเลิก'; s.note = 'ยกเลิก: ' + reason; } }); const f = sales.find((s) => s.id.indexOf(g + '-') === 0); if (f && f.bookingId) bookings.forEach((b) => { if (b.id === f.bookingId && b.time === f.time) b.status = 'ยืนยัน'; }); return delay(true); },
+    adminGetSales: (pin, from, to) => delay(sales.filter((s) => s.date >= from && s.date <= to)),
+    adminGetLoyalty: (pin, phone) => delay(loy(phone)),
+    adminAdjustLoyalty: (pin, phone, d) => { loyAdj[phone] = (loyAdj[phone] || 0) + d; return delay(loy(phone)); },
   };
 })();
 
@@ -378,16 +536,20 @@ function bookingsHTML(date) {
   if (!list.length) return '<div class="empty">ยังไม่มีคิว</div>';
   return list.map((b) => {
     const cancelled = b.status === 'ยกเลิก' || b.status === 'หมดเวลา';
+    const done = b.status === 'เสร็จแล้ว';
+    const canDone = b.status === 'ยืนยัน' && date <= todayStr();
+    const tags = (b.channel === 'โทรจอง' ? '<span class="st">โทรจอง</span>' : '') + (b.free ? '<span class="st ok">ฟรี ' + b.free + '</span>' : '');
     const sh = [b.moisture && `Moisture ×${b.moisture}`, b.keratin && `Keratin ×${b.keratin}`].filter(Boolean).join(', ');
-    return `<div class="bk${cancelled ? ' cancelled' : ''}">
+    return `<div class="bk${cancelled ? ' cancelled' : ''}${done ? ' donebk' : ''}">
       <div class="tm">${esc(b.time)}</div>
       <div class="who">
         <div>${esc(b.name)} · <a href="tel:${esc(b.phone)}">${fmtPhone(esc(b.phone))}</a></div>
-        <div class="meta">${b.people} ท่าน · ${sh} · ${b.total.toLocaleString('en-US')} บาท${statusTag(b.status)}</div>
+        <div class="meta">${b.people} ท่าน · ${sh} · ${b.total.toLocaleString('en-US')} บาท${statusTag(b.status)}${tags}</div>
         ${b.note ? '<div class="meta">' + esc(b.note) + '</div>' : ''}
       </div>
       ${b.hasSlip ? '<button class="slipbtn" data-slip="' + esc(b.id) + '">สลิป</button>' : ''}
-      ${cancelled ? '' : '<button class="x" data-cancel="' + esc(b.id) + '" data-date="' + date + '">ยกเลิก</button>'}
+      ${canDone ? '<button class="done" data-checkout="' + esc(b.id) + '|' + esc(b.time) + '">เสร็จแล้ว</button>' : ''}
+      ${cancelled || done ? '' : '<button class="x" data-cancel="' + esc(b.id) + '" data-date="' + date + '">ยกเลิก</button>'}
     </div>`;
   }).join('');
 }
@@ -415,7 +577,7 @@ function renderLine() {
 
 function statusTag(st) {
   if (!st || st === 'ยืนยัน') return '';
-  const cls = st === 'รอตรวจสลิป' || st === 'รอชำระ' ? ' wait' : ' bad';
+  const cls = st === 'เสร็จแล้ว' ? ' ok' : st === 'รอตรวจสลิป' || st === 'รอชำระ' ? ' wait' : ' bad';
   return '<span class="st' + cls + '">' + esc(st) + '</span>';
 }
 
@@ -437,7 +599,11 @@ function renderReview() {
   }).join('') : '<div class="row"><div class="s">ไม่มีสลิปที่รอตรวจ</div></div>';
 }
 
-function render() { renderReview(); renderDays(); renderWeekly(); renderLine(); }
+function render() {
+  if (state.open === null && state.data.days && state.data.days[0]) state.open = state.data.days[0].date;
+  $('#review-wrap').style.display = (state.data.review || []).length ? 'block' : 'none';
+  renderReview(); renderDays(); renderWeekly(); renderLine(); renderStylists();
+}
 
 /* ---------- ดูสลิป (โหลดเฉพาะตอนกดดู ไม่เก็บไว้ในเครื่อง) ---------- */
 const slipView = { id: null };
@@ -665,6 +831,383 @@ document.addEventListener('click', (e) => {
     renderDays();
   }
 });
+
+/* ---------- แท็บ ---------- */
+state.tab = 'q';
+function showTab(t) {
+  state.tab = t;
+  document.querySelectorAll('[data-tab]').forEach((b) => b.classList.toggle('on', b.dataset.tab === t));
+  ['q', 'sales', 'set'].forEach((k) => { $('#tab-' + k).style.display = k === t ? 'block' : 'none'; });
+  if (t === 'sales') loadSales();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- ตัวช่วยเรื่องเงิน / วันที่ ---------- */
+const baht = (n) => (Math.round(n * 100) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 });
+const pad2 = (n) => String(n).padStart(2, '0');
+function ymd(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function todayStr() { return (state.data && state.data.today) || ymd(new Date()); }
+function priceOf(shampoo) { const p = state.data.prices || { base: 290, keratin: 50 }; return p.base + (shampoo === 'keratin' ? p.keratin : 0); }
+function activeStylists() { return (state.data.stylists || []).filter((s) => s.active !== false); }
+function stylistSelect(attrs) {
+  const list = activeStylists();
+  return '<select ' + attrs + '><option value="">เลือกช่าง</option>' + list.map((s) => '<option value="' + esc(s.id) + '">' + esc(s.name) + '</option>').join('') + '</select>';
+}
+function methodRadios(name) {
+  return '<div class="seg"><label><input type="radio" name="' + name + '" value="เงินสด"> เงินสด</label><label><input type="radio" name="' + name + '" value="โอน"> โอน / พร้อมเพย์</label></div>';
+}
+function personsOf(b) {
+  const out = [];
+  for (let i = 0; i < b.moisture; i++) out.push({ shampoo: 'moisture' });
+  for (let i = 0; i < b.keratin; i++) out.push({ shampoo: 'keratin' });
+  out.forEach((p, i) => { p.free = i < (b.free || 0); });
+  return out;
+}
+
+/* ---------- กล่องโต้ตอบ ---------- */
+function openDlg(html) { $('#dlg-box').onclick = null; $('#dlg-box').innerHTML = html; $('#dlg').classList.add('show'); }
+function closeDlg() { $('#dlg').classList.remove('show'); $('#dlg-box').innerHTML = ''; }
+function dlgBusy(btn, text) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = text; }
+function dlgIdle(btn) { btn.disabled = false; if (btn.dataset.label) btn.textContent = btn.dataset.label; }
+function needStylists() {
+  if (activeStylists().length) return false;
+  toast('ยังไม่มีรายชื่อช่าง — เพิ่มที่แท็บ "ตั้งค่า" ก่อน');
+  showTab('set');
+  return true;
+}
+
+/* ----- ลูกค้าทำเสร็จ → บันทึกขาย ----- */
+function openCheckout(id, time) {
+  if (needStylists()) return;
+  let b = null;
+  state.data.days.forEach((d) => d.bookings.forEach((x) => { if (x.id === id && x.time === time) b = x; }));
+  if (!b) return;
+  const online = (b.channel || 'ออนไลน์') === 'ออนไลน์';
+  const persons = personsOf(b);
+  const due = persons.reduce((s, p) => s + (p.free ? priceOf(p.shampoo) - priceOf('moisture') : priceOf(p.shampoo)), 0);
+  openDlg('<h3>ลูกค้าใช้บริการเสร็จ</h3>'
+    + '<div class="s">' + esc(b.name) + ' · ' + dateLabel(b.date) + ' ' + esc(b.time) + ' · ' + esc(b.id) + '</div>'
+    + persons.map((p, i) => '<div class="frow"><span>ท่านที่ ' + (i + 1) + ' · ' + (p.shampoo === 'keratin' ? 'Keratin' : 'Moisture')
+      + (p.free ? ' <span class="st ok">ฟรี (สะสม)</span>' : '') + '</span>' + stylistSelect('data-co-sty="' + i + '"') + '</div>').join('')
+    + (online
+      ? '<div class="paid">ชำระแล้วตอนจอง (โอน) ' + baht(b.total) + ' บาท</div>'
+      : '<div class="due">เก็บเงิน <b>' + baht(due) + '</b> บาท</div>' + (due ? methodRadios('co-method') : ''))
+    + '<div class="err" id="dlg-err"></div>'
+    + '<div class="acts"><button class="btn ok" id="co-save">บันทึกยอดขาย</button><button class="btn ghost" data-dlg-close>ปิด</button></div>');
+  $('#co-save').onclick = async () => {
+    const stylists = [...document.querySelectorAll('[data-co-sty]')].map((s) => s.value);
+    if (stylists.some((v) => !v)) { $('#dlg-err').textContent = 'กรุณาเลือกช่างให้ครบทุกท่าน'; return; }
+    const m = document.querySelector('input[name="co-method"]:checked');
+    if (!online && due && !m) { $('#dlg-err').textContent = 'กรุณาเลือกช่องทางรับเงิน'; return; }
+    const btn = $('#co-save'); dlgBusy(btn, 'กำลังบันทึก…');
+    try {
+      receive(await call('adminCheckout', state.pin, { bookingId: b.id, time: b.time, stylists: stylists, method: m ? m.value : 'เงินสด' }));
+      closeDlg(); toast('บันทึกยอดขายแล้ว');
+      state.salesAt = 0;
+    } catch (e) { $('#dlg-err').textContent = errMsg(e); dlgIdle(btn); }
+  };
+}
+
+/* ----- แต้มสะสม (ใช้ในฟอร์มเพิ่มคิว / walk-in) ----- */
+async function lookupLoyalty(phone, box, onDone) {
+  box.innerHTML = '';
+  if (!/^0[0-9]{8,9}$/.test(phone)) { onDone(0); return; }
+  box.innerHTML = '<div class="lbox muted">กำลังดูแต้มสะสมของเบอร์นี้…</div>';
+  try {
+    const l = await call('adminGetLoyalty', state.pin, phone);
+    box.innerHTML = l.available
+      ? '<div class="lbox has"><b>ลูกค้ามีสิทธิ์สระฟรี ' + l.available + ' ครั้ง</b> (สูตร Moisture)<span class="muted">ถามลูกค้าว่าจะใช้สิทธิ์ครั้งนี้ไหม แล้วเลือก "ใช้สิทธิ์ฟรี" ด้านล่าง</span></div>'
+      : '<div class="lbox">สะสมแต้ม ' + l.progress + '/' + l.every + ' ครั้ง · ยังไม่มีสิทธิ์ฟรี'
+        + (l.reserved ? '<span class="muted">มีสิทธิ์ฟรีที่ใช้จองคิวอื่นไว้แล้ว ' + l.reserved + ' ครั้ง</span>' : '') + '</div>';
+    onDone(l.available);
+  } catch (e) { box.innerHTML = ''; onDone(0); }
+}
+
+/* ----- เพิ่มคิว (ลูกค้าโทรจอง) ----- */
+function openAddBooking() {
+  const slots = state.data.slots || [];
+  const f = { rows: [{ time: '', moisture: 1, keratin: 0 }], avail: null, free: 0, useFree: 0 };
+  const date0 = state.open && state.open >= todayStr() ? state.open : todayStr();
+  openDlg('<h3>เพิ่มคิว (ลูกค้าโทรจอง)</h3><div class="s">ยืนยันทันที ชำระเงินที่ร้าน · ระบบกันรอบนี้ไม่ให้ลูกค้าออนไลน์จองซ้อน</div>'
+    + '<label class="fl">ชื่อลูกค้า<input id="ab-name" maxlength="60"></label>'
+    + '<label class="fl">เบอร์โทร<input id="ab-phone" type="tel" inputmode="numeric" maxlength="12"></label><div class="loy" id="ab-loy"></div>'
+    + '<label class="fl">วันที่<input id="ab-date" type="date" min="' + todayStr() + '" value="' + date0 + '"></label>'
+    + '<div id="ab-rows"></div><button class="linkish" id="ab-addrow">+ เพิ่มรอบเวลา (คนละเวลา)</button>'
+    + '<div id="ab-free"></div><div class="due" id="ab-total"></div>'
+    + '<div class="err" id="dlg-err"></div>'
+    + '<div class="acts"><button class="btn ok" id="ab-save">เพิ่มคิว</button><button class="btn ghost" data-dlg-close>ปิด</button></div>');
+  const people = () => f.rows.reduce((s, r) => s + r.moisture + r.keratin, 0);
+  function renderRows() {
+    $('#ab-rows').innerHTML = f.rows.map((r, i) => '<div class="slotbox"><div class="top">'
+      + '<select data-ab-time="' + i + '"><option value="">เลือกเวลา' + (f.rows.length > 1 ? ' (รอบที่ ' + (i + 1) + ')' : '') + '</option>' + slots.map((t) => {
+        const free = f.avail && f.avail.slots ? f.avail.slots[t] : null;
+        return '<option value="' + t + '"' + (r.time === t ? ' selected' : '') + '>' + t + (free === null || free === undefined ? '' : ' (ว่าง ' + free + ')') + '</option>';
+      }).join('') + '</select>'
+      + (f.rows.length > 1 ? '<button class="rm" data-ab-del="' + i + '">ลบ</button>' : '') + '</div>'
+      + '<div class="shrow"><span>Moisture Shampoo · ' + priceOf('moisture') + '</span><span class="mini"><button data-ab-n="' + i + ':moisture:-1">−</button><b>' + r.moisture + '</b><button data-ab-n="' + i + ':moisture:1">+</button></span></div>'
+      + '<div class="shrow"><span>Keratin Shampoo · ' + priceOf('keratin') + '</span><span class="mini"><button data-ab-n="' + i + ':keratin:-1">−</button><b>' + r.keratin + '</b><button data-ab-n="' + i + ':keratin:1">+</button></span></div>'
+      + '</div>').join('')
+      + (f.avail && f.avail.closed ? '<div class="warn">วันนี้ตั้งช่างเป็น 0 (ร้านหยุด)</div>' : '');
+    f.useFree = Math.min(f.useFree, f.free, people());
+    $('#ab-free').innerHTML = f.free ? '<div class="freebox shrow"><span>ใช้สิทธิ์สระฟรีครั้งนี้<br><small class="muted">มี ' + f.free + ' สิทธิ์ · ฟรีค่า Moisture ' + priceOf('moisture') + ' บาทต่อท่าน</small></span><span class="mini"><button data-ab-free="-1">−</button><b>' + f.useFree + '</b><button data-ab-free="1">+</button></span></div>' : '';
+    const items = [];
+    f.rows.forEach((r) => { for (let k = 0; k < r.moisture; k++) items.push('moisture'); for (let k = 0; k < r.keratin; k++) items.push('keratin'); });
+    items.sort((a, b) => (a === 'keratin') - (b === 'keratin'));
+    const total = items.reduce((s, sh, k) => s + priceOf(sh) - (k < f.useFree ? priceOf('moisture') : 0), 0);
+    $('#ab-total').innerHTML = people() + ' ท่าน' + (f.useFree ? ' · ใช้สิทธิ์ฟรี ' + f.useFree : '') + ' · เก็บเงินที่ร้าน <b>' + baht(total) + '</b> บาท';
+  }
+  async function loadAvail() {
+    f.avail = null; renderRows();
+    try { f.avail = await call('getAvailability', $('#ab-date').value); } catch (e) { f.avail = null; }
+    renderRows();
+  }
+  $('#ab-date').onchange = loadAvail;
+  $('#ab-phone').addEventListener('input', (e) => {
+    const p = e.target.value.replace(/[^0-9]/g, '');
+    clearTimeout(f.t);
+    f.t = setTimeout(() => lookupLoyalty(p, $('#ab-loy'), (n) => { f.free = n; renderRows(); }), 500);
+  });
+  $('#ab-addrow').onclick = () => { f.rows.push({ time: '', moisture: 1, keratin: 0 }); renderRows(); };
+  $('#ab-rows').addEventListener('change', (e) => { const s = e.target.closest('[data-ab-time]'); if (s) f.rows[+s.dataset.abTime].time = s.value; });
+  $('#dlg-box').onclick = (e) => {
+    const n = e.target.closest('[data-ab-n]');
+    if (n) {
+      const [i, k, d] = n.dataset.abN.split(':');
+      const r = f.rows[+i];
+      r[k] = Math.max(0, r[k] + +d);
+      if (r.moisture + r.keratin === 0) r[k] = 1;
+      renderRows(); return;
+    }
+    const del = e.target.closest('[data-ab-del]');
+    if (del) { f.rows.splice(+del.dataset.abDel, 1); renderRows(); return; }
+    const fr = e.target.closest('[data-ab-free]');
+    if (fr) { f.useFree = Math.max(0, Math.min(f.free, people(), f.useFree + +fr.dataset.abFree)); renderRows(); }
+  };
+  $('#ab-save').onclick = async () => {
+    const name = $('#ab-name').value.trim(), phone = $('#ab-phone').value.replace(/[^0-9]/g, '');
+    if (!name) { $('#dlg-err').textContent = 'กรุณาใส่ชื่อลูกค้า'; return; }
+    if (!/^0[0-9]{8,9}$/.test(phone)) { $('#dlg-err').textContent = 'กรุณาใส่เบอร์โทรให้ถูกต้อง'; return; }
+    if (f.rows.some((r) => !r.time)) { $('#dlg-err').textContent = 'กรุณาเลือกเวลาให้ครบ'; return; }
+    const items = [];
+    f.rows.forEach((r) => { for (let k = 0; k < r.moisture; k++) items.push({ shampoo: 'moisture', time: r.time }); for (let k = 0; k < r.keratin; k++) items.push({ shampoo: 'keratin', time: r.time }); });
+    const btn = $('#ab-save'); dlgBusy(btn, 'กำลังเพิ่มคิว…');
+    try {
+      receive(await call('adminAddBooking', state.pin, { name: name, phone: phone, date: $('#ab-date').value, items: items, useFree: f.useFree }));
+      state.open = $('#ab-date').value; renderDays();
+      closeDlg(); toast('เพิ่มคิวแล้ว');
+    } catch (e) { $('#dlg-err').textContent = errMsg(e); dlgIdle(btn); }
+  };
+  loadAvail();
+}
+
+/* ----- บันทึกขาย walk-in ----- */
+function openWalkin() {
+  if (needStylists()) return;
+  const f = { lines: [{ shampoo: 'moisture', stylistId: '', free: false }], free: 0 };
+  openDlg('<h3>บันทึกขาย (walk-in)</h3><div class="s">ลูกค้าที่ไม่ได้จอง · บันทึกเป็นยอดขายวันนี้ทันที</div>'
+    + '<label class="fl">ชื่อลูกค้า (ไม่บังคับ)<input id="wk-name" maxlength="60"></label>'
+    + '<label class="fl">เบอร์โทร (ใส่เพื่อสะสมแต้ม)<input id="wk-phone" type="tel" inputmode="numeric" maxlength="12"></label><div class="loy" id="wk-loy"></div>'
+    + '<div id="wk-lines"></div><button class="linkish" id="wk-add">+ เพิ่มท่าน</button>'
+    + '<div class="due" id="wk-total"></div><div id="wk-method"></div>'
+    + '<div class="err" id="dlg-err"></div>'
+    + '<div class="acts"><button class="btn ok" id="wk-save">บันทึกยอดขาย</button><button class="btn ghost" data-dlg-close>ปิด</button></div>');
+  function total() { return f.lines.reduce((s, l) => s + priceOf(l.shampoo) - (l.free ? priceOf('moisture') : 0), 0); }
+  function render() {
+    const usedFree = f.lines.filter((l) => l.free).length;
+    $('#wk-lines').innerHTML = f.lines.map((l, i) => '<div class="abrow">'
+      + '<select data-wk-sh="' + i + '"><option value="moisture"' + (l.shampoo === 'moisture' ? ' selected' : '') + '>Moisture Shampoo · ' + priceOf('moisture') + '</option><option value="keratin"' + (l.shampoo === 'keratin' ? ' selected' : '') + '>Keratin Shampoo · ' + priceOf('keratin') + '</option></select>'
+      + stylistSelect('data-wk-sty="' + i + '"').replace('value="' + l.stylistId + '"', 'value="' + l.stylistId + '" selected')
+      + (f.free && (l.free || usedFree < f.free) ? '<label class="chk"><input type="checkbox" data-wk-free="' + i + '"' + (l.free ? ' checked' : '') + '> ใช้สิทธิ์ฟรี</label>' : '')
+      + (f.lines.length > 1 ? '<button class="rm" data-wk-del="' + i + '">ลบ</button>' : '') + '</div>').join('');
+    const t = total();
+    $('#wk-total').innerHTML = f.lines.length + ' ท่าน · เก็บเงิน <b>' + baht(t) + '</b> บาท';
+    if (t && !document.querySelector('input[name="wk-method"]')) $('#wk-method').innerHTML = methodRadios('wk-method');
+    if (!t) $('#wk-method').innerHTML = '';
+  }
+  $('#wk-phone').addEventListener('input', (e) => {
+    const p = e.target.value.replace(/[^0-9]/g, '');
+    clearTimeout(f.t);
+    f.t = setTimeout(() => lookupLoyalty(p, $('#wk-loy'), (n) => { f.free = n; if (!n) f.lines.forEach((l) => (l.free = false)); render(); }), 500);
+  });
+  $('#wk-add').onclick = () => { f.lines.push({ shampoo: 'moisture', stylistId: '', free: false }); render(); };
+  $('#wk-lines').addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.dataset.wkSh) f.lines[+t.dataset.wkSh].shampoo = t.value;
+    if (t.dataset.wkSty) f.lines[+t.dataset.wkSty].stylistId = t.value;
+    if (t.dataset.wkFree) f.lines[+t.dataset.wkFree].free = t.checked;
+    render();
+  });
+  $('#wk-lines').addEventListener('click', (e) => {
+    const d = e.target.closest('[data-wk-del]');
+    if (d) { f.lines.splice(+d.dataset.wkDel, 1); render(); }
+  });
+  $('#wk-save').onclick = async () => {
+    if (f.lines.some((l) => !l.stylistId)) { $('#dlg-err').textContent = 'กรุณาเลือกช่างให้ครบทุกท่าน'; return; }
+    const m = document.querySelector('input[name="wk-method"]:checked');
+    if (total() && !m) { $('#dlg-err').textContent = 'กรุณาเลือกช่องทางรับเงิน'; return; }
+    const btn = $('#wk-save'); dlgBusy(btn, 'กำลังบันทึก…');
+    try {
+      receive(await call('adminQuickSale', state.pin, {
+        name: $('#wk-name').value.trim(), phone: $('#wk-phone').value.replace(/[^0-9]/g, ''), method: m ? m.value : 'เงินสด',
+        lines: f.lines.map((l) => ({ shampoo: l.shampoo, stylistId: l.stylistId, free: l.free })),
+      }));
+      closeDlg(); toast('บันทึกยอดขายแล้ว'); state.salesAt = 0;
+      if (state.tab === 'sales') loadSales();
+    } catch (e) { $('#dlg-err').textContent = errMsg(e); dlgIdle(btn); }
+  };
+  render();
+}
+
+/* ---------- แท็บยอดขาย ---------- */
+state.range = { key: 'today', from: '', to: '' };
+state.sales = null;
+function rangeOf(key) {
+  const t = parseDate(todayStr());
+  const d = (x) => ymd(x);
+  if (key === 'yesterday') { const y = new Date(t); y.setDate(t.getDate() - 1); return [d(y), d(y)]; }
+  if (key === '7d') { const s = new Date(t); s.setDate(t.getDate() - 6); return [d(s), d(t)]; }
+  if (key === 'month') return [d(new Date(t.getFullYear(), t.getMonth(), 1)), d(t)];
+  if (key === 'lastmonth') return [d(new Date(t.getFullYear(), t.getMonth() - 1, 1)), d(new Date(t.getFullYear(), t.getMonth(), 0))];
+  return [d(t), d(t)];
+}
+async function loadSales() {
+  const r = state.range;
+  if (r.key !== 'custom') [r.from, r.to] = rangeOf(r.key);
+  $('#s-from').value = r.from; $('#s-to').value = r.to;
+  document.querySelectorAll('[data-range]').forEach((b) => b.classList.toggle('on', b.dataset.range === r.key));
+  $('#sales-body').innerHTML = '<div class="loading">กำลังโหลดยอดขาย…</div>';
+  const req = (state.salesReq = (state.salesReq || 0) + 1);
+  try {
+    const lines = await call('adminGetSales', state.pin, r.from, r.to);
+    if (req !== state.salesReq) return;
+    state.sales = lines; renderSales();
+  } catch (e) {
+    if (req === state.salesReq) $('#sales-body').innerHTML = '<div class="err">' + esc(errMsg(e)) + '</div>';
+  }
+}
+function renderSales() {
+  const all = state.sales || [];
+  const ok = all.filter((s) => s.status !== 'ยกเลิก');
+  const sum = (arr, k) => arr.reduce((n, s) => n + (+s[k] || 0), 0);
+  const by = (k) => ok.reduce((m, s) => { (m[s[k]] = m[s[k]] || []).push(s); return m; }, {});
+  const methods = by('method');
+  const card = (label, val, sub) => '<div class="card"><small>' + label + '</small><b>' + val + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
+  let html = '<div class="cards">'
+    + card('ลูกค้า', ok.length + ' ท่าน', ok.filter((s) => s.free).length ? 'ใช้สิทธิ์ฟรี ' + ok.filter((s) => s.free).length : '')
+    + card('ยอดขายรวม', baht(sum(ok, 'amount')) + ' ฿')
+    + card('เงินสด', baht(sum(methods['เงินสด'] || [], 'amount')) + ' ฿')
+    + card('โอน (ที่ร้าน)', baht(sum(methods['โอน'] || [], 'amount')) + ' ฿')
+    + card('โอน (จองออนไลน์)', baht(sum(methods['โอน (จองออนไลน์)'] || [], 'amount')) + ' ฿')
+    + card('ค่าคอมรวม', baht(sum(ok, 'commission')) + ' ฿')
+    + '</div>';
+  const st = by('stylist');
+  html += '<h3 class="sub-h">ค่าคอมช่าง</h3><div class="panel"><table class="tbl"><tr><th>ช่าง</th><th>ท่าน</th><th>ยอด</th><th>ค่าคอม</th></tr>'
+    + (Object.keys(st).length ? Object.keys(st).sort().map((n) => '<tr><td>' + esc(n) + '</td><td>' + st[n].length + '</td><td>' + baht(sum(st[n], 'amount')) + '</td><td><b>' + baht(sum(st[n], 'commission')) + '</b></td></tr>').join('')
+      : '<tr><td colspan="4" class="muted">ยังไม่มีรายการ</td></tr>')
+    + '</table></div>';
+  const days = by('date');
+  if (Object.keys(days).length > 1) {
+    html += '<h3 class="sub-h">รายวัน</h3><div class="panel"><table class="tbl"><tr><th>วันที่</th><th>ท่าน</th><th>ยอดขาย</th></tr>'
+      + Object.keys(days).sort().reverse().map((d) => '<tr><td>' + dateLabel(d) + '</td><td>' + days[d].length + '</td><td>' + baht(sum(days[d], 'amount')) + '</td></tr>').join('') + '</table></div>';
+  }
+  const bills = {};
+  all.forEach((s) => { const g = s.id.replace(/-[0-9]+$/, ''); (bills[g] = bills[g] || []).push(s); });
+  const keys = Object.keys(bills).sort((a, b) => (bills[b][0].date + bills[b][0].time).localeCompare(bills[a][0].date + bills[a][0].time));
+  html += '<h3 class="sub-h">รายการขาย (' + keys.length + ' บิล)</h3><div class="panel">' + (keys.length ? keys.map((g) => {
+    const L = bills[g], f = L[0], voided = f.status === 'ยกเลิก';
+    const paidLine = L.find((x) => x.method && x.method !== '-');
+    return '<div class="bill' + (voided ? ' void' : '') + '"><div class="bh"><span>' + dateLabel(f.date) + ' ' + esc(f.time) + ' · ' + esc(f.name) + (f.bookingId || f.name === 'walk-in' ? '' : ' <span class="st">walk-in</span>') + '</span><b>' + baht(sum(L, 'amount')) + ' ฿</b></div>'
+      + L.map((s) => '<div class="bl">' + esc(s.service) + (s.free ? ' (ฟรี)' : '') + ' · ' + esc(s.stylist) + ' · ' + baht(s.amount) + ' ฿ · คอม ' + baht(s.commission) + '</div>').join('')
+      + '<div class="bl muted">' + esc(paidLine ? paidLine.method : 'ไม่มียอดเก็บเงิน (ฟรี)') + (voided ? ' · ' + esc(f.note || 'ยกเลิกแล้ว') : '') + '</div>'
+      + (voided ? '' : '<button class="x" data-void="' + esc(g) + '">ยกเลิกบิล</button>') + '</div>';
+  }).join('') : '<div class="row"><div class="s">ยังไม่มีรายการขายในช่วงนี้</div></div>') + '</div>';
+  html += '<p class="hint" style="margin-top:12px">ยอดขายนับตามวันที่ลูกค้ามาใช้บริการ (กด "เสร็จแล้ว" ที่คิว หรือบันทึก walk-in) · ข้อมูลทั้งหมดอยู่ในแผ่นงาน Sales ของ Google Sheet</p>';
+  $('#sales-body').innerHTML = html;
+}
+
+/* ---------- แท็บตั้งค่า: ช่าง ---------- */
+state.styDraft = null;
+function renderStylists() {
+  if (!state.styDraft) state.styDraft = (state.data.stylists || []).map((s) => Object.assign({}, s));
+  const list = state.styDraft;
+  $('#stylists').innerHTML = list.length ? list.map((s, i) => '<div class="row sty">'
+    + '<input data-sty-name="' + i + '" value="' + esc(s.name) + '" placeholder="ชื่อช่าง" maxlength="40">'
+    + '<span class="pct"><input data-sty-pct="' + i + '" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="' + s.pct + '">%</span>'
+    + '<label class="chk"><input type="checkbox" data-sty-act="' + i + '"' + (s.active !== false ? ' checked' : '') + '> ทำงานอยู่</label>'
+    + '</div>').join('') : '<div class="row"><div class="s">ยังไม่มีช่าง กด "+ เพิ่มช่าง"</div></div>';
+  $('#free-full').checked = !state.data.salesSettings || state.data.salesSettings.freeCommissionFull !== false;
+}
+function bindSettings() {
+  $('#stylists').addEventListener('input', (e) => {
+    const t = e.target;
+    if (t.dataset.styName) state.styDraft[+t.dataset.styName].name = t.value;
+    if (t.dataset.styPct) state.styDraft[+t.dataset.styPct].pct = t.value;
+  });
+  $('#stylists').addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.dataset.styAct) state.styDraft[+t.dataset.styAct].active = t.checked;
+  });
+  $('#btn-add-stylist').onclick = () => { state.styDraft.push({ name: '', pct: 10, active: true }); renderStylists(); };
+  $('#btn-save-stylists').onclick = async () => {
+    const list = state.styDraft.filter((s) => String(s.name).trim());
+    const btn = $('#btn-save-stylists'); dlgBusy(btn, 'กำลังบันทึก…');
+    try {
+      const data = await call('adminSaveStylists', state.pin, list, { freeCommissionFull: $('#free-full').checked });
+      state.styDraft = null; receive(data); toast('บันทึกรายชื่อช่างแล้ว');
+    } catch (e) { toast(errMsg(e)); }
+    dlgIdle(btn);
+  };
+  $('#loy-find').onclick = () => findLoyalty();
+  $('#loy-phone').addEventListener('keydown', (e) => { if (e.key === 'Enter') findLoyalty(); });
+}
+
+/* ---------- แท็บตั้งค่า: สะสมแต้ม ---------- */
+function renderLoy(l) {
+  $('#loy').innerHTML = '<div class="panel" style="padding:14px">'
+    + '<div><b>' + fmtPhone(l.phone) + '</b> · สะสม ' + l.progress + '/' + l.every + ' · สิทธิ์ฟรีคงเหลือ <b>' + l.available + '</b>'
+    + (l.reserved ? ' (จองไว้แล้ว ' + l.reserved + ')' : '') + '</div>'
+    + '<div class="muted">ใช้บริการจ่ายเงิน ' + l.paid + ' ครั้ง · ปรับมือ ' + (l.adjust > 0 ? '+' : '') + l.adjust + ' · ใช้สิทธิ์ฟรีไปแล้ว ' + l.used + ' ครั้ง</div>'
+    + '<div class="abrow" style="margin-top:10px"><input id="loy-delta" type="number" inputmode="numeric" placeholder="+/- แต้ม" style="width:90px"><input id="loy-note" placeholder="หมายเหตุ เช่น บัตรสะสมเดิม" style="flex:1"><button class="btn ghost small" id="loy-adj">ปรับแต้ม</button></div>'
+    + (l.history.length ? '<div class="muted" style="margin-top:10px">ล่าสุด: ' + l.history.slice(0, 5).map((h) => dateLabel(h.date) + ' ' + h.service + (h.free ? ' (ฟรี)' : '')).join(' · ') + '</div>' : '')
+    + '</div>';
+  $('#loy-adj').onclick = async () => {
+    const delta = parseInt($('#loy-delta').value, 10);
+    if (!delta) { toast('ใส่จำนวนแต้ม เช่น 5 หรือ -1'); return; }
+    try { renderLoy(await call('adminAdjustLoyalty', state.pin, l.phone, delta, $('#loy-note').value)); toast('ปรับแต้มแล้ว'); } catch (e) { toast(errMsg(e)); }
+  };
+}
+async function findLoyalty() {
+  const p = $('#loy-phone').value.replace(/[^0-9]/g, '');
+  if (!/^0[0-9]{8,9}$/.test(p)) { toast('ใส่เบอร์โทรให้ถูกต้อง'); return; }
+  $('#loy').innerHTML = '<div class="loading">กำลังค้นหา…</div>';
+  try { renderLoy(await call('adminGetLoyalty', state.pin, p)); } catch (e) { $('#loy').innerHTML = '<div class="err">' + esc(errMsg(e)) + '</div>'; }
+}
+
+/* ---------- ปุ่มต่างๆ ของส่วนใหม่ ---------- */
+document.addEventListener('click', async (e) => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { showTab(tab.dataset.tab); return; }
+  if (e.target.closest('[data-dlg-close]')) { closeDlg(); return; }
+  if (e.target.id === 'dlg') { closeDlg(); return; }
+  const co = e.target.closest('[data-checkout]');
+  if (co) { const [id, time] = co.dataset.checkout.split('|'); openCheckout(id, time); return; }
+  if (e.target.closest('#btn-add-bk')) { openAddBooking(); return; }
+  if (e.target.closest('#btn-walkin')) { openWalkin(); return; }
+  const rg = e.target.closest('[data-range]');
+  if (rg) { state.range.key = rg.dataset.range; loadSales(); return; }
+  const v = e.target.closest('[data-void]');
+  if (v) {
+    const reason = prompt('ยกเลิกบิลนี้? (ยอดขายและค่าคอมจะถูกหักออก ถ้ามาจากคิว คิวจะกลับเป็น "ยืนยัน")\nเหตุผล:', 'บันทึกผิด');
+    if (reason === null) return;
+    v.disabled = true;
+    try { await call('adminVoidSale', state.pin, v.dataset.void, reason); toast('ยกเลิกบิลแล้ว'); loadSales(); refresh(); } catch (err) { toast(errMsg(err)); v.disabled = false; }
+  }
+});
+['#s-from', '#s-to'].forEach((id) => $(id).addEventListener('change', () => {
+  state.range = { key: 'custom', from: $('#s-from').value, to: $('#s-to').value };
+  if (state.range.from && state.range.to) loadSales();
+}));
+bindSettings();
 
 /* ---------- Login ---------- */
 function showApp() {
