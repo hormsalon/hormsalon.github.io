@@ -111,6 +111,28 @@
   .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink); color: var(--cream); padding: 10px 18px; border-radius: 99px; font-size: 13.5px; z-index: 30; display: none; max-width: calc(100% - 32px); text-align: center; }
   .loading { color: var(--muted); text-align: center; padding: 40px 0; font-size: 13.5px; }
   .busy { opacity: .55; pointer-events: none; }
+
+  /* ตรวจสลิป */
+  .rv { padding: 13px 14px; border-bottom: 1px solid var(--soft); }
+  .rv:last-child { border-bottom: 0; }
+  .rv .d { font-weight: 500; }
+  .rv .s { font-size: 12.5px; color: var(--muted); }
+  .rv .acts { display: flex; gap: 8px; margin-top: 10px; }
+  .rv .acts .btn { padding: 9px 14px; font-size: 14px; }
+  .st { font-size: 11px; padding: 1px 8px; border-radius: 99px; margin-left: 6px; white-space: nowrap; background: var(--soft); color: var(--greige-deep); }
+  .st.wait { background: #F5EEDC; color: #8A6D2B; }
+  .st.bad { background: var(--danger-bg); color: var(--danger); }
+  .bk .slipbtn { align-self: center; background: none; border: 1px solid var(--greige); border-radius: 99px; color: var(--ink); font-family: inherit; font-size: 12px; padding: 4px 10px; cursor: pointer; margin-right: 4px; }
+  .modal { position: fixed; inset: 0; z-index: 40; background: rgba(59,58,53,.6); display: none; align-items: center; justify-content: center; padding: 16px; }
+  .modal.show { display: flex; }
+  .modal .box { background: var(--paper); border-radius: 18px; width: 100%; max-width: 440px; max-height: 94vh; overflow-y: auto; padding: 16px; }
+  .modal .box h3 { margin: 0 0 2px; font-size: 16px; font-weight: 500; }
+  .modal .box .s { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+  .modal .amt { font-size: 22px; font-weight: 500; margin: 2px 0 10px; }
+  .modal .slipimg { width: 100%; max-height: 58vh; object-fit: contain; border-radius: 10px; border: 1px solid var(--line); display: block; background: #fff; min-height: 120px; }
+  .modal .acts { display: grid; gap: 8px; margin-top: 12px; }
+  .btn.ok { background: #4F6B47; }
+  .btn.danger { background: var(--danger); }
 </style>
 </head>
 <body>
@@ -132,6 +154,10 @@
     </div>
 
     <div id="app" style="display:none">
+      <h2>รอตรวจสลิป <span class="tag" id="review-count" style="display:none"></span></h2>
+      <p class="hint">ตรวจว่าเงินเข้าบัญชีร้านครบตามยอด แล้วกด "ยืนยัน" · ถ้าไม่ถูกต้องกด "ไม่ผ่าน" (คิวจะถูกยกเลิก และลูกค้าเห็นเหตุผล)</p>
+      <div class="panel" id="review"></div>
+
       <h2>จำนวนช่างรายวัน</h2>
       <p class="hint">กด − / + เพื่อปรับจำนวนช่างที่มาทำงานในวันนั้น (0 = ร้านหยุด) ระบบจะเปิดคิวให้ลูกค้าจองตามนี้ทันที · แตะที่วันที่เพื่อดูรายชื่อคิว</p>
       <div class="panel" id="days"><div class="loading">กำลังโหลด…</div></div>
@@ -142,7 +168,7 @@
       <p class="hint" style="margin-top:14px" id="cap-note"></p>
 
       <h2>แจ้งเตือน LINE</h2>
-      <p class="hint">เมื่อมีคนจองคิว ระบบจะส่งแจ้งเตือนไปที่รายการด้านล่างทั้งหมด</p>
+      <p class="hint">เมื่อมีลูกค้าจองและแนบสลิป ระบบจะส่งแจ้งเตือนไปที่รายการด้านล่างทั้งหมด</p>
       <div class="panel" id="line-list"></div>
       <div class="linkbox" id="link-box">
         <button class="btn ghost" id="btn-link-code">+ เพิ่มกลุ่ม LINE พนักงาน</button>
@@ -151,6 +177,20 @@
   </main>
 </div>
 <div class="toast" id="toast"></div>
+<div class="modal" id="slip-modal">
+  <div class="box">
+    <h3 id="sm-title"></h3>
+    <div class="s" id="sm-sub"></div>
+    <div class="amt" id="sm-amt"></div>
+    <img class="slipimg" id="sm-img" alt="กำลังโหลดสลิป…">
+    <div class="err" id="sm-err"></div>
+    <div class="acts" id="sm-acts">
+      <button class="btn ok" id="sm-ok">ยืนยัน (เงินเข้าครบแล้ว)</button>
+      <button class="btn danger" id="sm-bad">ไม่ผ่าน (ยกเลิกคิว)</button>
+      <button class="btn ghost" id="sm-close">ปิด</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const DOW = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
@@ -221,6 +261,7 @@ const Demo = (() => {
   const names = ['มินท์', 'ฝน', 'แพรว', 'ปอนด์', 'นุ่น', 'เจน', 'บีม', 'ออม'];
   const times = ['06:45', '08:15', '09:00', '09:00', '10:30', '12:00', '14:15', '16:30', '17:15'];
   let bookings = [];
+  const SLIP = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http:' + '/' + '/www.w3.org/2000/svg" width="360" height="640"><rect width="360" height="640" fill="#fff"/><text x="180" y="200" font-size="26" text-anchor="middle" fill="#0a7">โอนเงินสำเร็จ</text><text x="180" y="260" font-size="34" text-anchor="middle">630.00</text><text x="180" y="320" font-size="16" text-anchor="middle" fill="#888">(สลิปตัวอย่าง)</text></svg>');
   dates.slice(0, 8).forEach((d, di) => {
     const n = [5, 3, 4, 3, 2, 1, 2, 0][di];
     for (let i = 0; i < n; i++) {
@@ -230,13 +271,27 @@ const Demo = (() => {
         people: p, moisture: p - k, keratin: k, total: p * 290 + k * 50, status: 'ยืนยัน' });
     }
   });
+  // ตัวอย่างการจองที่รอตรวจสลิป (2 ท่าน แยก 2 รอบ)
+  bookings.push({ id: 'HM-REVIEW1', date: dates[1], time: '09:45', name: 'ลูกค้าใหม่', phone: '0891112222', people: 1, moisture: 1, keratin: 0, total: 290, status: 'รอตรวจสลิป', hasSlip: true });
+  bookings.push({ id: 'HM-REVIEW1', date: dates[1], time: '10:30', name: 'ลูกค้าใหม่', phone: '0891112222', people: 1, moisture: 0, keratin: 1, total: 340, status: 'รอตรวจสลิป', hasSlip: true });
+  bookings.push({ id: 'HM-HOLD1', date: dates[2], time: '13:30', name: 'รอโอน', phone: '0893334444', people: 1, moisture: 1, keratin: 0, total: 290, status: 'รอชำระ' });
+  const ACTIVE = ['ยืนยัน', 'รอตรวจสลิป', 'รอชำระ'];
+  const review = () => {
+    const g = {};
+    bookings.filter((b) => b.status === 'รอตรวจสลิป').forEach((b) => {
+      const o = g[b.id] = g[b.id] || { id: b.id, date: b.date, time: b.time, name: b.name, phone: b.phone, slots: [], people: 0, moisture: 0, keratin: 0, total: 0, status: b.status };
+      o.slots.push({ time: b.time, people: b.people }); o.people += b.people; o.moisture += b.moisture; o.keratin += b.keratin; o.total += b.total;
+    });
+    return Object.values(g);
+  };
+  const setStatus = (id, st, note) => bookings.filter((b) => b.id === id).forEach((b) => { b.status = st; if (note) b.note = note; });
   const staffFor = (d) => (d in overrides ? overrides[d] : weekly[new Date(d + 'T00:00').getDay()]);
   const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3);
   const overview = () => ({
-    beds: BEDS, maxStaff: 3, weekly: weekly.slice(), line: line.slice(),
+    beds: BEDS, maxStaff: 3, weekly: weekly.slice(), line: line.slice(), review: review(),
     days: dates.map((d) => {
       const staff = staffFor(d), cap = Math.min(BEDS, staff);
-      const act = bookings.filter((b) => b.date === d && b.status !== 'ยกเลิก');
+      const act = bookings.filter((b) => b.date === d && ACTIVE.includes(b.status));
       const used = {};
       act.forEach((b) => { for (let x = toMin(b.time); x < toMin(b.time) + SERVICE; x += 5) used[x] = (used[x] || 0) + b.people; });
       const peak = Math.max(0, ...Object.values(used));
@@ -250,7 +305,10 @@ const Demo = (() => {
     adminGetOverview: () => delay(overview()),
     adminSetWeekly: (pin, w) => { weekly = w; return delay(overview()); },
     adminSetDay: (pin, d, n) => { if (n === null) delete overrides[d]; else overrides[d] = n; return delay(overview()); },
-    adminCancelBooking: (pin, id) => { bookings.find((b) => b.id === id).status = 'ยกเลิก'; return delay(overview()); },
+    adminCancelBooking: (pin, id) => { setStatus(id, 'ยกเลิก', 'ร้านยกเลิก'); return delay(overview()); },
+    adminGetSlip: () => delay({ uploaded: dates[0] + ' 10:00:00', dataUrl: SLIP }),
+    adminConfirmPayment: (pin, id) => { setStatus(id, 'ยืนยัน'); return delay(overview()); },
+    adminRejectPayment: (pin, id, reason) => { setStatus(id, 'ยกเลิก', 'สลิปไม่ผ่าน: ' + reason); return delay(overview()); },
     adminCreateLinkCode: () => delay({ code: '482913', minutes: 15 }),
     adminRemoveRecipient: (pin, id) => { line = line.filter((r) => r.id !== id); return delay(overview()); },
   };
@@ -319,14 +377,16 @@ function bookingsHTML(date) {
   const list = (day && day.bookings) || [];
   if (!list.length) return '<div class="empty">ยังไม่มีคิว</div>';
   return list.map((b) => {
-    const cancelled = b.status === 'ยกเลิก';
+    const cancelled = b.status === 'ยกเลิก' || b.status === 'หมดเวลา';
     const sh = [b.moisture && `Moisture ×${b.moisture}`, b.keratin && `Keratin ×${b.keratin}`].filter(Boolean).join(', ');
     return `<div class="bk${cancelled ? ' cancelled' : ''}">
       <div class="tm">${esc(b.time)}</div>
       <div class="who">
         <div>${esc(b.name)} · <a href="tel:${esc(b.phone)}">${fmtPhone(esc(b.phone))}</a></div>
-        <div class="meta">${b.people} ท่าน · ${sh} · ${b.total.toLocaleString('en-US')} บาท${cancelled ? ' · ยกเลิกแล้ว' : ''}</div>
+        <div class="meta">${b.people} ท่าน · ${sh} · ${b.total.toLocaleString('en-US')} บาท${statusTag(b.status)}</div>
+        ${b.note ? '<div class="meta">' + esc(b.note) + '</div>' : ''}
       </div>
+      ${b.hasSlip ? '<button class="slipbtn" data-slip="' + esc(b.id) + '">สลิป</button>' : ''}
       ${cancelled ? '' : '<button class="x" data-cancel="' + esc(b.id) + '" data-date="' + date + '">ยกเลิก</button>'}
     </div>`;
   }).join('');
@@ -353,7 +413,92 @@ function renderLine() {
   </div>`).join('') : '<div class="row"><div class="s">ยังไม่มีผู้รับแจ้งเตือน</div></div>';
 }
 
-function render() { renderDays(); renderWeekly(); renderLine(); }
+function statusTag(st) {
+  if (!st || st === 'ยืนยัน') return '';
+  const cls = st === 'รอตรวจสลิป' || st === 'รอชำระ' ? ' wait' : ' bad';
+  return '<span class="st' + cls + '">' + esc(st) + '</span>';
+}
+
+function slotText(o) {
+  return o.slots.map((x) => x.time + (o.slots.length > 1 || x.people > 1 ? ' (' + x.people + ' ท่าน)' : '')).join(', ');
+}
+
+function renderReview() {
+  const list = state.data.review || [];
+  const cnt = $('#review-count');
+  cnt.style.display = list.length ? 'inline' : 'none';
+  cnt.textContent = list.length + ' รายการ';
+  $('#review').innerHTML = list.length ? list.map((o) => {
+    const sh = [o.moisture && 'Moisture ×' + o.moisture, o.keratin && 'Keratin ×' + o.keratin].filter(Boolean).join(', ');
+    return '<div class="rv"><div class="d">' + dateLabel(o.date) + ' · ' + slotText(o) + '</div>'
+      + '<div class="s">' + esc(o.name) + ' · <a href="tel:' + esc(o.phone) + '" style="color:inherit">' + fmtPhone(esc(o.phone)) + '</a> · ' + o.people + ' ท่าน · ' + sh + '</div>'
+      + '<div class="s">ยอดที่ต้องได้รับ <b style="color:var(--ink);font-weight:500">' + o.total.toLocaleString('en-US') + ' บาท</b> · ' + esc(o.id) + '</div>'
+      + '<div class="acts"><button class="btn" data-slip="' + esc(o.id) + '">ดูสลิป &amp; ยืนยัน</button></div></div>';
+  }).join('') : '<div class="row"><div class="s">ไม่มีสลิปที่รอตรวจ</div></div>';
+}
+
+function render() { renderReview(); renderDays(); renderWeekly(); renderLine(); }
+
+/* ---------- ดูสลิป (โหลดเฉพาะตอนกดดู ไม่เก็บไว้ในเครื่อง) ---------- */
+const slipView = { id: null };
+
+function findOrder(id) {
+  const r = (state.data.review || []).find((o) => o.id === id);
+  if (r) return r;
+  const rows = [];
+  state.data.days.forEach((d) => d.bookings.forEach((b) => { if (b.id === id) rows.push(b); }));
+  if (!rows.length) return null;
+  const o = { id: id, date: rows[0].date, name: rows[0].name, phone: rows[0].phone, status: rows[0].status,
+    slots: rows.map((b) => ({ time: b.time, people: b.people })), people: 0, total: 0 };
+  rows.forEach((b) => { o.people += b.people; o.total += b.total; });
+  return o;
+}
+
+async function openSlip(id) {
+  const o = findOrder(id);
+  slipView.id = id;
+  $('#sm-title').textContent = o ? o.name + ' · ' + dateLabel(o.date) : id;
+  $('#sm-sub').textContent = o ? slotText(o) + ' · ' + o.people + ' ท่าน · ' + id : '';
+  $('#sm-amt').textContent = o ? 'ยอดที่ต้องได้รับ ' + o.total.toLocaleString('en-US') + ' บาท' : '';
+  $('#sm-err').textContent = '';
+  const img = $('#sm-img'); img.removeAttribute('src'); img.alt = 'กำลังโหลดสลิป…';
+  const canDecide = o && o.status === 'รอตรวจสลิป';
+  $('#sm-ok').style.display = canDecide ? 'block' : 'none';
+  $('#sm-bad').style.display = canDecide ? 'block' : 'none';
+  $('#slip-modal').classList.add('show');
+  try {
+    const s = await call('adminGetSlip', state.pin, id);
+    if (slipView.id === id) img.src = s.dataUrl;
+  } catch (e) {
+    if (slipView.id === id) { img.alt = ''; $('#sm-err').textContent = errMsg(e); }
+  }
+}
+
+function closeSlip() {
+  slipView.id = null;
+  $('#sm-img').removeAttribute('src');
+  $('#slip-modal').classList.remove('show');
+  if (location.search.includes('slip=')) history.replaceState(null, '', location.pathname);
+}
+
+function decide(fn, label, ...extra) {
+  const id = slipView.id;
+  closeSlip();
+  // หน้าจอเปลี่ยนทันที แล้วค่อยบันทึกเบื้องหลัง
+  state.data.review = (state.data.review || []).filter((o) => o.id !== id);
+  state.data.days.forEach((d) => d.bookings.forEach((b) => { if (b.id === id) b.status = fn === 'adminConfirmPayment' ? 'ยืนยัน' : 'ยกเลิก'; }));
+  render();
+  enqueue(async () => { if (await send(fn, id, ...extra)) toast(label); });
+}
+
+$('#sm-ok').onclick = () => decide('adminConfirmPayment', 'ยืนยันคิวแล้ว');
+$('#sm-bad').onclick = () => {
+  const reason = prompt('เหตุผลที่สลิปไม่ผ่าน (ลูกค้าจะเห็นข้อความนี้)', 'ยอดเงินไม่ตรง / ไม่พบยอดเงินเข้า');
+  if (reason === null) return;
+  decide('adminRejectPayment', 'ยกเลิกคิวแล้ว', reason);
+};
+$('#sm-close').onclick = closeSlip;
+$('#slip-modal').onclick = (e) => { if (e.target.id === 'slip-modal') closeSlip(); };
 
 /* ---------- Actions ----------
    กดแล้วหน้าจอเปลี่ยนทันที (optimistic) แล้วค่อยส่งไปบันทึกเบื้องหลัง
@@ -461,15 +606,23 @@ document.addEventListener('click', (e) => {
     return;
   }
 
+  const slipBtn = e.target.closest('[data-slip]');
+  if (slipBtn) { openSlip(slipBtn.dataset.slip); return; }
+
   const cancel = e.target.closest('[data-cancel]');
   if (cancel) {
-    if (!confirm('ยืนยันยกเลิกคิวนี้? เวลานี้จะว่างให้ลูกค้าคนอื่นจองได้')) return;
-    const d = state.data.days.find((x) => x.date === cancel.dataset.date);
-    const b = d.bookings.find((x) => x.id === cancel.dataset.cancel);
-    if (b.status !== 'ยกเลิก') d.booked -= b.people;
-    b.status = 'ยกเลิก';
+    const id = cancel.dataset.cancel;
+    const o = findOrder(id);
+    const multi = o && o.slots.length > 1 ? ' (ทุกรอบของการจองนี้: ' + slotText(o) + ')' : '';
+    if (!confirm('ยืนยันยกเลิกการจองนี้' + multi + '? เวลานี้จะว่างให้ลูกค้าคนอื่นจองได้')) return;
+    state.data.days.forEach((d) => d.bookings.forEach((b) => {
+      if (b.id !== id || b.status === 'ยกเลิก') return;
+      if (b.status !== 'หมดเวลา') d.booked -= b.people;
+      b.status = 'ยกเลิก';
+    }));
+    state.data.review = (state.data.review || []).filter((x) => x.id !== id);
     render();
-    enqueue(async () => { if (await send('adminCancelBooking', b.id)) toast('ยกเลิกคิวแล้ว'); });
+    enqueue(async () => { if (await send('adminCancelBooking', id)) toast('ยกเลิกคิวแล้ว'); });
     return;
   }
 
@@ -527,6 +680,8 @@ async function login(pin, remember) {
     const data = await call('adminGetOverview', pin);
     state.pin = pin; store.set(pin, remember);
     showApp(); receive(data);
+    const m = location.search.match(/slip=([A-Za-z0-9-]+)/);
+    if (m && !slipView.id) openSlip(m[1]);
   } catch (e) {
     store.set(''); state.data = null;
     $('#app').style.display = 'none'; $('#btn-logout').style.display = 'none';
