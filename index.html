@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#A4A195">
+<title>HORM SALON — จองคิว</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500&family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* เบอร์โทร / LINE OA ร้าน ตั้งค่าที่ CONFIG ใน Code.gs */
+    --greige: #A4A195;
+    --greige-deep: #8C897D;
+    --cream: #F4F3EE;
+    --paper: #FAF9F6;
+    --ink: #3B3A35;
+    --muted: #8A877C;
+    --line: #E4E2DA;
+    --soft: #EDEBE4;
+    --danger: #A65A4E;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans Thai', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; }
+
+  /* Header */
+  header {
+    background: var(--greige);
+    text-align: center;
+    padding: 28px 16px 26px;
+    padding-top: calc(28px + env(safe-area-inset-top));
+  }
+  header img { width: 168px; height: auto; display: block; margin: 0 auto; }
+  header .meta {
+    color: var(--cream);
+    opacity: .9;
+    font-size: 12.5px;
+    letter-spacing: .08em;
+    margin-top: 10px;
+  }
+
+  main { padding: 8px 16px 140px; }
+  section { padding: 24px 0 4px; }
+  .step {
+    display: flex; align-items: baseline; gap: 10px;
+    margin: 0 0 14px;
+  }
+  .step .no { font-variant-numeric: lining-nums;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; color: var(--greige-deep); line-height: 1;
+  }
+  .step h2 { font-size: 16px; font-weight: 500; margin: 0; letter-spacing: .01em; }
+  .hint { color: var(--muted); font-size: 13px; margin: -8px 0 14px; }
+
+  /* Service cards */
+  .svc {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 10px;
+    transition: border-color .2s;
+  }
+  .svc.on { border-color: var(--greige); }
+  .svc .info { flex: 1; min-width: 0; }
+  .svc .name { font-weight: 500; font-size: 15px; }
+  .svc .desc { color: var(--muted); font-size: 12.5px; line-height: 1.45; margin-top: 2px; }
+  .svc .price { font-size: 14px; margin-top: 6px; }
+  .svc .price s { color: var(--muted); }
+  .tag {
+    display: inline-block; font-size: 11px; font-weight: 400;
+    background: var(--soft); color: var(--greige-deep);
+    padding: 1px 8px; border-radius: 99px; margin-left: 6px; vertical-align: 1px;
+  }
+  .stepper { display: flex; align-items: center; gap: 4px; }
+  .stepper button {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--paper);
+    color: var(--ink); font-size: 18px; line-height: 1; cursor: pointer;
+    font-family: inherit; font-weight: 300;
+  }
+  .stepper button:disabled { opacity: .35; cursor: default; }
+  .stepper span { width: 26px; text-align: center; font-weight: 500; font-size: 16px; }
+
+  /* Dates */
+  .dates {
+    display: flex; gap: 8px; overflow-x: auto;
+    margin: 0 -16px; padding: 2px 16px 8px;
+    scroll-snap-type: x proximity; scroll-padding: 0 16px; scrollbar-width: none;
+  }
+  .dates::-webkit-scrollbar { display: none; }
+  .date {
+    flex: 0 0 60px; scroll-snap-align: start;
+    border: 1px solid var(--line); background: #fff;
+    border-radius: 12px; padding: 9px 0 8px; text-align: center; cursor: pointer;
+    font-family: inherit; color: var(--ink);
+    transition: background .2s, border-color .2s, color .2s;
+  }
+  .date .dow { font-size: 11.5px; color: var(--muted); display: block; }
+  .date .d { font-family: 'Cormorant Garamond', serif; font-variant-numeric: lining-nums; font-size: 24px; line-height: 1.15; display: block; }
+  .date .m { font-size: 11px; color: var(--muted); display: block; }
+  .date.sel { background: var(--greige); border-color: var(--greige); color: var(--cream); }
+  .date.sel .dow, .date.sel .m { color: var(--cream); opacity: .85; }
+  .date.off { background: transparent; border-style: dashed; color: #C4C1B6; cursor: default; }
+  .date.off .dow, .date.off .m { color: #C4C1B6; }
+
+  /* Times */
+  .period { font-size: 12.5px; color: var(--muted); margin: 14px 0 8px; letter-spacing: .02em; }
+  .period:first-child { margin-top: 0; }
+  .times { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .time {
+    border: 1px solid var(--line); background: #fff; border-radius: 10px;
+    padding: 10px 0; text-align: center; font-family: inherit; font-size: 14px;
+    color: var(--ink); cursor: pointer; font-weight: 400;
+    transition: background .2s, border-color .2s, color .2s;
+  }
+  .time.sel { background: var(--greige); border-color: var(--greige); color: var(--cream); }
+  .time:disabled {
+    background: transparent; color: #C4C1B6; border-style: dashed; cursor: default;
+    text-decoration: line-through;
+  }
+  .time-state { color: var(--muted); font-size: 13.5px; padding: 18px 0; text-align: center; }
+
+  /* Form */
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .field input {
+    width: 100%; font-family: inherit; font-size: 16px; font-weight: 400;
+    padding: 13px 14px; border-radius: 12px; border: 1px solid var(--line);
+    background: #fff; color: var(--ink); outline: none; transition: border-color .2s;
+  }
+  .field input:focus { border-color: var(--greige); }
+  .field input.err { border-color: var(--danger); }
+  .field .msg { color: var(--danger); font-size: 12.5px; margin-top: 5px; display: none; }
+  .field input.err + .msg { display: block; }
+
+  .note {
+    font-size: 12.5px; color: var(--muted); line-height: 1.6;
+    border-top: 1px solid var(--line); margin-top: 22px; padding-top: 16px;
+  }
+
+  /* Bottom bar */
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    background: rgba(250, 249, 246, .94);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+  .bar .inner { max-width: 448px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+  .bar .sum { flex: 1; min-width: 0; }
+  .bar .sum small { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar .sum b { font-weight: 500; font-size: 20px; }
+  .btn {
+    border: 0; border-radius: 99px; background: var(--ink); color: var(--cream);
+    font-family: inherit; font-size: 15px; font-weight: 400;
+    padding: 13px 24px; cursor: pointer; white-space: nowrap; transition: opacity .2s;
+  }
+  .btn:disabled { opacity: .3; cursor: default; }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn.line { background: #06C755; color: #fff; }
+  .btn.danger { background: var(--danger); color: #fff; }
+  .linkbtn {
+    display: block; width: 100%; margin: 0 0 12px; padding: 13px; border-radius: 12px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+    font-family: inherit; font-size: 14px; cursor: pointer;
+  }
+  .contact { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 12px; }
+  .cbtn {
+    display: block; text-align: center; padding: 10px 6px; border-radius: 99px;
+    border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 13.5px; background: transparent;
+  }
+  .cbtn[data-contact="line"] { border-color: #06C755; color: #06A04A; }
+  .merr { color: var(--danger); font-size: 13px; min-height: 18px; margin: 4px 0 10px; }
+  .mcard { margin-bottom: 14px; }
+  .mcard .rows { margin-bottom: 8px; }
+  .mcard .merr { margin: 0 0 6px; }
+  .keep { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: -4px 0 14px; }
+  .btn.block { display: block; width: 100%; text-align: center; text-decoration: none; }
+
+  /* Sheet / success */
+  .overlay {
+    position: fixed; inset: 0; z-index: 20; background: rgba(59, 58, 53, .45);
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .overlay.show { display: flex; }
+  .sheet {
+    background: var(--paper); width: 100%; max-width: 480px;
+    border-radius: 22px 22px 0 0; padding: 26px 20px calc(20px + env(safe-area-inset-bottom));
+    max-height: 92vh; overflow-y: auto;
+    animation: up .28s ease-out;
+  }
+  @keyframes up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .sheet h3 { margin: 0 0 4px; font-weight: 500; font-size: 18px; }
+  .sheet .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+  .rows { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 16px; margin-bottom: 16px; }
+  .rows div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--soft); font-size: 14px; }
+  .rows div:last-child { border-bottom: 0; }
+  .rows span:first-child { color: var(--muted); }
+  .rows span:last-child { text-align: right; font-weight: 400; }
+  .rows .total span:last-child { font-weight: 500; font-size: 16px; }
+  .actions { display: grid; gap: 10px; }
+  .check {
+    width: 56px; height: 56px; border-radius: 50%; background: var(--greige);
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+  }
+  .center { text-align: center; }
+  .code { font-family: 'Cormorant Garamond', serif; font-variant-numeric: lining-nums; font-size: 22px; letter-spacing: .06em; }
+
+  .toast {
+    position: fixed; left: 50%; top: 18px; transform: translateX(-50%);
+    background: var(--ink); color: var(--cream); padding: 10px 18px; border-radius: 99px;
+    font-size: 13.5px; z-index: 30; display: none; max-width: calc(100% - 32px); text-align: center;
+  }
+  .spinner {
+    width: 16px; height: 16px; border: 2px solid rgba(244,243,238,.35); border-top-color: var(--cream);
+    border-radius: 50%; display: inline-block; vertical-align: -3px; margin-right: 8px;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAkACQAAD/4QCeRXhpZgAATU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAIdpAAQAAAABAAAAWgAAAAAAAACQAAAAAQAAAJAAAAABAAOShgAHAAAAEgAAAISgAgAEAAAAAQAAAVCgAwAEAAAAAQAAAK0AAAAAQVNDSUkAAABTY3JlZW5zaG90/+0AOFBob3Rvc2hvcCAzLjAAOEJJTQQEAAAAAAAAOEJJTQQlAAAAAAAQ1B2M2Y8AsgTpgAmY7PhCfv/iAihJQ0NfUFJPRklMRQABAQAAAhhhcHBsBAAAAG1udHJSR0IgWFlaIAfmAAEAAQAAAAAAAGFjc3BBUFBMAAAAAEFQUEwAAAAAAAAAAAAAAAAAAAAAAAD21gABAAAAANMtYXBwbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACmRlc2MAAAD8AAAAMGNwcnQAAAEsAAAAUHd0cHQAAAF8AAAAFHJYWVoAAAGQAAAAFGdYWVoAAAGkAAAAFGJYWVoAAAG4AAAAFHJUUkMAAAHMAAAAIGNoYWQAAAHsAAAALGJUUkMAAAHMAAAAIGdUUkMAAAHMAAAAIG1sdWMAAAAAAAAAAQAAAAxlblVTAAAAFAAAABwARABpAHMAcABsAGEAeQAgAFAAM21sdWMAAAAAAAAAAQAAAAxlblVTAAAANAAAABwAQwBvAHAAeQByAGkAZwBoAHQAIABBAHAAcABsAGUAIABJAG4AYwAuACwAIAAyADAAMgAyWFlaIAAAAAAAAPbVAAEAAAAA0yxYWVogAAAAAAAAg98AAD2/////u1hZWiAAAAAAAABKvwAAsTcAAAq5WFlaIAAAAAAAACg4AAARCwAAyLlwYXJhAAAAAAADAAAAAmZmAADypwAADVkAABPQAAAKW3NmMzIAAAAAAAEMQgAABd7///MmAAAHkwAA/ZD///ui///9owAAA9wAAMBu/8AAEQgArQFQAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMAAgICAgICAwICAwQDAwMEBQQEBAQFBgUFBQUFBggGBgYGBgYICAgICAgICAkJCQkJCQsLCwsLDAwMDAwMDAwMDP/bAEMBAgICAwMDBQMDBQwIBwgMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDP/dAAQAFf/aAAwDAQACEQMRAD8A+hKKKK8c7AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//Q+hKKKUdR9a8c7CX7Pcf88n/75NREFSVYEEdQa/Ty2s7P7ND/AKPD/q0/5Zr/AHR7V+ePxAVU8c6+qAKBqNwAAMADee1aTp8vUlSuchRRRWZQUUUUAKAWIVQST0A61L9nuP8Ank//AHya6/4cKr+PtAVwGU38IIIyDz3FfoNeWdn9juMW8P8AqpP+Wa/3T7VrCnzK9yXKx+YlFFFZFBRWhpelajrV7Hp2lW8l1cynCxxjJ+vsPevfbT4P6B4U0wa78TNTECdVtLdvmZuuzdyWPsoP1qoxb2E2fOQ54HNSeTNjPlvj/dNev3/xL0PTWNt4J8N2NpCvC3F5GLiZsd8NkD86wj8VvGxbcLqBR/cFrBt/LZRZdwPOiCOGBH14pK9dsvilb3REPi/w/p2qQMfnkihW3nA9QyYBP5V2afDDwT4/sH1P4daibW5QZksbo52E/wAJ/iX2PI96ahf4WF7bnzfRW5r/AIc1rwxftput2r20w5G4fK4/vI3Qj3FYdQ1YYVKIJ2AIicg9CFNRHpX6M+BbS0bwVoTNBExOnWxJKKSf3S98VpThzCk7H52fZ7j/AJ5Sf98tR9nuP+eUn/fLV7/8U/Hfifw/451HSdIuUt7WEQbIxBEQN0KMeSueSSa89/4Wp45/5/1/8B4f/iKTSTtcEcF9nuP+eUn/AHy1H2e4/wCeUn/fLV3v/C1PHP8Az/r/AOA8P/xFWbb4u+OLaQSG6gmA/hltoip/JQf1pWj3HqebNHIn30ZfqCKZX1d4S+L/AIW8SyJo/jfSrO3klIRbjykaBiegbIymfXOPet/xl8CNA1iB73wqRp12RuWLJa3k745yVz6gkVfs7q8Xcnm7nxlRV/VNLv8ARb+bS9Tha3ubdikkbDBB/qD1B71QrIoKKKKAFALEADJPQCpfs9x/zyk/75avQvhlawRaxd+Jr2MSWvh2ymv2VvuvMBsgQ59ZCPyr7n0K50zXNGsdZtoIfLvYI5hiNOC6gkdOxyPwrWFPm6kylY/NA5BweDRXp/xg8PDw747v44k2W99i8hAGBiX74H0cMK8wrNqzsUhyoznailj6AZP6VIbe4AyYn/75Nex/Cu4s/C1hqXj3U4VlihmttMgVwCC9xIGnYA90iBP419rmy024iKm3heKVccRphkYfTuDWkKXMr3JcrH5f0V0PizQ38NeJdS0NwcWlw6IT3jJ3Rn8VINc9WTKCiiigD//R+hKUdR9aSlHUfWvHOw/UW2/49of+uaf+givzp+IP/I9eIP8AsI3H/oZr9Frb/j2h/wCuaf8AoIr86fiD/wAj14g/7CNx/wChmumvsjOmcfRRRXMaBRRRQB23w2/5H/w//wBhCH+dfobe/wDHlcf9cpP/AEE1+eXw2/5H/wAP/wDYQh/nX6G3v/Hlcf8AXKT/ANBNdVDZmc90fl5W34e8P6n4o1eDRdJj8y4nbHPCoo+87HsqjkmsSvuH4JeB08NeHE1q8jxqOrIshJHzRQHmOMem77zfh6VhCHM7FydkaOnaP4V+DHhGfUpsSTIg864IHm3ErfdjT0BPQenJr418W+LtX8Z6tJqurSZySIYVP7uFOyoP5nqa9M+O/i99b8T/APCP2z5stIyjAHh7kj94x/3fuj8fWvC6qpL7K2FFdWFFFFZFBWtomuap4d1KLVtHna3uYTkMOjDurDup7g1k0UAfeGlXXhj41eDf+JjAomj/AHcyjHm2s+PvRt12nqOxHBr498a+DdT8Ea3JpOoDchy9vOBhZos8MPfsR2Nb3wn8Xv4R8XW0kr4sb5ltbsE8BXOEk+qNg/TNfXfxP8FQ+NfDM9rGo+32gaezfvvUcx59HHH1we1dFueN+pHws/Pg9K/SHwH/AMiToP8A2Drb/wBFLX5vurIWRwVZSQQeoI4INfpB4D/5EnQf+wdbf+ilpUN2E9j40+Nn/JStW+lv/wCk6V5TXq3xs/5KVq30t/8A0nSvKayn8TKWwUUUVIwr7G+AfjW41nTLjwvqUhkuNNVZLd2OWa3J27T67GwB7EelfHNeyfAaeSL4i20aH5ZrW5Rx6gJv/morSk7SRMloewftA+EYb7Q4/FttGBdaeyxXBA5eCQ7QW9SjEY9ia+O6/Rr4iRRz+A/EEcv3f7Pnb8VUsv6gV+ctVWVncUHoFFFXNOsLjVdQttMtRumu5khjA/vSMFH86xLPTZk/4R34RwqfluvFV/5h7H7HZfd/AyHNe6/s9+If7R8LXGgzNmXSpsoD18ifLL+Thh+VeHfGa6t4/E1t4ZsT/onh6ygsYwOm/aHkP1OQD7im/BTxD/YXju0hkbbBqimykz03PzEf++wB+NbRfLOxLV0e0ftE+HvtmgWPiOFcyadMYZSP+eM/Qn2Dgf8AfVfHlfpj4l0WLxFoGoaHN0vbd4gT/C5GUb8GANfAvgXwxNr3jnT/AA9cxkBbo/alP8KW5LSg/wDfJX8adaPvLzFB6HTeP0/4R7wj4X8Fj5ZvIbVr1e/nXXEYb3VARX1J8IvEP/CReA9PmkfdcWamzmz13Q8KT9U2mvjb4k64PEPjjVtRQ5hE5ghx0EUH7tcex25/GvVv2dfEH2XW7/w3M2EvohcQg9PNh4YD3KHP/AaIStOwSWg/9ovw/wDZtY0/xLCmEvYjbTEdPNh5Qn6ocf8AAa+bq/QT4teHv+Ej8CajbxruntF+2Qeu+D5mA+qbhX599eamtG0hwegUUUVkUf/S+hKUdR9aSlHUfWvHOw/UW2/49of+uaf+givz08a2F7qXxC120sIJLiZ9SuAqRqWY/vD2FfoXbf8AHtD/ANc0/wDQRXyT4n+J6+CfFWsWHhDTbYTtdyteXtypeWWZmy4XBGEUnAHtmuuqlZXMoHn9v8G/iLcxCYaUyAjIEjojfkTmue1nwF4w0BTJqulXEUY6uELJ/wB9LkV7Jov7RmrxzKuv6dBND/E1sWRx74YkGvo3wv428OeMbXzdGulkYj95A+FkX2ZD1rOMIS2ZTk10PzfPBweoor9BvEnwq8FeJy0t3Yi2uG/5b2uInz6kAbT+VeO6p+ze28to2rjb2W4Tn814qXRkhqaPEfht/wAj/wCH/wDr/h/nX6G3v/Hlcf8AXKT/ANBNfO3hL4UaX8P9Y07XfEOoLdXr3SW9jBGNqGaX5QxzydoJb0FfRN7/AMeVx/1yk/8AQTW1KLS1Ik7s/OjwLoQ8S+LtK0VxmO4uFMv/AFyj+eT/AMdUiv0N1jUItF0a91RgBHY20k23tiJCQP0Ar46/Z7tEn8dy3LDJtbCZ1+rskf8AImvo74wXTWvw31t0ODJFHD+EkqKf0NTS0g2OWrsfAdzcTXlxLd3DF5Z3aSRj1LOdzH8zUNFFcxoFFFFABRRRQAV+jXw81p/EHgrR9VkbdLJbKkp7mSL925P1K5/Gvzlr7c/Z9umn8AtAxyLa/nRfowR/5sa2oP3rET2PnT4yaAmgePb9IV2wXwW9iAGAPOzvA+jhq+0PAf8AyJOg/wDYOtv/AEUtfPH7Sloi3+hX4HzSQXELH1CMrD/0M19D+A/+RJ0H/sHW3/opa0grTYpP3UfGnxs/5KVq30t//SdK8pr1b42f8lK1b6W//pOleU1zz+JlrYKKKkSGaQ4jjZieyqT/ACqRkdfQv7O2iy3Pia911lPk2NqYg3YyzkDA+ihj+NcB4T+F3i3xZcIsFo9rak/PczqURR3wDyT7CvquLUvA/wAHPDSaWbkNImZGjUhri4mPViB09BngCtqcdeZ7EyfRDfjbr8Wi+A7y03AXGqkWkS9ypIaU/QKCPxFfCFdt478cap471j+0b4CKGIFLa3UkrEmefqzdWNcTUVJczuEVZBXtXwL0eG68WTeIL0f6JoVtJdOx6CQgqn5Dc34V4rX0pp0H/CF/Ae+1IjZe+JHCKT18uU7FA/7Zh2/4FRTWt+w5bHz7rOpy61q97q85zJe3Ek5/7aMWA/AcVShmltpo7mBiksTrIjDqGU5B/AioqKgZ+l/hjWovEfh7T9ciIxeW6SMB2fGHX8GBFeT6h4bh8Cav40+IuFVJrIGy9p5x+9wPeUL+dY/7O3iL7Xot94ZnbL2EouIR38qb7w/Bxn/gVdT8eIL6f4e3Bsz+7iuYJLkDqYgxH6OVJ+ldd7w5jK1nY+F8k8sck9T6mt/wtrcnhvxHp2uRn/jzuEkYesecSD8VJFYFFciNT9SI3huYVkQiSGZAwPUMjjI/Ag1+cXjjQD4Y8WanomCI4J2MPvC/zxn/AL5IFfZHwW8RHX/AlpHM+640xjZSeu2PBiJ+qED8K8r/AGjfDoS403xVCv8ArQbO4I/vLl4ifqNw/AV01fejczjo7HzBRRRXMaH/0/oSlHUfWkpR1H1rxzsP1Ftv+PaH/rmn/oIr86fiD/yPXiD/ALCNx/6Ga/Ra2/49of8Armn/AKCK/On4g/8AI9eIP+wjcf8AoZrpr7IzpnH1asr68065S8sJ5LeeM5WSNirA/UVVormND3nQf2gPFemxrBq0MOpKvG9spJ+JHBrpLv8AaRu2hIstGRJccGSQlQfoK+YqK0VWXcnlR69oHjHXvGPxN8PXut3Bk2X8QjiX5Y4wT0Vf619y3v8Ax5XH/XKT/wBBNfnl8Nv+R/8AD/8A2EIf51+ht7/x5XH/AFyk/wDQTW1F3TuTPdHxv+ztcLH41u4CcGbTpMe5SSNv5Zr6A+M8LT/DXWAv8AgkP0WdCf0r5F+FmtroHj3Sb2VtsMkptpT2CTgx5P0JB/CvuvxZpR1vwxqukAZa6tJo1H+2VJT/AMeApUtYNBLdM/NOilIZTtYYI4I9COopK5jQKKKKACiiigAr7V/Z5haPwLPKRxLqMxH0VI1/mK+Kq/Qb4S6S2j/D7R7eRdsk0RunHvOxkH/jpFbUV7xE9jxr9pWdTNoFqD8wS6kI9iY1H8jX0B4D/wCRJ0H/ALB1t/6KWvkX4860uq+O5bOJt0emW8dr7eYcySfkWA/CvrrwH/yJOg/9g62/9FLWkHebE/hR8afGz/kpWrfS3/8ASdK5/S28H6RYw3+qI+r30w3CzRjHDCM4Hmv1ZjjOBxiug+Nn/JStW+lv/wCk6V5TWEn7zLWx9CeEvit4RtruOz1jwzZWlqxC+dAm8x+7Bskj1xX1ZDpui3dks+mRW6JPHuinhjTowyHU4r8z6+qPgB46Lb/BGpSZwGlsGY9hzJCP/Ql/GtaVTWzJlHqcZ8Tta+JXhfWX0bUdYne0lXfbSxARrJEeP4ehXoRXh8001xIZriRpZG6s5LMfxNfoH8TfBcXjXwxNZxqPt9sDPZv38xRymfRxwffBr8+pI3idopVKOhKsp4IIOCCPUGoqxaY4u6GUUUVkUauh6TPrus2WjWwzJezxwjHYO2CfwGTX0N+0NewWNv4f8JWfyw2sTT7B2VQIYv0DVifs9eH/AO0PFFzr0y5i0uDCE9POnyo/EIGNcj8ZtW/tb4h6mVbdHZlLNPT9yvzf+Plq1WkL9yftHltFFFZFHsXwJkv0+IdqlkMxyQTrc+nk7M5P0cLj3r7Y1nTINa0m80i5GYryCSBs9t6kZ/A8187fs6eH1gsNT8VXAwZmFpCx7Rx4eU/QsQPwr37w1r1p4n0S21yx/wBVchsA9VKsVYH6EV10l7tmZT3Pzbv7K402+uNOuhtmtZXhkHo0bFT+oqpXtfx48P8A9j+Nm1KJdsGrxC4BHTzU+SUfmA3414pXLJWdjRHv/wCz14g/s/xRc6DM2ItUgJQH/ntBlhj6oW/KvpT4k+H/APhJvBWqaYi7phCZ4PXzYfnUD64K/jXwDoWrT6DrNjrVsSJLKdJhjuFOSPxGRX6X2l1BfWsN7bEPDcRpKh9UcBh+hroou8XFkT0dz8u6K7n4k+H/APhGfGuqaYi7YTMZ4PTypvnXH0yV/CuGrnas7Gh//9T6EpR1H1pKUdR9a8c7D9Rbb/j2h/65p/6CK/On4g/8j14g/wCwjcf+hmv0Wtv+PaH/AK5p/wCgivzp+IP/ACPXiD/sI3H/AKGa6a+yM6Zx9FFFcxoFFFFAHbfDb/kf/D//AGEIf51+ht7/AMeVx/1yk/8AQTX55fDb/kf/AA//ANhCH+dfobe/8eVx/wBcpP8A0E11UNmZz3R+XoJBDKcEHII6gjvX6E/DHxhH4y8K2187g3tsBBeL3EqD72PRxhh+NfnrXefD3xze+BddXUIQZbSbEd3Bnh489R/tL1B/DvWNOfKypRuaXxc8Kt4W8Z3aRpts79jd2xA42yHLoP8AdbIx6YrzGvvPxn4e0f4s+Do7rRpklmQGaxmz918fNE/cbuhB6HBr4WvrG7027lsL+JoLiBikkbjDKwoqRs7hF3RVooorMoKKKciPK6xRKXdyFVVGSSegA9aAOp8E+Gp/F3iex0OIHZNIGnYfwQp80jH8OB7kV99eKfEFh4M8NXOrzALHaRBIIum98bYox9Tj8K84+FXge2+Hvh+fX/ELJBfXMe+4dyALeAciPPqere+B2r55+KvxGl8c6qLeyLR6TZsRAh4MjdDKw9T/AAjsPrXQvcjruzN+8zzC+vLnUby41C8cvPcyPLIx7u5JJ/Ov0Y8B/wDIk6D/ANg62/8ARS1+bx6V+kPgP/kSdB/7B1t/6KWlQ3Y57Hxp8bP+Slat9Lf/ANJ0rymvVvjZ/wAlK1b6W/8A6TpXlNZT+JlLYKu6bqN3pGoW2qWDmO4tZVljYdmU5H4HofaqVFSM/Szwr4htfFXh+y160wFuowzqD9yQcOh/3WyK+RPjr4Q/sHxONbtE22esZkOBwlwv+sX/AIFww+prc/Z98X/YdVn8I3j4gv8AM1rk8LOg+ZR/vqM/UV9D/ETwmnjLwpeaQAPtKr51qx/hnjBKj/gXKn611P34GXws/OuinyRyQyNDKpR0YqyngqwOCD7g1teGNFl8R+IdP0OEc3lwkbH0TOXb8FBNcpqfZ/we0ePwr8OotRul2SXayajOT1Cbcxg/SNQfxr4e1C9k1K/udRmOZLqaSZvrIxY/zr77+KF9HoHw41b7N+7H2VbOEDjAlIhAH0Umvz5ratpaJEOrCnKrOwRAWZiAoHUk8AU2vTfhD4e/4SLx3YRyLut7Im8mz0xDygP1faKySu7Fs+qLu2X4ffCCe2TCS2WmMrEcZuZxtY/XzHrz39nLxD5un6j4WmbLWzi7gB/uSYSQD6MAfxro/wBoTVDZ+CYdPU4bUL2NSPVIgZG/ULXzT8L/ABD/AMI1440y/dtsE0n2Wf08uf5CT/unDfhXRKVpozSumfT3x78Pf2v4L/tSJczaRMJ89/Jf5JB+Hyt+FfENfqBqNhBqdhc6ZdDdDdRPBIP9l1Kn+dfmfq2m3Gjapd6TdDEtnPJA/wBUYjP49amvHW44PSxn19z/AAL8QHWvA0VlK26fSZGtWz18v78R/wC+Tt/CvhivdfgB4g/svxi+jytiHVoTGAennRZdPzG4fjUUnaQ5LQ7f9o7w/uh0vxRCvKM1lOR6Nl4ifx3D8a+U6/R7x5oA8T+ENU0YLullgZ4faaP54/8Ax4AfjX5w4IOGGCOCPQ1VZWlcUHof/9X6EpR1H1pKK8c7D9Rrb/j2h/65p/6CK/On4g/8j14g/wCwjcf+hmtlfi78QkUIuryAKAB8q9BwO1cDf311qV7PqN65luLmRpZXPVnY5J/E1tUqKS0IjGxUooorEsKKKKAO2+G3/I/+H/8AsIQ/zr9Db3/jyuP+uUn/AKCa/MjT7+70q+g1KwkMVzbSCSJx1V16Gu8f4ufEKRGjbV5CrAqRtXkEYPatqdRRVmTKN2eb0UUViUdv4L8fa94HvPP0uTfbuf31tJkxSe+Ox9xXt2qX/wAOPjDAkktwND19VCq82AH/ANlm6MPQ9RXy1RVxm0rdBNHf6/8ADLxh4fYtNZNdW/8ADcWv72Nh65XJFcUbG9DbDbzBvTy2z+WK1tO8VeJNIG3TtSuYF/urIdv5HIrc/wCFm+Nu+pMT6mNCfz20vdDUraH8PvF/iGQLYadKsfeaYeVGo9SzYr2vQ9O+HnwmUapr17HrGuqPkht8OsLf7PYH/aP4V4PqHjPxVqqlL/VLmVD/AA+YVX8lxXNEkksTknqTTUktkDVz0rx78UNd8cymCY/ZNOU5S1jJwfQyH+I/pXmlFFS23qxpAelfpD4D/wCRJ0H/ALB1t/6KWvzer0Cy+KXjvTrOCws9Ukjgto1iiQBcKiDCjp2FXTmovUmSujW+Nn/JStW+lv8A+k6V5TWnrGsajr+oS6rq0xuLqbbvkPBO1Qo6egAFZlRJ3bY0FFFFIZasry5068gv7NzHPbyLLG46hkOQfzr9HPB3ia18XeHbPXbUgGZAJkB5jmXh0P0PT2xX5s10eg+LvEfhjeNDv5bVZTl1U/KSO5B4z71pTqcpMo3PY/jt4CfStUPi/TYv9Cv2/wBKCjiKc/xH0V+v+9n1qX9nbw99r12+8RzLmOwh8iIkf8tZ+pH0QH/vqvNL34o+OdStJbC/1Jp7edSkkbopVgexGKztA8d+KvDFm1hod81rA8hlZVA5cgAk59gKfNHm5gs7WPpn9ovUvs/hXT9MU4N5e72HqkCE/wDoTLXxvXSeIfF3iHxUYDr1492bYMItwA278bunrgVzdTOXM7jirIK+wf2dvD32TQr7xJMuJNQl8iIn/njB1I+rk/8AfNfH1d1pfxK8a6Lp8Ol6ZqTwWtuu2ONVXCgkk9vUk0U5JO7CSuj1v9pHUvM1bRtIU8QW8tww95XCD9ENfNXI5BwfUVs674g1fxLff2lrdw1zcBFj3tgHYucDj6msalOV3cErI/Rn4e+IB4n8G6XqzNumaERT/wDXaL5Hz9SM/jXy7+0B4e/szxfHrUS4h1aEMxHTzocI/wCa7TXm+g+PPFnhizbT9E1B7a3eQylFAI3kAE8+oAqLxB428TeKYIbbXr1ruOBy8YYAbWIwSMDuK0lUTjZ7kqNmcrV/StRuNH1O01W1OJrOZJ0+qMGx+PSqFFYln6gabqEGq6fa6paHMN3Ck8Z/2ZFDD+dfAnxW8Pf8I3461K0jTZBcP9rg9Nk/zED6NuH4VV0v4meN9G0+DS9O1OSG2tl2RIApCrknAyPesPxB4n1zxTcRXWu3JupYUMaOwAIUnOOPetqlRSREYtM//9b6EooorxzsCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//9f6EooorxzsCiiigAooooAKKKKACiiigDqvB/hDV/GurrpOkqMgb5pW+5FH0LMf0A7mvVbjRfgn4Vc2Gr3l5rd5H8sptjiJWHUAqVHH1P1q78OBNZfCDxhqmk5GolmjZl++sSxpnGOeFdzXznWmkUhH0Fb6b8CPEJFraXV7o078K85OzJ9SS4/PFeEX8Ntb31xb2c32iCKV0ilI2+YisQr47ZHNVKKlu/QAr1/4SeCNJ8V3epX/AIkJXStNgBkYOYx5rn5csOwUMT+FeQV9Da2v/CD/AAVsNGH7vUPE832mcdGEPD4/75Ea/iacEr3YM82+JfhNPBvi670i2VhaMEntSxJJikHTJ67WBXPtXBV9D/EBf+Ez+F/h/wAdR/Nd6cPsF8RycZ2ZP/AwD/wOvnilNWegI9D+GHhPT/GnipdD1OSSOFreWXdEQG3R4x1B45rkddsYtM1vUNNgJaO0upoELdSschUE++BXq/7P/wDyUSP/AK8rn/2WvNfF/wDyNmtf9hG6/wDRzU2lyJh1OdoooqBjkR5XWONS7uQqqoySTwAAOpNe76R8HrLTdLTXviPqa6PbPylspHnN3wevP+yoJHc1a+C/h/TLGy1L4k+IVBtNIVhbBuhlVcu4B6kZVV/2jXkvi/xbqvjPWZdX1OQ4YkQwg/JDHn5UUe3c9zzWiSSuxbnqhb9n6Jvs/l6nKBx52W/P74/lU8vwn8K+K7OS++GutC4mjUs1ldHD49M8MPqQR71891paRq+o6FqEOqaVO1vcwMGR1Pp2I7g9CDS5l1QW7EN/YXul3kun6jC9vcwMUkjcYZSP88HvW34L0W28R+K9L0K8Z0gvZxE7JgMAQTxnvxXuXxAtbD4j/D+2+JOmQrFqNgBFqEad1UhXB/3CQyn+6a8l+Ff/ACUXw/8A9fi/+gtQ42kkF9Dpviv8L08CtaX+lPLcadc/uneTBaOcc4JAAww6e4NeNV9kahrNjrfjzxN8LvELf6Hqwheydv8Aljci3Q4X0yQGH+0Md6+TNc0a+8PavdaLqSbLi0kMb+hx0YezDBHsadSKTugXmZVeqfFTwPpfge80u30uWaVb20M8hmIJDBgMDAHFeV19EftD/wDIU8Pf9g5v/QxSilyth1PneiiioGFFFFABRRRQAUUUUAFFFFAH/9D6EooorxzsCiiigAooooAKKKKACiiigD034Y/EBvA2qTLeRG50u/UR3cI5IAyA6g8EgEgg9QcV6Pq3wj8O+L0fW/hnqkDJJ87WMjY2E8kL/En0II9DivmurVpfXmnzLcWM8lvKpyHjYqQfqKtS0s0K3U2vEPhDxH4Vm8nXbGS2BOFkI3RN/uuOPw61zdfQ/gP4tXOp3MPhLx6sep6dfsLcTTKC8bP8q7z/ABKTgEnkda81+JXhFfBfi260eAk2rBbi2LcnypM4UnuVIK/hRKKtdBfoZvgfw8/inxXpuhgExzzAzH0hT55D/wB8giu1+N3iBNZ8bS2FsR9l0eNbKJV+6GX5pMf8CO3/AIDXdfADR4LG11fxtqEkdtHEv2K3mmIVEY4aRiT2yUX8xWFcfCXRru4lurjxtpryzO0jsduSzncx/wBZ3JquV8mnUXUsfBK4g13TfEPw6v2Hl6nbNPBn+GQDY5HuPkb/AIDXgV3az2N3NY3S7JreR4pFPZ0JVh+Yr6T8IeAdG8J+I7HxBB4y01/skmXjBUeZGwKumd/dSa4747eHl0nxl/a1uB9m1mIXKsv3fNXCyYPvw3/AqJRfLr0C+o79n/8A5KJH/wBeVz/7LXmvi/8A5GzWv+wjdf8Ao5q9K/Z//wCSiR/9eVz/AOy15r4v/wCRs1r/ALCN1/6Oak/gQ+pztFFFZjPpHxK50b9n/QbGD5f7UnR5cfxBmknOfxVfyr5ur6R8Qodb/Z+0O+txuOk3CpMB/CFaSE5/76U/jXzdWlTp6CiFFFFZjPpH4Dv/AGlo/i3w1P8ANDcWgkCnoC6PEx/9B/KvLPhVn/hYvh/P/P4v/oLV6p8Ck/svQvFviif5YILURBj0LRo8rfzX868r+FWf+Fi+Hs9fti/+gNWvSJPc2fjDPNa/FHU7m2cxywvbPG68FWWGMgj6Guw8b28PxJ8EWvxF01B/ammoLbV4k6lV/wCWmPQZ3D/ZJ/u1xXxp/wCSlav9YP8A0QlR/CrxlH4T8Q+TqOG0nU1+y3qNyoVuFkI/2Sef9kmi/vNPqPoeY19EftD/APIU8Pf9g5v/AEMV5v8AEnwY/grxLLYxAtYXI+0WUnUNCx+7nuUPB9sHvXpH7Q//ACFPD3/YOb/0MUJWjJC6o+d6KKKyKCiiigAooooAKKKKACiiigD/0foSiiivHOwKKKKACiiigAooooAKKKKAJGhmWJZ2RhE5Kq5B2sV6gHoSM8io69v+H3xEWHT4PA+taNZ6pppdtgkAR1MhJJJ2sGOT1Iz719Cv8FvhxdEXH9lmPeA21JpVXnnGA2K1jT5ldMlytufF3hHRL7xD4k0/StPRnkknjLEDhEVgXdj2CgE16T8etUt9W8fm1siJTY20Vq23nMpZnK/UbwPrXX+OPGcHw2lufC3gbSbfS5H+SS9Ul5mGOo3DIPoSWx2rw7wfdQxeLNP1HUIjeLDcfaHjZ9pkdMuNzEN/EATxzSaS90fme0/E/b4K+G/h/wAAQELcXQFze46nZ87Z+srf+O182V6B8TfE9x4s8W3Gozx+SkaRwRRbt+xEXP3sDOWJJ4715/Sm7vQEgr6Y1If8J98DbbUR+81Dwy+yQ9WMcQCNn6xFW/4DXzPXsPwl8Yv4ck1bTZ7UX1nqMCiSEyeWARlCc7W6qxBGPSiD1swZb/Z//wCSiR/9eVz/AOy15r4v/wCRs1r/ALCN1/6Oaus+GevJ4U8bPqEVubhI4riFYzJtOCQAS205xj05r1m51vwJeXEt3c+DbWSaZ2kkdp+Wdzlif3XUk5qkk42uJuzPliivqH+0/h7/ANCVaf8Af/8A+1Vw3xBvPClxoSJovh2DSrgXCEzxSb2KbWymNi8E4PXtUuCS3DmNX4MeJtMeHUPh54jI/s/WgwhLnAWZ12smT03AAqf7wHrXmfjbwVq3gjWJNN1BGaEkm3uAPkmTsQezD+Jex9q48Eg5HBFe/eCfipqGqJB4Q8W2MGu2chWNHuf9ao6DLEMGx2JGfemmmrMb01PAK2NC0HVfEmpxaTo8DT3EpAwPuqO7OeyjuTX2/J8E/hxJKZv7MK99qzShfy3V5X448er8OJrjwn4I0m10wj5Wu1+eQ8dQCo592LU3StrJiUr7FP4j3+nfD/wNa/C/R5RLeXAEuoyr1wSHbd6F2AAHZB715P8ACv8A5KL4f/6/F/8AQWrh7m5uLy4ku7uRpppmLySOSzMx5JJPU10fgfU/7G8X6Tqvl+d9muA/l7tu75SMbsHHX0qea8kO2h1Hxp/5KVq/1g/9EJXltdv8RtZ/t/xlqGreT5HnmL93u342xKv3sLnOM9K4ilL4mNH0Z4fdPir8O5vCtywbX/DyedYOx+aWADATPfj5D/wE0z9okFdV8PqwwRpzAg9iHFeLeFvEF94X1+y1vTz+9t5BlScLIjfK6N7MDj9a9A+MXiv/AISzVdOufsv2X7PbPHt8zzN2XznO1cVfMnB9ybanj9FFFZFBRRRQAUUUUAFFFFABRRRQB//Z" alt="HORM SALON">
+    <div class="meta">สระ · ไดร์ &nbsp;|&nbsp; เปิดทุกวัน 06:00 – 19:00</div>
+  </header>
+
+  <main>
+    <section>
+      <div class="step"><span class="no">01</span><h2>เลือกแชมพู &amp; จำนวนท่าน</h2></div>
+      <div class="svc on" id="svc-moisture">
+        <div class="info">
+          <div class="name">Moisture Shampoo</div>
+          <div class="desc">สระ ไดร์ ด้วยแชมพูสูตรเพิ่มความชุ่มชื้น เหมาะกับผมทุกสภาพ</div>
+          <div class="price"><span id="p-base">290</span> บาท / ท่าน</div>
+        </div>
+        <div class="stepper" data-key="moisture">
+          <button type="button" data-d="-1" aria-label="ลด">−</button><span>1</span><button type="button" data-d="1" aria-label="เพิ่ม">+</button>
+        </div>
+      </div>
+      <div class="svc" id="svc-keratin">
+        <div class="info">
+          <div class="name">Keratin Shampoo <span class="tag">+<span id="p-add">50</span></span></div>
+          <div class="desc">สำหรับผมแห้งเสียมาก ต้องการบำรุงเป็นพิเศษ</div>
+          <div class="price"><span id="p-ker">340</span> บาท / ท่าน</div>
+        </div>
+        <div class="stepper" data-key="keratin">
+          <button type="button" data-d="-1" aria-label="ลด">−</button><span>0</span><button type="button" data-d="1" aria-label="เพิ่ม">+</button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="step"><span class="no">02</span><h2>เลือกวัน</h2></div>
+      <div class="dates" id="dates"></div>
+    </section>
+
+    <section>
+      <div class="step"><span class="no">03</span><h2>เลือกเวลา</h2></div>
+      <p class="hint">ใช้เวลาประมาณ <span id="svc-min">60</span> นาที</p>
+      <div id="times"></div>
+    </section>
+
+    <section>
+      <div class="step"><span class="no">04</span><h2>ข้อมูลติดต่อ</h2></div>
+      <div class="field">
+        <label for="name">ชื่อ</label>
+        <input id="name" autocomplete="name" placeholder="ชื่อ หรือ ชื่อเล่น" maxlength="60">
+        <div class="msg">กรุณากรอกชื่อ</div>
+      </div>
+      <div class="field">
+        <label for="phone">เบอร์ติดต่อ</label>
+        <input id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="08X-XXX-XXXX" maxlength="12">
+        <div class="msg">กรุณากรอกเบอร์โทร 10 หลัก</div>
+      </div>
+      <div class="note">
+        <button type="button" class="linkbtn" id="btn-manage">ยกเลิกคิว / ตรวจสอบการจอง</button>
+        <div class="contact">
+          <a class="cbtn" data-contact="tel">โทรหาร้าน</a>
+          <a class="cbtn" data-contact="line" target="_blank" rel="noopener">แชท LINE ร้าน</a>
+        </div>
+        <div>ยกเลิกเองได้ก่อนเวลานัด <span class="cancel-hrs">1</span> ชั่วโมง · ชำระเงินที่ร้าน</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="bar">
+  <div class="inner">
+    <div class="sum">
+      <small id="sum-text">เลือกวันและเวลา</small>
+      <b id="sum-total">290</b> <span style="font-size:13px">บาท</span>
+    </div>
+    <button class="btn" id="btn-next" disabled>จองคิว</button>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div class="overlay" id="ov-confirm">
+  <div class="sheet">
+    <h3>ตรวจสอบการจอง</h3>
+    <div class="sub">กรุณาตรวจสอบรายละเอียดก่อนยืนยัน</div>
+    <div class="rows" id="confirm-rows"></div>
+    <div class="actions">
+      <button class="btn block" id="btn-confirm">ยืนยันการจอง</button>
+      <button class="btn ghost block" id="btn-back">แก้ไข</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success -->
+<div class="overlay" id="ov-done">
+  <div class="sheet">
+    <div class="check"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F4F3EE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <div class="center">
+      <h3>จองคิวเรียบร้อย</h3>
+      <div class="sub">รหัสการจอง <span class="code" id="done-code"></span></div>
+    </div>
+    <div class="rows" id="done-rows"></div>
+    <p class="keep">ถ้าต้องการยกเลิก กด "ยกเลิกคิว / ตรวจสอบการจอง" ท้ายหน้าจอง แล้วกรอกเบอร์โทรที่ใช้จอง (ยกเลิกได้ก่อนเวลานัด <span class="cancel-hrs">1</span> ชั่วโมง)</p>
+    <div class="actions">
+      <a class="btn line block" id="btn-line" target="_blank" rel="noopener" style="display:none">บันทึกการจองใน LINE ร้าน</a>
+      <button class="btn ghost block" id="btn-new">จองคิวเพิ่ม</button>
+    </div>
+  </div>
+</div>
+
+<!-- ยกเลิกคิว / ตรวจสอบการจอง -->
+<div class="overlay" id="ov-manage">
+  <div class="sheet">
+    <h3>ยกเลิกคิว / ตรวจสอบการจอง</h3>
+    <div id="m-form">
+      <div class="sub">กรอกเบอร์โทรที่ใช้จอง</div>
+      <div class="field">
+        <label for="m-phone">เบอร์โทร</label>
+        <input id="m-phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="08X-XXX-XXXX" maxlength="12">
+      </div>
+      <div class="merr" id="m-err"></div>
+      <div class="actions">
+        <button class="btn block" id="m-find">ดูคิวของฉัน</button>
+        <button class="btn ghost block" data-close="ov-manage">ปิด</button>
+      </div>
+    </div>
+    <div id="m-result" style="display:none">
+      <div class="sub" id="m-title"></div>
+      <div id="m-list"></div>
+      <div class="actions">
+        <button class="btn ghost block" id="m-back">ค้นหาด้วยเบอร์อื่น</button>
+        <div class="contact">
+          <a class="cbtn" data-contact="tel">โทรหาร้าน</a>
+          <a class="cbtn" data-contact="line" target="_blank" rel="noopener">แชท LINE ร้าน</a>
+        </div>
+        <button class="btn ghost block" data-close="ov-manage">ปิด</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* เบอร์โทร / LINE OA ของร้าน และเวลายกเลิกล่วงหน้า ตั้งค่าที่ CONFIG ใน Code.gs */
+const DOW = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+const DOW_FULL = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+const MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+const $ = (s) => document.querySelector(s);
+const state = { moisture: 1, keratin: 0, date: null, time: null, avail: null, cfg: null };
+let availReq = 0;
+
+/* ---------- Server bridge (Apps Script หรือโหมดตัวอย่าง) ---------- */
+// ลิงก์ระบบหลังบ้านบน Google (หน้าเว็บบน GitHub Pages เรียกข้อมูลผ่านลิงก์นี้)
+const API_URL = 'https:' + '/' + '/script.google.com/macros/s/AKfycbyPNULeyrY5v92wrFAYpHOSFKHIPEZCTDeIobmWGp70yIaxwMAtQE_uoJ2NIYTypI-nBw/exec';
+const isGAS = typeof google !== 'undefined' && google.script && google.script.run;
+const useDemo = !isGAS && ['localhost', '127.0.0.1'].includes(location.hostname) && !location.search.includes('api=1');
+function call(fn, ...args) {
+  if (isGAS) {
+    return new Promise((res, rej) => {
+      google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](...args);
+    });
+  }
+  if (useDemo) return Demo[fn](...args);
+  // ส่งแบบ text/plain เพื่อไม่ให้เบราว์เซอร์ต้องขออนุญาต CORS ก่อน และไม่แนบ cookie ของ Google
+  return fetch(API_URL, { method: 'POST', body: JSON.stringify({ fn: fn, args: args }) })
+    .then((r) => r.json())
+    .then((r) => {
+      if (!r.ok) throw new Error(r.error || 'เกิดข้อผิดพลาด');
+      return r.data;
+    });
+}
+
+/* โหมดตัวอย่าง: ใช้เมื่อเปิดไฟล์นี้ตรงๆ โดยไม่ผ่าน Apps Script */
+const Demo = (() => {
+  const cfg = { open: '06:00', close: '19:00', step: 45, service: 45, maxPeople: 3,
+    daysAhead: 30, minLead: 30, priceBase: 290, priceKeratin: 50,
+    shopPhone: '0652914251', lineOa: '@007nvgwf', cancelBeforeMin: 60 };
+  const demoBooking = { id: 'HM-DEMO', date: '', time: '10:30', name: 'ลูกค้าตัวอย่าง', phone: '0812345678',
+    people: 1, moisture: 1, keratin: 0, total: 290, status: 'ยืนยัน', canCancel: true, reason: '' };
+  const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3);
+  const pad = (n) => String(n).padStart(2, '0');
+  const now = new Date();
+  const ymdOf = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  cfg.today = ymdOf(now);
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const off = new Date(now); off.setDate(now.getDate() + 4);
+  cfg.closed = [ymdOf(off)];
+  const delay = (v) => new Promise((r) => setTimeout(() => r(v), 350));
+  return {
+    getConfig: () => delay(cfg),
+    getAvailability: (date) => {
+      if (cfg.closed.includes(date)) return delay({ closed: true, capacity: 0, slots: {} });
+      const out = {};
+      let seed = +date.replace(/-/g, '');
+      const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+      for (let m = toMin(cfg.open); m <= toMin(cfg.close) - cfg.service; m += cfg.step) {
+        const r = rnd();
+        let free = r < .2 ? 0 : r < .35 ? 1 : r < .55 ? 2 : 3;
+        if (date === cfg.today && m < nowMin + cfg.minLead) free = 0;
+        out[`${pad(Math.floor(m / 60))}:${pad(m % 60)}`] = free;
+      }
+      return delay({ closed: false, capacity: 3, slots: out });
+    },
+    createBooking: (p) => {
+      const people = p.moisture + p.keratin;
+      return delay({ ...p, people, total: people * cfg.priceBase + p.keratin * cfg.priceKeratin,
+        id: 'HM' + p.date.slice(2).replace(/-/g, '') + '-DEMO' });
+    },
+    lookupBooking: (id, phone) => {
+      if (id !== demoBooking.id || phone !== demoBooking.phone) {
+        return new Promise((r, rej) => setTimeout(() => rej(new Error('ไม่พบการจอง กรุณาตรวจสอบรหัสการจองและเบอร์โทร')), 350));
+      }
+      demoBooking.date = demoBooking.date || ymdOf(new Date(now.getTime() + 864e5));
+      return delay({ ...demoBooking });
+    },
+    lookupBookingsByPhone: (phone) => {
+      if (phone !== demoBooking.phone) return delay([]);
+      demoBooking.date = demoBooking.date || ymdOf(new Date(now.getTime() + 864e5));
+      const soon = { ...demoBooking, id: 'HM-SOON', date: cfg.today, time: '23:30', canCancel: false,
+        reason: 'ยกเลิกเองได้ก่อนเวลานัด 1 ชั่วโมง กรุณาติดต่อร้าน' };
+      return delay([soon, { ...demoBooking }]);
+    },
+    cancelBookingByCustomer: () => {
+      Object.assign(demoBooking, { status: 'ยกเลิก', canCancel: false, reason: 'คิวนี้ถูกยกเลิกแล้ว' });
+      return delay({ ...demoBooking });
+    },
+  };
+})();
+
+/* ---------- Helpers ---------- */
+const people = () => state.moisture + state.keratin;
+const total = () => people() * state.cfg.priceBase + state.keratin * state.cfg.priceKeratin;
+const fmt = (n) => n.toLocaleString('en-US');
+function parseDate(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+function ymd(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+function thaiDate(s) { const d = parseDate(s); return `วัน${DOW_FULL[d.getDay()]}ที่ ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear() + 543}`; }
+function fmtPhone(p) { return p.length === 10 ? `${p.slice(0, 3)}-${p.slice(3, 6)}-${p.slice(6)}` : p; }
+// ไม่เขียน entity หรือเครื่องหมายคำพูดใน regex ตรงๆ เพราะ Apps Script ประมวลผลสคริปต์แล้วโค้ดพัง
+const ESC_MAP = { 38: 'amp', 60: 'lt', 62: 'gt', 34: 'quot', 39: '#39' };
+const ESC_RE = new RegExp('[&<>' + String.fromCharCode(34, 39) + ']', 'g');
+function esc(s) { return String(s).replace(ESC_RE, (c) => String.fromCharCode(38) + ESC_MAP[c.charCodeAt(0)] + ';'); }
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toast.t); toast.t = setTimeout(() => (t.style.display = 'none'), 3200);
+}
+function shampooText(b) {
+  const a = [];
+  if (b.moisture) a.push(`Moisture × ${b.moisture}`);
+  if (b.keratin) a.push(`Keratin × ${b.keratin}`);
+  return a.join('<br>');
+}
+
+/* ---------- Render ---------- */
+function renderSteppers() {
+  document.querySelectorAll('.stepper').forEach((el) => {
+    const k = el.dataset.key;
+    el.querySelector('span').textContent = state[k];
+    const [minus, plus] = el.querySelectorAll('button');
+    minus.disabled = state[k] === 0 || people() === 1;
+    plus.disabled = people() >= state.cfg.maxPeople;
+    $('#svc-' + k).classList.toggle('on', state[k] > 0);
+  });
+}
+
+function renderDates() {
+  const box = $('#dates'); box.innerHTML = '';
+  const start = parseDate(state.cfg.today);
+  for (let i = 0; i <= state.cfg.daysAhead; i++) {
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const v = ymd(d);
+    const b = document.createElement('button');
+    const off = state.cfg.closed.includes(v);
+    b.type = 'button'; b.className = 'date' + (v === state.date ? ' sel' : '') + (off ? ' off' : ''); b.dataset.v = v;
+    b.innerHTML = `<span class="dow">${i === 0 ? 'วันนี้' : DOW[d.getDay()]}</span><span class="d">${d.getDate()}</span><span class="m">${off ? 'หยุด' : MON[d.getMonth()]}</span>`;
+    if (off) b.disabled = true; else b.onclick = () => selectDate(v);
+    box.appendChild(b);
+  }
+}
+
+function renderTimes() {
+  const box = $('#times');
+  if (!state.date) { box.innerHTML = '<div class="time-state">กรุณาเลือกวัน</div>'; return; }
+  if (!state.avail) { box.innerHTML = '<div class="time-state">กำลังโหลดเวลาว่าง…</div>'; return; }
+  if (state.avail.closed) { box.innerHTML = '<div class="time-state">วันนี้ร้านหยุด กรุณาเลือกวันอื่น</div>'; return; }
+  const slots = state.avail.slots;
+  const groups = [['ช่วงเช้า', 0, 12 * 60], ['ช่วงบ่าย', 12 * 60, 16 * 60], ['ช่วงเย็น', 16 * 60, 24 * 60]];
+  const times = Object.keys(slots).sort();
+  const n = people();
+  let html = '', anyFree = false;
+  groups.forEach(([label, a, z]) => {
+    const list = times.filter((t) => { const m = +t.slice(0, 2) * 60 + +t.slice(3); return m >= a && m < z; });
+    if (!list.length) return;
+    html += `<div class="period">${label}</div><div class="times">`;
+    list.forEach((t) => {
+      const ok = slots[t] >= n;
+      if (ok) anyFree = true;
+      html += `<button type="button" class="time${t === state.time ? ' sel' : ''}" data-t="${t}" ${ok ? '' : 'disabled'}>${t}</button>`;
+    });
+    html += '</div>';
+  });
+  const forN = n > 1 ? 'สำหรับ ' + n + ' ท่าน' : '';
+  if (!anyFree) html = `<div class="time-state">คิวเต็มแล้ว${forN} กรุณาเลือกวันอื่น</div>`;
+  box.innerHTML = html;
+  box.querySelectorAll('.time:not(:disabled)').forEach((b) => (b.onclick = () => { state.time = b.dataset.t; renderTimes(); renderBar(); }));
+}
+
+function renderBar() {
+  $('#sum-total').textContent = fmt(total());
+  const parts = [`${people()} ท่าน`];
+  if (state.date) { const d = parseDate(state.date); parts.push(`${d.getDate()} ${MON[d.getMonth()]}`); }
+  if (state.time) parts.push(`${state.time} น.`);
+  $('#sum-text').textContent = state.date && state.time ? parts.join(' · ') : 'เลือกวันและเวลา';
+  $('#btn-next').disabled = !(state.date && state.time);
+}
+
+async function selectDate(v) {
+  state.date = v; state.time = null; state.avail = null;
+  document.querySelectorAll('.date').forEach((b) => b.classList.toggle('sel', b.dataset.v === v));
+  renderTimes(); renderBar();
+  const req = ++availReq;
+  try {
+    const a = await call('getAvailability', v);
+    if (req !== availReq) return;
+    state.avail = a; renderTimes();
+  } catch (e) {
+    if (req === availReq) $('#times').innerHTML = '<div class="time-state">โหลดเวลาว่างไม่สำเร็จ กรุณาลองใหม่</div>';
+  }
+}
+
+/* ---------- Validate & submit ---------- */
+function validate() {
+  const name = $('#name'), phone = $('#phone');
+  const p = phone.value.replace(/[^0-9]/g, '');
+  name.classList.toggle('err', !name.value.trim());
+  phone.classList.toggle('err', !/^0[0-9]{9}$/.test(p));
+  const bad = document.querySelector('.field input.err');
+  if (bad) { bad.scrollIntoView({ behavior: 'smooth', block: 'center' }); bad.focus({ preventScroll: true }); return null; }
+  return { name: name.value.trim(), phone: p };
+}
+
+function summaryRows(b) {
+  const row = (label, value, cls) => '<div' + (cls ? ' class="' + cls + '"' : '') + '><span>' + label + '</span><span>' + value + '</span></div>';
+  return [
+    row('วันที่', thaiDate(b.date)),
+    row('เวลา', b.time + ' น.'),
+    row('ชื่อ', esc(b.name)),
+    row('เบอร์ติดต่อ', fmtPhone(b.phone)),
+    row('บริการ', 'สระ ไดร์ ' + (b.moisture + b.keratin) + ' ท่าน<br>' + shampooText(b)),
+    row('ยอดรวม', fmt(b.total) + ' บาท', 'total'),
+  ].join('');
+}
+
+function lineText(b) {
+  return [
+    'จองคิว HORM SALON',
+    `รหัส: ${b.id}`,
+    `${thaiDate(b.date)} เวลา ${b.time} น.`,
+    `ชื่อ: ${b.name}`,
+    `เบอร์: ${fmtPhone(b.phone)}`,
+    `สระ ไดร์ ${b.people} ท่าน (${[b.moisture && 'Moisture ×' + b.moisture, b.keratin && 'Keratin ×' + b.keratin].filter(Boolean).join(', ')})`,
+    `ยอดรวม ${fmt(b.total)} บาท`,
+  ].join('\n');
+}
+
+$('#btn-next').onclick = () => {
+  const c = validate(); if (!c) return;
+  $('#confirm-rows').innerHTML = summaryRows({ ...state, ...c, total: total() });
+  $('#ov-confirm').classList.add('show');
+};
+$('#btn-back').onclick = () => $('#ov-confirm').classList.remove('show');
+$('#ov-confirm').onclick = (e) => { if (e.target.id === 'ov-confirm') $('#ov-confirm').classList.remove('show'); };
+
+$('#btn-confirm').onclick = async () => {
+  const c = validate(); if (!c) { $('#ov-confirm').classList.remove('show'); return; }
+  const btn = $('#btn-confirm');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>กำลังจอง…';
+  try {
+    const b = await call('createBooking', {
+      name: c.name, phone: c.phone, date: state.date, time: state.time,
+      moisture: state.moisture, keratin: state.keratin,
+    });
+    $('#ov-confirm').classList.remove('show');
+    $('#done-code').textContent = b.id;
+    $('#done-rows').innerHTML = summaryRows(b);
+    if (state.cfg.lineOa) {
+      const a = $('#btn-line');
+      // เขียน "//" แยกกัน เพราะ Apps Script ตัดข้อความหลัง // ในสคริปต์ทิ้ง (มองว่าเป็นคอมเมนต์)
+      a.href = 'https:' + '/' + '/line.me/R/oaMessage/' + encodeURIComponent(state.cfg.lineOa) + '/?' + encodeURIComponent(lineText(b));
+      a.style.display = 'block';
+    }
+    try { localStorage.setItem('horm_last', JSON.stringify({ id: b.id, phone: b.phone })); } catch (err) {}
+    $('#ov-done').classList.add('show');
+  } catch (e) {
+    $('#ov-confirm').classList.remove('show');
+    toast(((e && e.message) || '').replace(/^Error: /, '') || 'จองไม่สำเร็จ กรุณาลองใหม่');
+    if (state.date) selectDate(state.date);
+  } finally {
+    btn.disabled = false; btn.textContent = 'ยืนยันการจอง';
+  }
+};
+
+$('#btn-new').onclick = () => {
+  $('#ov-done').classList.remove('show');
+  selectDate(state.date);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+document.querySelectorAll('.stepper button').forEach((b) => {
+  b.onclick = () => {
+    const k = b.parentElement.dataset.key;
+    state[k] = Math.max(0, state[k] + +b.dataset.d);
+    renderSteppers(); renderBar();
+    if (state.time && state.avail && (state.avail.slots[state.time] || 0) < people()) { state.time = null; renderBar(); }
+    renderTimes();
+  };
+});
+
+function formatPhoneInput(e) {
+  const d = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+  e.target.value = d.length > 6 ? d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6) : d.length > 3 ? d.slice(0, 3) + '-' + d.slice(3) : d;
+  e.target.classList.remove('err');
+}
+$('#phone').addEventListener('input', formatPhoneInput);
+$('#m-phone').addEventListener('input', formatPhoneInput);
+$('#name').addEventListener('input', (e) => e.target.classList.remove('err'));
+
+/* ---------- ยกเลิกคิว / ตรวจสอบการจอง (ใช้แค่เบอร์โทร) ---------- */
+const manage = { phone: '', list: [] };
+
+function showManageForm() {
+  $('#m-form').style.display = 'block';
+  $('#m-result').style.display = 'none';
+  $('#m-err').textContent = '';
+}
+
+function renderManageList() {
+  const list = manage.list;
+  const active = list.filter((b) => b.status !== 'ยกเลิก').length;
+  $('#m-title').textContent = list.length
+    ? 'เบอร์ ' + fmtPhone(manage.phone) + ' มีคิวที่จองไว้ ' + active + ' คิว'
+    : 'ไม่พบคิวที่จองไว้ด้วยเบอร์ ' + fmtPhone(manage.phone);
+  $('#m-list').innerHTML = list.map((b) => {
+    const cancelled = b.status === 'ยกเลิก';
+    return '<div class="mcard">'
+      + '<div class="rows">' + summaryRows(b)
+      + (cancelled ? '<div><span>สถานะ</span><span>ยกเลิกแล้ว</span></div>' : '') + '</div>'
+      + (!cancelled && !b.canCancel ? '<div class="merr">' + esc(b.reason) + '</div>' : '')
+      + (b.canCancel ? '<button class="btn danger block" data-mcancel="' + esc(b.id) + '">ยกเลิกคิวนี้</button>' : '')
+      + '</div>';
+  }).join('');
+  $('#m-form').style.display = 'none';
+  $('#m-result').style.display = 'block';
+}
+
+$('#btn-manage').onclick = () => {
+  let last = null;
+  try { last = JSON.parse(localStorage.getItem('horm_last') || 'null'); } catch (e) {}
+  if (last && !$('#m-phone').value) $('#m-phone').value = fmtPhone(last.phone);
+  showManageForm();
+  $('#ov-manage').classList.add('show');
+};
+
+$('#m-back').onclick = showManageForm;
+
+$('#m-find').onclick = async () => {
+  const phone = $('#m-phone').value.replace(/[^0-9]/g, '');
+  if (phone.length !== 10) { $('#m-err').textContent = 'กรุณากรอกเบอร์โทร 10 หลัก'; return; }
+  const btn = $('#m-find');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>กำลังค้นหา…';
+  try {
+    manage.list = await call('lookupBookingsByPhone', phone);
+    manage.phone = phone;
+    renderManageList();
+  } catch (e) {
+    $('#m-err').textContent = ((e && e.message) || '').replace(/^Error: /, '') || 'ค้นหาไม่สำเร็จ กรุณาลองใหม่';
+  } finally {
+    btn.disabled = false; btn.textContent = 'ดูคิวของฉัน';
+  }
+};
+
+$('#m-list').addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-mcancel]');
+  if (!btn) return;
+  const b = manage.list.find((x) => x.id === btn.dataset.mcancel);
+  if (!confirm('ยืนยันยกเลิกคิว ' + thaiDate(b.date) + ' เวลา ' + b.time + ' น.?')) return;
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>กำลังยกเลิก…';
+  try {
+    const updated = await call('cancelBookingByCustomer', b.id, manage.phone);
+    manage.list = manage.list.map((x) => (x.id === updated.id ? updated : x));
+    renderManageList();
+    toast('ยกเลิกคิวเรียบร้อยแล้ว');
+    if (state.date) selectDate(state.date);
+  } catch (err) {
+    toast(((err && err.message) || '').replace(/^Error: /, '') || 'ยกเลิกไม่สำเร็จ กรุณาติดต่อร้าน');
+    btn.disabled = false; btn.textContent = 'ยกเลิกคิวนี้';
+  }
+});
+
+document.querySelectorAll('[data-close]').forEach((b) => {
+  b.onclick = () => $('#' + b.dataset.close).classList.remove('show');
+});
+$('#ov-manage').onclick = (e) => { if (e.target.id === 'ov-manage') $('#ov-manage').classList.remove('show'); };
+
+function setupContacts(c) {
+  document.querySelectorAll('[data-contact="tel"]').forEach((a) => {
+    a.href = 'tel:' + c.shopPhone;
+    a.textContent = 'โทร ' + fmtPhone(c.shopPhone);
+  });
+  document.querySelectorAll('[data-contact="line"]').forEach((a) => {
+    a.href = 'https:' + '/' + '/line.me/R/ti/p/' + encodeURIComponent(c.lineOa);
+    a.textContent = 'แชท LINE ร้าน';
+  });
+  document.querySelectorAll('.cancel-hrs').forEach((s) => { s.textContent = Math.round(c.cancelBeforeMin / 60 * 10) / 10; });
+}
+
+/* ---------- Init ---------- */
+(async function init() {
+  try {
+    state.cfg = await call('getConfig');
+  } catch (e) {
+    toast('เชื่อมต่อระบบไม่สำเร็จ กรุณารีเฟรช'); return;
+  }
+  const c = state.cfg;
+  $('#p-base').textContent = fmt(c.priceBase);
+  $('#p-add').textContent = fmt(c.priceKeratin);
+  $('#p-ker').textContent = fmt(c.priceBase + c.priceKeratin);
+  $('#svc-min').textContent = c.service;
+  setupContacts(c);
+  renderSteppers(); renderDates(); renderTimes(); renderBar();
+  const open = document.querySelector('.date:not(.off)');
+  if (open) selectDate(open.dataset.v); else renderTimes();
+})();
+</script>
+</body>
+</html>
