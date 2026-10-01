@@ -278,6 +278,11 @@
   .smalllink { background: none; border: 0; color: var(--muted); font-family: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; padding: 8px; }
   .check.wait { background: var(--soft); }
   .check.bad { background: var(--danger); }
+  .loybox { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin: -6px 0 16px; font-size: 13.5px; }
+  .loybox.has { border-color: #A9BFA2; background: #F3F7F1; }
+  .loybox .stamps { letter-spacing: 2px; color: var(--greige-deep); font-size: 13px; }
+  .loybox .use { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .loybox .stepper button { width: 30px; height: 30px; }
 </style>
 </head>
 <body>
@@ -342,7 +347,7 @@
           <a class="cbtn" data-contact="tel">โทรหาร้าน</a>
           <a class="cbtn" data-contact="line" target="_blank" rel="noopener">แชท LINE ร้าน</a>
         </div>
-        <div>ชำระเงินเต็มจำนวนภายใน <span class="hold-min">10</span> นาทีหลังจอง เพื่อยืนยันคิว · หากชำระแล้วต้องการยกเลิกหรือเลื่อนนัด กรุณาติดต่อร้าน</div>
+        <div>ชำระเงินเต็มจำนวนภายใน <span class="hold-min">10</span> นาทีหลังจอง เพื่อยืนยันคิว · สะสมครบ 10 ครั้ง สระฟรี 1 ครั้ง · หากชำระแล้วต้องการยกเลิกหรือเลื่อนนัด กรุณาติดต่อร้าน</div>
       </div>
     </section>
   </main>
@@ -364,7 +369,8 @@
     <h3>ตรวจสอบการจอง</h3>
     <div class="sub">กรุณาตรวจสอบรายละเอียดก่อนยืนยัน</div>
     <div class="rows" id="confirm-rows"></div>
-    <p class="keep">หลังกดยืนยัน กรุณาโอนเงินเต็มจำนวนและแนบสลิปภายใน <span class="hold-min">10</span> นาที ไม่เช่นนั้นคิวจะถูกปล่อยให้ผู้อื่น</p>
+    <div class="loybox" id="loybox" style="display:none"></div>
+    <p class="keep" id="confirm-keep">หลังกดยืนยัน กรุณาโอนเงินเต็มจำนวนและแนบสลิปภายใน <span class="hold-min">10</span> นาที ไม่เช่นนั้นคิวจะถูกปล่อยให้ผู้อื่น</p>
     <div class="actions">
       <button class="btn block" id="btn-confirm">ยืนยันและไปชำระเงิน</button>
       <button class="btn ghost block" id="btn-back">แก้ไข</button>
@@ -540,6 +546,7 @@ const Demo = (() => {
   const off = new Date(now); off.setDate(now.getDate() + 4);
   cfg.closed = [ymdOf(off)];
   const orders = {};
+  let demoFree = 1; // เบอร์ 0812345678 มีสิทธิ์ฟรี 1 ครั้งในโหมดตัวอย่าง
   let polls = 0;
   const delay = (v) => new Promise((r) => setTimeout(() => r(JSON.parse(JSON.stringify(v))), 350));
   const fail = (m) => new Promise((r, rej) => setTimeout(() => rej(new Error(m)), 350));
@@ -583,11 +590,14 @@ const Demo = (() => {
       const keratin = p.items.filter((i) => i.shampoo === 'keratin').length;
       const o = view({ id: 'HM' + p.date.slice(2).replace(/-/g, '') + '-DEMO', date: p.date, time: slots[0].time,
         name: p.name, phone: p.phone, slots: slots, people: p.items.length, moisture: p.items.length - keratin, keratin: keratin,
-        total: p.items.length * cfg.priceBase + keratin * cfg.priceKeratin, status: ST_PENDING,
+        total: p.items.length * cfg.priceBase + keratin * cfg.priceKeratin - (p.useFree || 0) * cfg.priceBase, free: p.useFree || 0, status: ST_PENDING,
         expiresAt: Date.now() + cfg.holdMin * 60000, note: '' });
+      if (!o.total) o.status = ST_OK;
+      if (p.useFree) demoFree = Math.max(0, demoFree - p.useFree);
       orders[o.id] = o;
       return delay(o);
     },
+    getLoyalty: (phone) => delay(phone === '0812345678' ? { every: 10, progress: 0, available: demoFree } : { every: 10, progress: 3, available: 0 }),
     uploadSlip: (id) => {
       const o = orders[id]; if (!o) return fail('ไม่พบการจอง');
       o.status = ST_REVIEW; o.hasSlip = true; polls = 0;
@@ -881,6 +891,7 @@ function summaryRows(b) {
     row('ชื่อ', esc(b.name)),
     row('เบอร์ติดต่อ', fmtPhone(b.phone)),
     row('บริการ', 'สระ ไดร์ ' + b.people + ' ท่าน<br>' + shampooText(b)),
+    b.free ? row('ใช้สิทธิ์สระฟรี', b.free + ' ท่าน') : '',
     row('ยอดชำระ', fmt(b.total) + ' บาท', 'total'),
   ].join('');
 }
@@ -897,12 +908,60 @@ function lineText(b) {
   ]).join('\n');
 }
 
+/* ---------- สะสมแต้ม: ครบ 10 ครั้งสระฟรี 1 ครั้ง (Moisture) ---------- */
+const loy = { phone: '', info: null, use: 0, req: 0 };
+// สิทธิ์ฟรีให้ท่านที่ใช้ Moisture ก่อน (ฟรีทั้งหมด) ถ้าเป็น Keratin จ่ายเพิ่มแค่ส่วนต่าง
+const totalWithFree = (n) => total() - n * state.cfg.priceBase;
+function draftOrder(c) {
+  return { date: state.date, name: c.name, phone: c.phone, slots: slotsOf(state.persons), free: loy.use,
+    people: people(), moisture: state.moisture, keratin: state.keratin, total: totalWithFree(loy.use) };
+}
+function renderConfirm(c) {
+  const d = draftOrder(c);
+  $('#confirm-rows').innerHTML = summaryRows(d);
+  const l = loy.info, box = $('#loybox');
+  if (!l) { box.style.display = 'none'; }
+  else {
+    const every = l.every || 10;
+    const dots = Array.from({ length: every }, (_, i) => (i < l.progress ? '●' : '○')).join('');
+    box.style.display = 'block';
+    box.className = 'loybox' + (l.available ? ' has' : '');
+    box.innerHTML = l.available
+      ? '<b>คุณมีสิทธิ์สระฟรี ' + l.available + ' ครั้ง</b> (สูตร Moisture)'
+        + '<div class="use"><span>ใช้สิทธิ์ครั้งนี้</span><div class="stepper"><button type="button" data-loy="-1"' + (loy.use <= 0 ? ' disabled' : '') + '>−</button><span>' + loy.use + '</span><button type="button" data-loy="1"' + (loy.use >= Math.min(l.available, people()) ? ' disabled' : '') + '>+</button></div></div>'
+      : 'สะสมแต้ม <span class="stamps">' + dots + '</span> ' + l.progress + '/' + every + '<br><span style="color:var(--muted);font-size:12.5px">ใช้บริการครบ ' + every + ' ครั้ง สระฟรี 1 ครั้ง</span>';
+  }
+  const free = d.total === 0;
+  $('#confirm-keep').style.display = free ? 'none' : 'block';
+  $('#btn-confirm').textContent = free ? 'ยืนยันการจอง (ใช้สิทธิ์ฟรี)' : 'ยืนยันและไปชำระเงิน';
+}
+$('#loybox').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-loy]');
+  if (!b || b.disabled) return;
+  loy.use = Math.max(0, Math.min(loy.info.available, people(), loy.use + +b.dataset.loy));
+  const c = validate(); if (c) renderConfirm(c);
+});
+async function loadLoyalty(c) {
+  if (loy.phone !== c.phone) { loy.phone = c.phone; loy.info = null; loy.use = 0; }
+  const req = ++loy.req;
+  try {
+    const l = await call('getLoyalty', c.phone);
+    if (req !== loy.req) return;
+    const first = !loy.info;
+    loy.info = l;
+    if (first) loy.use = Math.min(l.available, people(), 1);
+    loy.use = Math.min(loy.use, l.available, people());
+    if ($('#ov-confirm').classList.contains('show')) renderConfirm(c);
+  } catch (e) { /* ดูแต้มไม่ได้ก็จองได้ตามปกติ */ }
+}
+
 $('#btn-next').onclick = () => {
   const c = validate(); if (!c) return;
-  const draft = { date: state.date, name: c.name, phone: c.phone, slots: slotsOf(state.persons),
-    people: people(), moisture: state.moisture, keratin: state.keratin, total: total() };
-  $('#confirm-rows').innerHTML = summaryRows(draft);
+  if (loy.phone !== c.phone) { loy.info = null; loy.use = 0; }
+  if (loy.info) loy.use = Math.min(loy.use, loy.info.available, people());
+  renderConfirm(c);
   $('#ov-confirm').classList.add('show');
+  loadLoyalty(c);
 };
 $('#btn-back').onclick = () => $('#ov-confirm').classList.remove('show');
 $('#ov-confirm').onclick = (e) => { if (e.target.id === 'ov-confirm') $('#ov-confirm').classList.remove('show'); };
@@ -914,17 +973,19 @@ $('#btn-confirm').onclick = async () => {
   try {
     const o = await call('createBooking', {
       name: c.name, phone: c.phone, date: state.date,
-      items: state.persons.map((p) => ({ shampoo: p.shampoo, time: p.time })),
+      items: state.persons.map((p) => ({ shampoo: p.shampoo, time: p.time })), useFree: loy.use,
     });
     $('#ov-confirm').classList.remove('show');
     try { localStorage.setItem('horm_last', JSON.stringify({ id: o.id, phone: o.phone })); } catch (err) {}
-    openPay(o);
+    loy.phone = '';
+    if (o.status === ST_OK) { showStatus(o); refreshAvail(); } else openPay(o);
   } catch (e) {
     $('#ov-confirm').classList.remove('show');
     toast(errMsg(e, 'จองไม่สำเร็จ กรุณาลองใหม่'));
     refreshAvail();
   } finally {
-    btn.disabled = false; btn.textContent = 'ยืนยันและไปชำระเงิน';
+    btn.disabled = false;
+    const c2 = validate(); if (c2) renderConfirm(c2);
   }
 };
 
@@ -1204,7 +1265,7 @@ function showManageForm() {
 }
 
 function statusTag(o) {
-  const cls = o.status === ST_OK ? ' ok' : o.status === ST_CANCEL || o.status === ST_EXPIRED ? ' bad' : '';
+  const cls = o.status === ST_OK || o.status === 'เสร็จแล้ว' ? ' ok' : o.status === ST_CANCEL || o.status === ST_EXPIRED ? ' bad' : '';
   const label = o.status === ST_OK ? 'ยืนยันแล้ว' : o.status === ST_REVIEW ? 'รอร้านตรวจสลิป' : o.status === ST_PENDING ? 'รอชำระเงิน' : o.status === ST_CANCEL ? 'ยกเลิกแล้ว' : o.status;
   return '<span class="status' + cls + '">' + label + '</span>';
 }
