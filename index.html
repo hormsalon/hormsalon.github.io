@@ -280,7 +280,8 @@
   .check.bad { background: var(--danger); }
   .loybox { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin: -6px 0 16px; font-size: 13.5px; }
   .loybox.has { border-color: #A9BFA2; background: #F3F7F1; }
-  .loybox .stamps { letter-spacing: 2px; color: var(--greige-deep); font-size: 13px; }
+  .loybox small { display: block; color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.5; }
+  .loybox a { color: #06A04A; }
   .loybox .use { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
   .loybox .stepper button { width: 30px; height: 30px; }
 </style>
@@ -347,7 +348,7 @@
           <a class="cbtn" data-contact="tel">โทรหาร้าน</a>
           <a class="cbtn" data-contact="line" target="_blank" rel="noopener">แชท LINE ร้าน</a>
         </div>
-        <div>ชำระเงินเต็มจำนวนภายใน <span class="hold-min">10</span> นาทีหลังจอง เพื่อยืนยันคิว · สะสมครบ 10 ครั้ง สระฟรี 1 ครั้ง · หากชำระแล้วต้องการยกเลิกหรือเลื่อนนัด กรุณาติดต่อร้าน</div>
+        <div>ชำระเงินเต็มจำนวนภายใน <span class="hold-min">10</span> นาทีหลังจอง เพื่อยืนยันคิว · สะสมแต้มกับบัตรสะสมแต้ม LINE ของร้าน (ครบ 10 ครั้ง สระฟรี 1 ครั้ง) · หากชำระแล้วต้องการยกเลิกหรือเลื่อนนัด กรุณาติดต่อร้าน</div>
       </div>
     </section>
   </main>
@@ -546,7 +547,6 @@ const Demo = (() => {
   const off = new Date(now); off.setDate(now.getDate() + 4);
   cfg.closed = [ymdOf(off)];
   const orders = {};
-  let demoFree = 1; // เบอร์ 0812345678 มีสิทธิ์ฟรี 1 ครั้งในโหมดตัวอย่าง
   let polls = 0;
   const delay = (v) => new Promise((r) => setTimeout(() => r(JSON.parse(JSON.stringify(v))), 350));
   const fail = (m) => new Promise((r, rej) => setTimeout(() => rej(new Error(m)), 350));
@@ -593,11 +593,10 @@ const Demo = (() => {
         total: p.items.length * cfg.priceBase + keratin * cfg.priceKeratin - (p.useFree || 0) * cfg.priceBase, free: p.useFree || 0, status: ST_PENDING,
         expiresAt: Date.now() + cfg.holdMin * 60000, note: '' });
       if (!o.total) o.status = ST_OK;
-      if (p.useFree) demoFree = Math.max(0, demoFree - p.useFree);
+
       orders[o.id] = o;
       return delay(o);
     },
-    getLoyalty: (phone) => delay(phone === '0812345678' ? { every: 10, progress: 0, available: demoFree } : { every: 10, progress: 3, available: 0 }),
     uploadSlip: (id) => {
       const o = orders[id]; if (!o) return fail('ไม่พบการจอง');
       o.status = ST_REVIEW; o.hasSlip = true; polls = 0;
@@ -891,7 +890,7 @@ function summaryRows(b) {
     row('ชื่อ', esc(b.name)),
     row('เบอร์ติดต่อ', fmtPhone(b.phone)),
     row('บริการ', 'สระ ไดร์ ' + b.people + ' ท่าน<br>' + shampooText(b)),
-    b.free ? row('ใช้สิทธิ์สระฟรี', b.free + ' ท่าน') : '',
+    b.free ? row('คูปองฟรี (LINE)', b.free + ' ท่าน · กดใช้ที่ร้าน') : '',
     row('ยอดชำระ', fmt(b.total) + ' บาท', 'total'),
   ].join('');
 }
@@ -908,60 +907,44 @@ function lineText(b) {
   ]).join('\n');
 }
 
-/* ---------- สะสมแต้ม: ครบ 10 ครั้งสระฟรี 1 ครั้ง (Moisture) ---------- */
-const loy = { phone: '', info: null, use: 0, req: 0 };
-// สิทธิ์ฟรีให้ท่านที่ใช้ Moisture ก่อน (ฟรีทั้งหมด) ถ้าเป็น Keratin จ่ายเพิ่มแค่ส่วนต่าง
+/* ---------- คูปองสระฟรีจากบัตรสะสมแต้ม LINE OA ของร้าน (ร้านตรวจคูปองตอนลูกค้ามา) ---------- */
+const loy = { use: 0 };
+// คูปองฟรีให้ท่านที่ใช้ Moisture ก่อน (ฟรีทั้งหมด) ถ้าเป็น Keratin จ่ายเพิ่มแค่ส่วนต่าง
 const totalWithFree = (n) => total() - n * state.cfg.priceBase;
 function draftOrder(c) {
   return { date: state.date, name: c.name, phone: c.phone, slots: slotsOf(state.persons), free: loy.use,
     people: people(), moisture: state.moisture, keratin: state.keratin, total: totalWithFree(loy.use) };
 }
+function lineCardLink() {
+  return 'https:' + '/' + '/line.me/R/ti/p/' + encodeURIComponent(state.cfg.lineOa);
+}
 function renderConfirm(c) {
+  loy.use = Math.min(loy.use, people());
   const d = draftOrder(c);
   $('#confirm-rows').innerHTML = summaryRows(d);
-  const l = loy.info, box = $('#loybox');
-  if (!l) { box.style.display = 'none'; }
-  else {
-    const every = l.every || 10;
-    const dots = Array.from({ length: every }, (_, i) => (i < l.progress ? '●' : '○')).join('');
-    box.style.display = 'block';
-    box.className = 'loybox' + (l.available ? ' has' : '');
-    box.innerHTML = l.available
-      ? '<b>คุณมีสิทธิ์สระฟรี ' + l.available + ' ครั้ง</b> (สูตร Moisture)'
-        + '<div class="use"><span>ใช้สิทธิ์ครั้งนี้</span><div class="stepper"><button type="button" data-loy="-1"' + (loy.use <= 0 ? ' disabled' : '') + '>−</button><span>' + loy.use + '</span><button type="button" data-loy="1"' + (loy.use >= Math.min(l.available, people()) ? ' disabled' : '') + '>+</button></div></div>'
-      : 'สะสมแต้ม <span class="stamps">' + dots + '</span> ' + l.progress + '/' + every + '<br><span style="color:var(--muted);font-size:12.5px">ใช้บริการครบ ' + every + ' ครั้ง สระฟรี 1 ครั้ง</span>';
-  }
+  const box = $('#loybox');
+  box.style.display = 'block';
+  box.className = 'loybox' + (loy.use ? ' has' : '');
+  box.innerHTML = '<div class="use" style="margin-top:0"><span>จะใช้คูปองสระฟรี (บัตรสะสมแต้ม LINE) ไหม?</span>'
+    + '<div class="stepper"><button type="button" data-loy="-1"' + (loy.use <= 0 ? ' disabled' : '') + '>−</button><span>' + loy.use + '</span><button type="button" data-loy="1"' + (loy.use >= people() ? ' disabled' : '') + '>+</button></div></div>'
+    + (loy.use
+      ? '<small>ใช้คูปองฟรี ' + loy.use + ' ท่าน (สูตร Moisture) · <b>ยังไม่ต้องกดใช้คูปองตอนนี้</b> กดใช้ในแอป LINE ต่อหน้าพนักงานที่ร้าน · หากไม่มีคูปองชำระที่ร้านตามราคาปกติ</small>'
+      : '<small>สะสมแต้มกับบัตรสะสมแต้ม LINE ของร้าน · ครบ 10 ครั้งสระฟรี 1 ครั้ง · <a href="' + lineCardLink() + '" target="_blank" rel="noopener">แอดเพื่อน LINE ร้าน</a> แล้วสแกน QR สะสมแต้มที่ร้าน</small>');
   const free = d.total === 0;
   $('#confirm-keep').style.display = free ? 'none' : 'block';
-  $('#btn-confirm').textContent = free ? 'ยืนยันการจอง (ใช้สิทธิ์ฟรี)' : 'ยืนยันและไปชำระเงิน';
+  $('#btn-confirm').textContent = free ? 'ยืนยันการจอง (ใช้คูปองฟรี)' : 'ยืนยันและไปชำระเงิน';
 }
 $('#loybox').addEventListener('click', (e) => {
   const b = e.target.closest('[data-loy]');
   if (!b || b.disabled) return;
-  loy.use = Math.max(0, Math.min(loy.info.available, people(), loy.use + +b.dataset.loy));
+  loy.use = Math.max(0, Math.min(people(), loy.use + +b.dataset.loy));
   const c = validate(); if (c) renderConfirm(c);
 });
-async function loadLoyalty(c) {
-  if (loy.phone !== c.phone) { loy.phone = c.phone; loy.info = null; loy.use = 0; }
-  const req = ++loy.req;
-  try {
-    const l = await call('getLoyalty', c.phone);
-    if (req !== loy.req) return;
-    const first = !loy.info;
-    loy.info = l;
-    if (first) loy.use = Math.min(l.available, people(), 1);
-    loy.use = Math.min(loy.use, l.available, people());
-    if ($('#ov-confirm').classList.contains('show')) renderConfirm(c);
-  } catch (e) { /* ดูแต้มไม่ได้ก็จองได้ตามปกติ */ }
-}
 
 $('#btn-next').onclick = () => {
   const c = validate(); if (!c) return;
-  if (loy.phone !== c.phone) { loy.info = null; loy.use = 0; }
-  if (loy.info) loy.use = Math.min(loy.use, loy.info.available, people());
   renderConfirm(c);
   $('#ov-confirm').classList.add('show');
-  loadLoyalty(c);
 };
 $('#btn-back').onclick = () => $('#ov-confirm').classList.remove('show');
 $('#ov-confirm').onclick = (e) => { if (e.target.id === 'ov-confirm') $('#ov-confirm').classList.remove('show'); };
@@ -977,7 +960,7 @@ $('#btn-confirm').onclick = async () => {
     });
     $('#ov-confirm').classList.remove('show');
     try { localStorage.setItem('horm_last', JSON.stringify({ id: o.id, phone: o.phone })); } catch (err) {}
-    loy.phone = '';
+    loy.use = 0;
     if (o.status === ST_OK) { showStatus(o); refreshAvail(); } else openPay(o);
   } catch (e) {
     $('#ov-confirm').classList.remove('show');
@@ -1211,7 +1194,7 @@ function renderStatus() {
       : '<span class="spinner" style="border-color:rgba(140,137,125,.3);border-top-color:#8C897D;margin:0"></span>';
   $('#done-title').textContent = ok ? 'ยืนยันคิวเรียบร้อย' : bad ? 'การจองไม่สำเร็จ' : 'ส่งสลิปแล้ว รอร้านตรวจสอบ';
   $('#done-note').textContent = ok
-    ? 'ร้านได้รับเงินและยืนยันคิวแล้ว แล้วพบกันนะคะ · หากต้องการยกเลิกหรือเลื่อนนัด กรุณาติดต่อร้าน'
+    ? (o.total ? 'ร้านได้รับเงินและยืนยันคิวแล้ว แล้วพบกันนะคะ' : 'ยืนยันคิวแล้ว แล้วพบกันนะคะ') + (o.free ? ' · กดใช้คูปองสระฟรีในแอป LINE ต่อหน้าพนักงานที่ร้าน' : '') + ' · อย่าลืมสแกน QR สะสมแต้มในบัตร LINE ที่ร้าน · หากต้องการยกเลิกหรือเลื่อนนัด กรุณาติดต่อร้าน'
     : bad ? (o.note || 'การจองนี้ถูกยกเลิก') + ' · หากโอนเงินแล้ว กรุณาติดต่อร้าน'
       : 'ร้านจะตรวจสลิปและยืนยันคิวโดยเร็ว ปิดหน้านี้ได้เลย ดูสถานะภายหลังได้ที่ "ตรวจสอบการจอง" ท้ายหน้าจอง';
   $('#btn-line').style.display = ok && state.cfg.lineOa ? 'block' : 'none';
