@@ -277,6 +277,12 @@
   .status.bad { background: #F3E3E0; color: var(--danger); }
   .smalllink { background: none; border: 0; color: var(--muted); font-family: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; padding: 8px; }
   .check.wait { background: var(--soft); }
+  .sync-line { font-size: 13px; text-align: center; margin: -6px 0 14px; color: var(--muted); }
+  .sync-line.ok { color: #4F6B47; }
+  .sync-line.err { color: var(--danger); }
+  .sync-line button { margin-top: 8px; }
+  .dots::after { content: ''; animation: dots 1.4s steps(4, end) infinite; }
+  @keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
   .check.bad { background: var(--danger); }
   .loybox { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin: -6px 0 16px; font-size: 13.5px; }
   .loybox.has { border-color: #A9BFA2; background: #F3F7F1; }
@@ -421,13 +427,14 @@
 <!-- สถานะหลังส่งสลิป -->
 <div class="overlay" id="ov-done">
   <div class="sheet">
-    <div class="check wait" id="done-icon"><span class="spinner" style="border-color:rgba(140,137,125,.3);border-top-color:#8C897D;margin:0"></span></div>
+    <div class="check wait" id="done-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8C897D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></div>
     <div class="center">
       <h3 id="done-title">ส่งสลิปแล้ว รอร้านตรวจสอบ</h3>
       <div class="sub">รหัสการจอง <span class="code" id="done-code"></span></div>
     </div>
     <div class="rows" id="done-rows"></div>
     <p class="keep" id="done-note">ร้านจะตรวจสลิปและยืนยันคิวโดยเร็ว ปิดหน้านี้ได้เลย ดูสถานะภายหลังได้ที่ "ตรวจสอบการจอง" ท้ายหน้าจอง</p>
+    <div class="sync-line" id="done-sync"></div>
     <div class="actions">
       <a class="btn line block" id="btn-line" target="_blank" rel="noopener" style="display:none">บันทึกการจองใน LINE ร้าน</a>
       <div class="contact">
@@ -949,27 +956,40 @@ $('#btn-next').onclick = () => {
 $('#btn-back').onclick = () => $('#ov-confirm').classList.remove('show');
 $('#ov-confirm').onclick = (e) => { if (e.target.id === 'ov-confirm') $('#ov-confirm').classList.remove('show'); };
 
-$('#btn-confirm').onclick = async () => {
+/* กดยืนยัน: เปิดหน้าชำระเงินทันที แล้วจองคิวเบื้องหลัง (ไม่ต้องรอระบบ Google) */
+$('#btn-confirm').onclick = () => {
   const c = validate(); if (!c) { $('#ov-confirm').classList.remove('show'); return; }
-  const btn = $('#btn-confirm');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>กำลังจอง…';
-  try {
-    const o = await call('createBooking', {
-      name: c.name, phone: c.phone, date: state.date,
-      items: state.persons.map((p) => ({ shampoo: p.shampoo, time: p.time })), useFree: loy.use,
-    });
-    $('#ov-confirm').classList.remove('show');
+  const draft = Object.assign(draftOrder(c), { id: '', status: 'booking', expiresAt: Date.now() + state.cfg.holdMin * 60000 });
+  const booking = call('createBooking', {
+    name: c.name, phone: c.phone, date: state.date,
+    items: state.persons.map((p) => ({ shampoo: p.shampoo, time: p.time })), useFree: loy.use,
+  });
+  $('#ov-confirm').classList.remove('show');
+  loy.use = 0;
+  pay.booking = booking;
+  if (draft.total === 0) showStatus(draft); else openPay(draft);
+  booking.then((o) => {
+    if (pay.booking !== booking) return;
     try { localStorage.setItem('horm_last', JSON.stringify({ id: o.id, phone: o.phone })); } catch (err) {}
-    loy.use = 0;
-    if (o.status === ST_OK) { showStatus(o); refreshAvail(); } else openPay(o);
-  } catch (e) {
-    $('#ov-confirm').classList.remove('show');
+    refreshAvail();
+    if (o.status === ST_OK) { showStatus(o); return; }
+    if (stat.order && !stat.order.id && stat.sending) { stat.order.id = o.id; stat.order.phone = o.phone; renderStatus(); }
+    if (pay.order && pay.order.status === 'booking') {
+      pay.order = Object.assign(o, { _slip: pay.order._slip });
+      savePending(o);
+      $('#pay-code').textContent = o.id;
+      $('#pay-cancel').disabled = false;
+      tick();
+    }
+  }).catch((e) => {
+    if (pay.booking !== booking) return;
+    pay.booking = null;
+    clearInterval(pay.timer);
+    $('#ov-pay').classList.remove('show');
+    $('#ov-done').classList.remove('show');
     toast(errMsg(e, 'จองไม่สำเร็จ กรุณาลองใหม่'));
     refreshAvail();
-  } finally {
-    btn.disabled = false;
-    const c2 = validate(); if (c2) renderConfirm(c2);
-  }
+  });
 };
 
 /* ---------- PromptPay QR (มาตรฐาน EMVCo ของ ธปท.) ---------- */
@@ -1019,7 +1039,7 @@ async function qrImage(o) {
 }
 
 /* ---------- หน้าชำระเงิน ---------- */
-const pay = { order: null, timer: null, slip: null, sending: false };
+const pay = { order: null, timer: null, slip: null, sending: false, booking: null };
 
 function savePending(o) {
   try {
@@ -1030,9 +1050,10 @@ function savePending(o) {
 
 async function openPay(o) {
   pay.order = o; pay.slip = null;
-  savePending(o);
+  if (o.id) { savePending(o); pay.booking = Promise.resolve(o); }
+  $('#pay-cancel').disabled = !o.id;
   const p = state.cfg.payment;
-  $('#pay-code').textContent = o.id;
+  $('#pay-code').innerHTML = o.id ? esc(o.id) : '<span class="dots" style="font-size:15px">กำลังจองคิว</span>';
   $('#pay-amount').textContent = fmt(o.total);
   $('#pay-amount2').textContent = fmt(o.total) + '.00 บาท';
   $('#pay-bank').textContent = ' ' + p.bank;
@@ -1052,7 +1073,7 @@ async function openPay(o) {
     const url = await qrImage(o);
     $('#pay-qr').src = url;
     $('#pay-save').href = url;
-    $('#pay-save').download = 'HORM-' + o.id + '.png';
+    $('#pay-save').download = 'HORM-' + (o.id || 'QR') + '.png';
   } catch (e) {
     $('#pay-qr').alt = 'สร้าง QR ไม่สำเร็จ กรุณาโอนเข้าบัญชีด้านล่าง';
   }
@@ -1063,7 +1084,7 @@ function tick() {
   const left = Math.max(0, Math.floor((o.expiresAt - Date.now()) / 1000));
   $('#pay-left').textContent = pad2(Math.floor(left / 60)) + ':' + pad2(left % 60);
   $('#pay-count').classList.toggle('late', left < 120);
-  if (left === 0 && !pay.sending) {
+  if (left === 0 && !pay.sending && o.id) {
     clearInterval(pay.timer);
     $('#pay-live').style.display = 'none';
     $('#pay-count').style.display = 'none';
@@ -1128,23 +1149,38 @@ $('#slip-file').onchange = async (e) => {
   }
 };
 
-$('#slip-send').onclick = async () => {
+/* ส่งสลิป: ขึ้นหน้า "จองแล้ว รอร้านตรวจสลิป" ทันที แล้วส่งสลิปเบื้องหลัง */
+$('#slip-send').onclick = () => {
   if (!pay.slip || !pay.order) return;
-  const btn = $('#slip-send');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>กำลังส่งสลิป…';
-  pay.sending = true;
-  try {
-    const o = await call('uploadSlip', pay.order.id, pay.order.phone, pay.slip);
-    clearInterval(pay.timer);
-    $('#ov-pay').classList.remove('show');
-    showStatus(o);
-  } catch (e) {
-    $('#slip-err').textContent = errMsg(e, 'ส่งสลิปไม่สำเร็จ กรุณาลองใหม่');
-    btn.disabled = false; btn.textContent = 'ส่งสลิป';
-  } finally {
-    pay.sending = false;
-  }
+  clearInterval(pay.timer);
+  $('#ov-pay').classList.remove('show');
+  const o = Object.assign({}, pay.order, { status: ST_REVIEW });
+  showStatus(o, true);
+  sendSlip(pay.slip);
 };
+
+async function sendSlip(slip) {
+  const sync = $('#done-sync');
+  stat.sending = true;
+  sync.className = 'sync-line';
+  sync.innerHTML = '<span class="dots">กำลังส่งสลิปไปที่ร้าน</span><br>อย่าเพิ่งปิดหน้านี้สักครู่';
+  try {
+    const booked = await pay.booking;
+    const o = await call('uploadSlip', booked.id, booked.phone, slip);
+    stat.sending = false;
+    pay.slip = null;
+    stat.order = o; renderStatus();
+    sync.className = 'sync-line ok';
+    sync.textContent = 'ส่งสลิปถึงร้านแล้ว ✓ ปิดหน้านี้ได้เลย';
+    clearTimeout(stat.timer);
+    if (o.status === ST_REVIEW) stat.timer = setTimeout(pollStatus, 8000);
+  } catch (e) {
+    stat.sending = false;
+    sync.className = 'sync-line err';
+    sync.innerHTML = esc(errMsg(e, 'ส่งสลิปไม่สำเร็จ')) + '<br><button class="btn block" id="slip-retry">ส่งสลิปอีกครั้ง</button>';
+    $('#slip-retry').onclick = () => sendSlip(slip);
+  }
+}
 
 $('#pay-cancel').onclick = async () => {
   if (!confirm('ยกเลิกการจองนี้? (ยังไม่ได้ชำระเงิน)')) return;
@@ -1165,22 +1201,22 @@ $('#pay-again').onclick = () => {
 };
 
 /* ---------- สถานะหลังส่งสลิป (เช็กซ้ำจนร้านตรวจเสร็จ) ---------- */
-const stat = { timer: null, order: null, until: 0 };
+const stat = { timer: null, order: null, until: 0, sending: false };
 
-function showStatus(o) {
+function showStatus(o, uploading) {
   stat.order = o;
-  $('#done-code').textContent = o.id;
+  if (!uploading && !stat.sending) $('#done-sync').textContent = '';
   $('#done-rows').innerHTML = summaryRows(o);
   if (state.cfg.lineOa) {
     const a = $('#btn-line');
     // เขียน "//" แยกกัน เพราะ Apps Script ตัดข้อความหลัง // ในสคริปต์ทิ้ง (มองว่าเป็นคอมเมนต์)
-    a.href = 'https:' + '/' + '/line.me/R/oaMessage/' + encodeURIComponent(state.cfg.lineOa) + '/?' + encodeURIComponent(lineText(o));
+    if (o.id) a.href = 'https:' + '/' + '/line.me/R/oaMessage/' + encodeURIComponent(state.cfg.lineOa) + '/?' + encodeURIComponent(lineText(o));
   }
   renderStatus();
   $('#ov-done').classList.add('show');
   clearTimeout(stat.timer);
   stat.until = Date.now() + 30 * 60000;
-  if (o.status === ST_REVIEW) stat.timer = setTimeout(pollStatus, 8000);
+  if (o.status === ST_REVIEW && !uploading) stat.timer = setTimeout(pollStatus, 8000);
 }
 
 function renderStatus() {
@@ -1191,19 +1227,23 @@ function renderStatus() {
   icon.innerHTML = ok
     ? '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F4F3EE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
     : bad ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
-      : '<span class="spinner" style="border-color:rgba(140,137,125,.3);border-top-color:#8C897D;margin:0"></span>';
-  $('#done-title').textContent = ok ? 'ยืนยันคิวเรียบร้อย' : bad ? 'การจองไม่สำเร็จ' : 'ส่งสลิปแล้ว รอร้านตรวจสอบ';
+      : '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8C897D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
+  const booking = o.status === 'booking';
+  $('#done-title').textContent = ok ? 'ยืนยันคิวเรียบร้อย' : bad ? 'การจองไม่สำเร็จ' : booking ? 'กำลังจองคิว' : 'จองแล้ว รอร้านตรวจสลิป';
+  $('#done-code').innerHTML = o.id ? esc(o.id) : '<span class="dots" style="font-size:15px">กำลังจอง</span>';
   $('#done-note').textContent = ok
     ? (o.total ? 'ร้านได้รับเงินและยืนยันคิวแล้ว แล้วพบกันนะคะ' : 'ยืนยันคิวแล้ว แล้วพบกันนะคะ') + (o.free ? ' · กดใช้คูปองสระฟรีในแอป LINE ต่อหน้าพนักงานที่ร้าน' : '') + ' · อย่าลืมสแกน QR สะสมแต้มในบัตร LINE ที่ร้าน · หากต้องการยกเลิกหรือเลื่อนนัด กรุณาติดต่อร้าน'
     : bad ? (o.note || 'การจองนี้ถูกยกเลิก') + ' · หากโอนเงินแล้ว กรุณาติดต่อร้าน'
-      : 'ร้านจะตรวจสลิปและยืนยันคิวโดยเร็ว ปิดหน้านี้ได้เลย ดูสถานะภายหลังได้ที่ "ตรวจสอบการจอง" ท้ายหน้าจอง';
+      : booking ? 'กรุณารอสักครู่'
+      : 'ร้านจะตรวจสลิปและยืนยันคิวโดยเร็ว (ไม่ต้องรอหน้านี้) ดูสถานะภายหลังได้ที่ "ตรวจสอบการจอง" ท้ายหน้าจอง';
+  if (ok || bad) { $('#done-sync').textContent = ''; $('#done-sync').className = 'sync-line'; }
   $('#btn-line').style.display = ok && state.cfg.lineOa ? 'block' : 'none';
   if (ok || bad) savePending(null);
 }
 
 async function pollStatus() {
   const o = stat.order;
-  if (!o || o.status !== ST_REVIEW || !$('#ov-done').classList.contains('show') || Date.now() > stat.until) return;
+  if (!o || !o.id || stat.sending || o.status !== ST_REVIEW || !$('#ov-done').classList.contains('show') || Date.now() > stat.until) return;
   if (document.visibilityState === 'visible') {
     try {
       const n = await call('getOrderStatus', o.id, o.phone);
