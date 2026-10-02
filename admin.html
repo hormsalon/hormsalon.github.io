@@ -261,13 +261,16 @@
         <p class="hint">ค่าคอม = ยอดที่ช่างทำ × % · แก้ % ภายหลังไม่กระทบยอดที่บันทึกไปแล้ว · ช่างที่ออกแล้วให้เอาติ๊ก "ทำงานอยู่" ออก (ไม่ต้องลบ ประวัติจะได้ไม่หาย)</p>
         <div class="panel" id="stylists"></div>
         <div class="linkbox"><button class="btn ghost" id="btn-add-stylist">+ เพิ่มช่าง</button></div>
-        <label class="remember" style="justify-content:flex-start;margin:12px 0"><input type="checkbox" id="free-full"> ลูกค้าใช้สิทธิ์สระฟรี: ช่างได้ค่าคอมจากราคาปกติ (ไม่ติ๊ก = ไม่ได้ค่าคอมครั้งฟรี)</label>
+        <label class="remember" style="justify-content:flex-start;margin:12px 0"><input type="checkbox" id="free-full"> ลูกค้าใช้คูปองสระฟรี LINE: ช่างได้ค่าคอมจากราคาปกติ (ไม่ติ๊ก = ไม่ได้ค่าคอมครั้งฟรี)</label>
         <button class="btn" id="btn-save-stylists">บันทึกช่าง &amp; ค่าคอม</button>
 
-        <h2>สะสมแต้ม (สระครบ 10 ครั้ง ฟรี 1 ครั้ง)</h2>
-        <p class="hint">ระบบนับให้เองทุกครั้งที่กด "เสร็จแล้ว" / บันทึก walk-in ที่มีเบอร์โทร · ลูกค้าที่มีบัตรสะสมกระดาษเดิม ค้นหาเบอร์แล้วปรับแต้มเพิ่มได้</p>
-        <div class="daterow"><input id="loy-phone" type="tel" inputmode="numeric" placeholder="เบอร์โทรลูกค้า"><button class="btn ghost small" id="loy-find">ค้นหา</button></div>
-        <div id="loy"></div>
+        <h2>สะสมแต้ม (บัตรสะสมแต้ม LINE)</h2>
+        <div class="panel" style="padding:12px 14px;font-size:13.5px;line-height:1.7">
+          ใช้บัตรสะสมแต้มในแอป LINE OA ของร้าน (ลูกค้าต้องแอดเพื่อนก่อน)<br>
+          · ลูกค้ามาใช้บริการ → ให้สแกน QR สะสมแต้มของ LINE ที่ร้าน<br>
+          · ลูกค้าใช้คูปองสระฟรี → ให้ลูกค้ากดใช้คูปองในแอป LINE ต่อหน้าพนักงาน แล้วติ๊ก <b>คูปองฟรี LINE</b> ตอนบันทึกขาย (ยอดขายและค่าคอมจะคิดถูกต้อง)<br>
+          · ลูกค้าจองออนไลน์บอกว่าจะใช้คูปองได้ คิวจะมีป้าย "คูปองฟรี" ลูกค้ามากดใช้คูปองที่ร้าน
+        </div>
 
         <h2>จำนวนช่างปกติแต่ละวันในสัปดาห์</h2>
         <p class="hint">ใช้กับทุกสัปดาห์ เช่น วันที่ช่างคนหนึ่งหยุดประจำ ตั้งเป็น 2 · วันที่ปรับเองในแท็บคิวจะไม่ถูกเปลี่ยน</p>
@@ -275,7 +278,7 @@
         <p class="hint" style="margin-top:14px" id="cap-note"></p>
 
         <h2>แจ้งเตือน LINE</h2>
-        <p class="hint">เมื่อมีลูกค้าจองออนไลน์ (แนบสลิปแล้ว หรือใช้สิทธิ์ฟรี) ระบบจะส่งแจ้งเตือนไปที่รายการด้านล่างทั้งหมด</p>
+        <p class="hint">เมื่อมีลูกค้าจองออนไลน์ (แนบสลิปแล้ว หรือใช้คูปองฟรี LINEทธิ์ฟรี) ระบบจะส่งแจ้งเตือนไปที่รายการด้านล่างทั้งหมด</p>
         <div class="panel" id="line-list"></div>
         <div class="linkbox" id="link-box">
           <button class="btn ghost" id="btn-link-code">+ เพิ่มกลุ่ม LINE พนักงาน</button>
@@ -434,8 +437,6 @@ const Demo = (() => {
     }),
   });
   const delay = (v) => new Promise((r) => setTimeout(() => r(JSON.parse(JSON.stringify(v))), 500));
-  loyAdj['0861234567'] = 10;
-  loyAdj['0899999999'] = 13; // เบอร์ตัวอย่างที่มีสิทธิ์ฟรี 1 ครั้ง
   return {
     adminGetOverview: () => delay(overview()),
     adminSetWeekly: (pin, w) => { weekly = w; return delay(overview()); },
@@ -460,15 +461,14 @@ const Demo = (() => {
     adminCheckout: (pin, r) => {
       const b = bookings.find((x) => x.id === r.bookingId && x.time === r.time);
       const persons = []; for (let i = 0; i < b.moisture; i++) persons.push('moisture'); for (let i = 0; i < b.keratin; i++) persons.push('keratin');
-      addSales(persons.map((sh, i) => ({ service: sh, free: i < (b.free || 0), stylistId: r.stylists[i] })), { date: b.date, time: b.time, bookingId: b.id, name: b.name, phone: b.phone, method: b.channel === 'โทรจอง' ? r.method : 'โอน (จองออนไลน์)' });
+      const bad = r.invalidCoupon || [];
+      addSales(persons.map((sh, i) => ({ service: sh, free: i < (b.free || 0) && bad.indexOf(i) === -1, stylistId: r.stylists[i] })), { date: b.date, time: b.time, bookingId: b.id, name: b.name, phone: b.phone, method: b.channel === 'โทรจอง' || bad.length ? r.method : 'โอน (จองออนไลน์)' });
       b.status = 'เสร็จแล้ว';
       return delay(overview());
     },
     adminQuickSale: (pin, r) => { addSales(r.lines.map((l) => ({ service: l.shampoo, free: l.free, stylistId: l.stylistId })), { date: dates[0], time: new Date().toTimeString().slice(0, 5), bookingId: '', name: r.name || 'walk-in', phone: r.phone, method: r.method }); return delay(overview()); },
     adminVoidSale: (pin, g, reason) => { sales.forEach((s) => { if (s.id.indexOf(g + '-') === 0) { s.status = 'ยกเลิก'; s.note = 'ยกเลิก: ' + reason; } }); const f = sales.find((s) => s.id.indexOf(g + '-') === 0); if (f && f.bookingId) bookings.forEach((b) => { if (b.id === f.bookingId && b.time === f.time) b.status = 'ยืนยัน'; }); return delay(true); },
     adminGetSales: (pin, from, to) => delay(sales.filter((s) => s.date >= from && s.date <= to)),
-    adminGetLoyalty: (pin, phone) => delay(loy(phone)),
-    adminAdjustLoyalty: (pin, phone, d) => { loyAdj[phone] = (loyAdj[phone] || 0) + d; return delay(loy(phone)); },
   };
 })();
 
@@ -538,7 +538,7 @@ function bookingsHTML(date) {
     const cancelled = b.status === 'ยกเลิก' || b.status === 'หมดเวลา';
     const done = b.status === 'เสร็จแล้ว';
     const canDone = b.status === 'ยืนยัน' && date <= todayStr();
-    const tags = (b.channel === 'โทรจอง' ? '<span class="st">โทรจอง</span>' : '') + (b.free ? '<span class="st ok">ฟรี ' + b.free + '</span>' : '');
+    const tags = (b.channel === 'โทรจอง' ? '<span class="st">โทรจอง</span>' : '') + (b.free ? '<span class="st ok">คูปองฟรี ' + b.free + '</span>' : '');
     const sh = [b.moisture && `Moisture ×${b.moisture}`, b.keratin && `Keratin ×${b.keratin}`].filter(Boolean).join(', ');
     return `<div class="bk${cancelled ? ' cancelled' : ''}${done ? ' donebk' : ''}">
       <div class="tm">${esc(b.time)}</div>
@@ -865,7 +865,7 @@ function personsOf(b) {
 }
 
 /* ---------- กล่องโต้ตอบ ---------- */
-function openDlg(html) { $('#dlg-box').onclick = null; $('#dlg-box').innerHTML = html; $('#dlg').classList.add('show'); }
+function openDlg(html) { $('#dlg-box').onclick = null; $('#dlg-box').onchange = null; $('#dlg-box').innerHTML = html; $('#dlg').classList.add('show'); }
 function closeDlg() { $('#dlg').classList.remove('show'); $('#dlg-box').innerHTML = ''; }
 function dlgBusy(btn, text) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = text; }
 function dlgIdle(btn) { btn.disabled = false; if (btn.dataset.label) btn.textContent = btn.dataset.label; }
@@ -884,43 +884,48 @@ function openCheckout(id, time) {
   if (!b) return;
   const online = (b.channel || 'ออนไลน์') === 'ออนไลน์';
   const persons = personsOf(b);
-  const due = persons.reduce((s, p) => s + (p.free ? priceOf(p.shampoo) - priceOf('moisture') : priceOf(p.shampoo)), 0);
+  const bad = {};
+  // เงินที่ต้องเก็บที่ร้าน: คิวออนไลน์จ่ายแล้วตอนจอง (ยกเว้นท่านที่คูปองไม่ถูกต้อง)
+  const dueOf = () => persons.reduce((s, p, i) => {
+    const invalid = p.free && bad[i];
+    if (online) return s + (invalid ? priceOf('moisture') : 0);
+    return s + (p.free && !invalid ? priceOf(p.shampoo) - priceOf('moisture') : priceOf(p.shampoo));
+  }, 0);
   openDlg('<h3>ลูกค้าใช้บริการเสร็จ</h3>'
     + '<div class="s">' + esc(b.name) + ' · ' + dateLabel(b.date) + ' ' + esc(b.time) + ' · ' + esc(b.id) + '</div>'
     + persons.map((p, i) => '<div class="frow"><span>ท่านที่ ' + (i + 1) + ' · ' + (p.shampoo === 'keratin' ? 'Keratin' : 'Moisture')
-      + (p.free ? ' <span class="st ok">ฟรี (สะสม)</span>' : '') + '</span>' + stylistSelect('data-co-sty="' + i + '"') + '</div>').join('')
-    + (online
-      ? '<div class="paid">ชำระแล้วตอนจอง (โอน) ' + baht(b.total) + ' บาท</div>'
-      : '<div class="due">เก็บเงิน <b>' + baht(due) + '</b> บาท</div>' + (due ? methodRadios('co-method') : ''))
+      + (p.free ? '<br><span class="st ok">คูปองฟรี LINE</span> <label class="chk muted"><input type="checkbox" data-co-bad="' + i + '"> คูปองไม่ถูกต้อง (เก็บเงิน)</label>' : '')
+      + '</span>' + stylistSelect('data-co-sty="' + i + '"') + '</div>').join('')
+    + (persons.some((p) => p.free) ? '<div class="muted" style="margin-top:8px">ให้ลูกค้ากดใช้คูปองสระฟรีในแอป LINE ต่อหน้าพนักงานก่อนบันทึก</div>' : '')
+    + (online ? '<div class="paid">ชำระแล้วตอนจอง (โอน) ' + baht(b.total) + ' บาท</div>' : '')
+    + '<div id="co-due"></div>'
+    + '<div class="muted" style="margin-top:8px">อย่าลืมให้ลูกค้าสแกน QR สะสมแต้มในบัตร LINE</div>'
     + '<div class="err" id="dlg-err"></div>'
     + '<div class="acts"><button class="btn ok" id="co-save">บันทึกยอดขาย</button><button class="btn ghost" data-dlg-close>ปิด</button></div>');
+  function renderDue() {
+    const due = dueOf();
+    const had = document.querySelector('input[name="co-method"]:checked');
+    $('#co-due').innerHTML = (online && !due) ? '' : '<div class="due">เก็บเงินที่ร้าน <b>' + baht(due) + '</b> บาท</div>' + (due ? methodRadios('co-method') : '');
+    if (had && due) { const r = document.querySelector('input[name="co-method"][value="' + had.value + '"]'); if (r) r.checked = true; }
+  }
+  renderDue();
+  $('#dlg-box').onchange = (e) => {
+    const c = e.target.closest('[data-co-bad]');
+    if (c) { bad[+c.dataset.coBad] = c.checked; renderDue(); }
+  };
   $('#co-save').onclick = async () => {
     const stylists = [...document.querySelectorAll('[data-co-sty]')].map((s) => s.value);
     if (stylists.some((v) => !v)) { $('#dlg-err').textContent = 'กรุณาเลือกช่างให้ครบทุกท่าน'; return; }
     const m = document.querySelector('input[name="co-method"]:checked');
-    if (!online && due && !m) { $('#dlg-err').textContent = 'กรุณาเลือกช่องทางรับเงิน'; return; }
+    if (dueOf() && !m) { $('#dlg-err').textContent = 'กรุณาเลือกช่องทางรับเงิน'; return; }
     const btn = $('#co-save'); dlgBusy(btn, 'กำลังบันทึก…');
     try {
-      receive(await call('adminCheckout', state.pin, { bookingId: b.id, time: b.time, stylists: stylists, method: m ? m.value : 'เงินสด' }));
+      const invalidCoupon = Object.keys(bad).filter((k) => bad[k]).map(Number);
+      receive(await call('adminCheckout', state.pin, { bookingId: b.id, time: b.time, stylists: stylists, method: m ? m.value : 'เงินสด', invalidCoupon: invalidCoupon }));
       closeDlg(); toast('บันทึกยอดขายแล้ว');
       state.salesAt = 0;
     } catch (e) { $('#dlg-err').textContent = errMsg(e); dlgIdle(btn); }
   };
-}
-
-/* ----- แต้มสะสม (ใช้ในฟอร์มเพิ่มคิว / walk-in) ----- */
-async function lookupLoyalty(phone, box, onDone) {
-  box.innerHTML = '';
-  if (!/^0[0-9]{8,9}$/.test(phone)) { onDone(0); return; }
-  box.innerHTML = '<div class="lbox muted">กำลังดูแต้มสะสมของเบอร์นี้…</div>';
-  try {
-    const l = await call('adminGetLoyalty', state.pin, phone);
-    box.innerHTML = l.available
-      ? '<div class="lbox has"><b>ลูกค้ามีสิทธิ์สระฟรี ' + l.available + ' ครั้ง</b> (สูตร Moisture)<span class="muted">ถามลูกค้าว่าจะใช้สิทธิ์ครั้งนี้ไหม แล้วเลือก "ใช้สิทธิ์ฟรี" ด้านล่าง</span></div>'
-      : '<div class="lbox">สะสมแต้ม ' + l.progress + '/' + l.every + ' ครั้ง · ยังไม่มีสิทธิ์ฟรี'
-        + (l.reserved ? '<span class="muted">มีสิทธิ์ฟรีที่ใช้จองคิวอื่นไว้แล้ว ' + l.reserved + ' ครั้ง</span>' : '') + '</div>';
-    onDone(l.available);
-  } catch (e) { box.innerHTML = ''; onDone(0); }
 }
 
 /* ----- เพิ่มคิว (ลูกค้าโทรจอง) ----- */
@@ -930,7 +935,7 @@ function openAddBooking() {
   const date0 = state.open && state.open >= todayStr() ? state.open : todayStr();
   openDlg('<h3>เพิ่มคิว (ลูกค้าโทรจอง)</h3><div class="s">ยืนยันทันที ชำระเงินที่ร้าน · ระบบกันรอบนี้ไม่ให้ลูกค้าออนไลน์จองซ้อน</div>'
     + '<label class="fl">ชื่อลูกค้า<input id="ab-name" maxlength="60"></label>'
-    + '<label class="fl">เบอร์โทร<input id="ab-phone" type="tel" inputmode="numeric" maxlength="12"></label><div class="loy" id="ab-loy"></div>'
+    + '<label class="fl">เบอร์โทร<input id="ab-phone" type="tel" inputmode="numeric" maxlength="12"></label>'
     + '<label class="fl">วันที่<input id="ab-date" type="date" min="' + todayStr() + '" value="' + date0 + '"></label>'
     + '<div id="ab-rows"></div><button class="linkish" id="ab-addrow">+ เพิ่มรอบเวลา (คนละเวลา)</button>'
     + '<div id="ab-free"></div><div class="due" id="ab-total"></div>'
@@ -948,13 +953,13 @@ function openAddBooking() {
       + '<div class="shrow"><span>Keratin Shampoo · ' + priceOf('keratin') + '</span><span class="mini"><button data-ab-n="' + i + ':keratin:-1">−</button><b>' + r.keratin + '</b><button data-ab-n="' + i + ':keratin:1">+</button></span></div>'
       + '</div>').join('')
       + (f.avail && f.avail.closed ? '<div class="warn">วันนี้ตั้งช่างเป็น 0 (ร้านหยุด)</div>' : '');
-    f.useFree = Math.min(f.useFree, f.free, people());
-    $('#ab-free').innerHTML = f.free ? '<div class="freebox shrow"><span>ใช้สิทธิ์สระฟรีครั้งนี้<br><small class="muted">มี ' + f.free + ' สิทธิ์ · ฟรีค่า Moisture ' + priceOf('moisture') + ' บาทต่อท่าน</small></span><span class="mini"><button data-ab-free="-1">−</button><b>' + f.useFree + '</b><button data-ab-free="1">+</button></span></div>' : '';
+    f.useFree = Math.min(f.useFree, people());
+    $('#ab-free').innerHTML = '<div class="' + (f.useFree ? 'freebox ' : 'slotbox ') + 'shrow"><span>ลูกค้าจะใช้คูปองสระฟรี LINE<br><small class="muted">ฟรีค่า Moisture ' + priceOf('moisture') + ' บาทต่อท่าน · ตรวจคูปองตอนลูกค้ามา</small></span><span class="mini"><button data-ab-free="-1">−</button><b>' + f.useFree + '</b><button data-ab-free="1">+</button></span></div>';
     const items = [];
     f.rows.forEach((r) => { for (let k = 0; k < r.moisture; k++) items.push('moisture'); for (let k = 0; k < r.keratin; k++) items.push('keratin'); });
     items.sort((a, b) => (a === 'keratin') - (b === 'keratin'));
     const total = items.reduce((s, sh, k) => s + priceOf(sh) - (k < f.useFree ? priceOf('moisture') : 0), 0);
-    $('#ab-total').innerHTML = people() + ' ท่าน' + (f.useFree ? ' · ใช้สิทธิ์ฟรี ' + f.useFree : '') + ' · เก็บเงินที่ร้าน <b>' + baht(total) + '</b> บาท';
+    $('#ab-total').innerHTML = people() + ' ท่าน' + (f.useFree ? ' · คูปองฟรี ' + f.useFree : '') + ' · เก็บเงินที่ร้าน <b>' + baht(total) + '</b> บาท';
   }
   async function loadAvail() {
     f.avail = null; renderRows();
@@ -962,11 +967,6 @@ function openAddBooking() {
     renderRows();
   }
   $('#ab-date').onchange = loadAvail;
-  $('#ab-phone').addEventListener('input', (e) => {
-    const p = e.target.value.replace(/[^0-9]/g, '');
-    clearTimeout(f.t);
-    f.t = setTimeout(() => lookupLoyalty(p, $('#ab-loy'), (n) => { f.free = n; renderRows(); }), 500);
-  });
   $('#ab-addrow').onclick = () => { f.rows.push({ time: '', moisture: 1, keratin: 0 }); renderRows(); };
   $('#ab-rows').addEventListener('change', (e) => { const s = e.target.closest('[data-ab-time]'); if (s) f.rows[+s.dataset.abTime].time = s.value; });
   $('#dlg-box').onclick = (e) => {
@@ -981,7 +981,7 @@ function openAddBooking() {
     const del = e.target.closest('[data-ab-del]');
     if (del) { f.rows.splice(+del.dataset.abDel, 1); renderRows(); return; }
     const fr = e.target.closest('[data-ab-free]');
-    if (fr) { f.useFree = Math.max(0, Math.min(f.free, people(), f.useFree + +fr.dataset.abFree)); renderRows(); }
+    if (fr) { f.useFree = Math.max(0, Math.min(people(), f.useFree + +fr.dataset.abFree)); renderRows(); }
   };
   $('#ab-save').onclick = async () => {
     const name = $('#ab-name').value.trim(), phone = $('#ab-phone').value.replace(/[^0-9]/g, '');
@@ -1006,29 +1006,23 @@ function openWalkin() {
   const f = { lines: [{ shampoo: 'moisture', stylistId: '', free: false }], free: 0 };
   openDlg('<h3>บันทึกขาย (walk-in)</h3><div class="s">ลูกค้าที่ไม่ได้จอง · บันทึกเป็นยอดขายวันนี้ทันที</div>'
     + '<label class="fl">ชื่อลูกค้า (ไม่บังคับ)<input id="wk-name" maxlength="60"></label>'
-    + '<label class="fl">เบอร์โทร (ใส่เพื่อสะสมแต้ม)<input id="wk-phone" type="tel" inputmode="numeric" maxlength="12"></label><div class="loy" id="wk-loy"></div>'
+    + '<label class="fl">เบอร์โทร (ไม่บังคับ)<input id="wk-phone" type="tel" inputmode="numeric" maxlength="12"></label>'
     + '<div id="wk-lines"></div><button class="linkish" id="wk-add">+ เพิ่มท่าน</button>'
-    + '<div class="due" id="wk-total"></div><div id="wk-method"></div>'
+    + '<div class="due" id="wk-total"></div><div id="wk-method"></div><div class="muted">คูปองฟรี: ให้ลูกค้ากดใช้คูปองในแอป LINE ต่อหน้าพนักงาน · อย่าลืมให้ลูกค้าสแกน QR สะสมแต้ม</div>'
     + '<div class="err" id="dlg-err"></div>'
     + '<div class="acts"><button class="btn ok" id="wk-save">บันทึกยอดขาย</button><button class="btn ghost" data-dlg-close>ปิด</button></div>');
   function total() { return f.lines.reduce((s, l) => s + priceOf(l.shampoo) - (l.free ? priceOf('moisture') : 0), 0); }
   function render() {
-    const usedFree = f.lines.filter((l) => l.free).length;
     $('#wk-lines').innerHTML = f.lines.map((l, i) => '<div class="abrow">'
       + '<select data-wk-sh="' + i + '"><option value="moisture"' + (l.shampoo === 'moisture' ? ' selected' : '') + '>Moisture Shampoo · ' + priceOf('moisture') + '</option><option value="keratin"' + (l.shampoo === 'keratin' ? ' selected' : '') + '>Keratin Shampoo · ' + priceOf('keratin') + '</option></select>'
       + stylistSelect('data-wk-sty="' + i + '"').replace('value="' + l.stylistId + '"', 'value="' + l.stylistId + '" selected')
-      + (f.free && (l.free || usedFree < f.free) ? '<label class="chk"><input type="checkbox" data-wk-free="' + i + '"' + (l.free ? ' checked' : '') + '> ใช้สิทธิ์ฟรี</label>' : '')
+      + '<label class="chk"><input type="checkbox" data-wk-free="' + i + '"' + (l.free ? ' checked' : '') + '> คูปองฟรี LINE</label>'
       + (f.lines.length > 1 ? '<button class="rm" data-wk-del="' + i + '">ลบ</button>' : '') + '</div>').join('');
     const t = total();
     $('#wk-total').innerHTML = f.lines.length + ' ท่าน · เก็บเงิน <b>' + baht(t) + '</b> บาท';
     if (t && !document.querySelector('input[name="wk-method"]')) $('#wk-method').innerHTML = methodRadios('wk-method');
     if (!t) $('#wk-method').innerHTML = '';
   }
-  $('#wk-phone').addEventListener('input', (e) => {
-    const p = e.target.value.replace(/[^0-9]/g, '');
-    clearTimeout(f.t);
-    f.t = setTimeout(() => lookupLoyalty(p, $('#wk-loy'), (n) => { f.free = n; if (!n) f.lines.forEach((l) => (l.free = false)); render(); }), 500);
-  });
   $('#wk-add').onclick = () => { f.lines.push({ shampoo: 'moisture', stylistId: '', free: false }); render(); };
   $('#wk-lines').addEventListener('change', (e) => {
     const t = e.target;
@@ -1093,7 +1087,7 @@ function renderSales() {
   const methods = by('method');
   const card = (label, val, sub) => '<div class="card"><small>' + label + '</small><b>' + val + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
   let html = '<div class="cards">'
-    + card('ลูกค้า', ok.length + ' ท่าน', ok.filter((s) => s.free).length ? 'ใช้สิทธิ์ฟรี ' + ok.filter((s) => s.free).length : '')
+    + card('ลูกค้า', ok.length + ' ท่าน', ok.filter((s) => s.free).length ? 'ใช้คูปองฟรี ' + ok.filter((s) => s.free).length : '')
     + card('ยอดขายรวม', baht(sum(ok, 'amount')) + ' ฿')
     + card('เงินสด', baht(sum(methods['เงินสด'] || [], 'amount')) + ' ฿')
     + card('โอน (ที่ร้าน)', baht(sum(methods['โอน'] || [], 'amount')) + ' ฿')
@@ -1117,7 +1111,7 @@ function renderSales() {
     const L = bills[g], f = L[0], voided = f.status === 'ยกเลิก';
     const paidLine = L.find((x) => x.method && x.method !== '-');
     return '<div class="bill' + (voided ? ' void' : '') + '"><div class="bh"><span>' + dateLabel(f.date) + ' ' + esc(f.time) + ' · ' + esc(f.name) + (f.bookingId || f.name === 'walk-in' ? '' : ' <span class="st">walk-in</span>') + '</span><b>' + baht(sum(L, 'amount')) + ' ฿</b></div>'
-      + L.map((s) => '<div class="bl">' + esc(s.service) + (s.free ? ' (ฟรี)' : '') + ' · ' + esc(s.stylist) + ' · ' + baht(s.amount) + ' ฿ · คอม ' + baht(s.commission) + '</div>').join('')
+      + L.map((s) => '<div class="bl">' + esc(s.service) + (s.free ? ' (คูปองฟรี)' : '') + ' · ' + esc(s.stylist) + ' · ' + baht(s.amount) + ' ฿ · คอม ' + baht(s.commission) + '</div>').join('')
       + '<div class="bl muted">' + esc(paidLine ? paidLine.method : 'ไม่มียอดเก็บเงิน (ฟรี)') + (voided ? ' · ' + esc(f.note || 'ยกเลิกแล้ว') : '') + '</div>'
       + (voided ? '' : '<button class="x" data-void="' + esc(g) + '">ยกเลิกบิล</button>') + '</div>';
   }).join('') : '<div class="row"><div class="s">ยังไม่มีรายการขายในช่วงนี้</div></div>') + '</div>';
@@ -1157,30 +1151,6 @@ function bindSettings() {
     } catch (e) { toast(errMsg(e)); }
     dlgIdle(btn);
   };
-  $('#loy-find').onclick = () => findLoyalty();
-  $('#loy-phone').addEventListener('keydown', (e) => { if (e.key === 'Enter') findLoyalty(); });
-}
-
-/* ---------- แท็บตั้งค่า: สะสมแต้ม ---------- */
-function renderLoy(l) {
-  $('#loy').innerHTML = '<div class="panel" style="padding:14px">'
-    + '<div><b>' + fmtPhone(l.phone) + '</b> · สะสม ' + l.progress + '/' + l.every + ' · สิทธิ์ฟรีคงเหลือ <b>' + l.available + '</b>'
-    + (l.reserved ? ' (จองไว้แล้ว ' + l.reserved + ')' : '') + '</div>'
-    + '<div class="muted">ใช้บริการจ่ายเงิน ' + l.paid + ' ครั้ง · ปรับมือ ' + (l.adjust > 0 ? '+' : '') + l.adjust + ' · ใช้สิทธิ์ฟรีไปแล้ว ' + l.used + ' ครั้ง</div>'
-    + '<div class="abrow" style="margin-top:10px"><input id="loy-delta" type="number" inputmode="numeric" placeholder="+/- แต้ม" style="width:90px"><input id="loy-note" placeholder="หมายเหตุ เช่น บัตรสะสมเดิม" style="flex:1"><button class="btn ghost small" id="loy-adj">ปรับแต้ม</button></div>'
-    + (l.history.length ? '<div class="muted" style="margin-top:10px">ล่าสุด: ' + l.history.slice(0, 5).map((h) => dateLabel(h.date) + ' ' + h.service + (h.free ? ' (ฟรี)' : '')).join(' · ') + '</div>' : '')
-    + '</div>';
-  $('#loy-adj').onclick = async () => {
-    const delta = parseInt($('#loy-delta').value, 10);
-    if (!delta) { toast('ใส่จำนวนแต้ม เช่น 5 หรือ -1'); return; }
-    try { renderLoy(await call('adminAdjustLoyalty', state.pin, l.phone, delta, $('#loy-note').value)); toast('ปรับแต้มแล้ว'); } catch (e) { toast(errMsg(e)); }
-  };
-}
-async function findLoyalty() {
-  const p = $('#loy-phone').value.replace(/[^0-9]/g, '');
-  if (!/^0[0-9]{8,9}$/.test(p)) { toast('ใส่เบอร์โทรให้ถูกต้อง'); return; }
-  $('#loy').innerHTML = '<div class="loading">กำลังค้นหา…</div>';
-  try { renderLoy(await call('adminGetLoyalty', state.pin, p)); } catch (e) { $('#loy').innerHTML = '<div class="err">' + esc(errMsg(e)) + '</div>'; }
 }
 
 /* ---------- ปุ่มต่างๆ ของส่วนใหม่ ---------- */
