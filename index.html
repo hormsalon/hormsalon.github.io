@@ -139,6 +139,7 @@
   }
   .time:disabled b { font-weight: 400; }
   .time:disabled small { color: #C4C1B6; }
+  .time.past:disabled { text-decoration: none; background: var(--soft); border-color: transparent; }
   .time-state { color: var(--muted); font-size: 13.5px; padding: 18px 0; text-align: center; }
 
   /* Form */
@@ -281,8 +282,8 @@
   .sync-line.ok { color: #4F6B47; }
   .sync-line.err { color: var(--danger); }
   .sync-line button { margin-top: 8px; }
-  .dots::after { content: ''; animation: dots 1.4s steps(4, end) infinite; }
-  @keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+  .ldots::after { content: ''; animation: ldots 1.4s steps(4, end) infinite; }
+  @keyframes ldots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
   .check.bad { background: var(--danger); }
   .loybox { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin: -6px 0 16px; font-size: 13.5px; }
   .loybox.has { border-color: #A9BFA2; background: #F3F7F1; }
@@ -666,6 +667,10 @@ function endTime(t) {
   const m = toMin(t) + ((state.cfg && state.cfg.service) || 45);
   return pad2(Math.floor(m / 60)) + ':' + pad2(m % 60);
 }
+function bangkokMinutes() {
+  const p = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+  return toMin(p);
+}
 function timeRange(t) { return t + ' – ' + endTime(t) + ' น.'; }
 function fmtPhone(p) { return p.length === 10 ? p.slice(0, 3) + '-' + p.slice(3, 6) + '-' + p.slice(6) : p; }
 // ไม่เขียน entity หรือเครื่องหมายคำพูดใน regex ตรงๆ เพราะ Apps Script ประมวลผลสคริปต์แล้วโค้ดพัง
@@ -833,6 +838,9 @@ function renderTimes() {
   const times = Object.keys(slots).sort();
   const i = state.active;
   const mine = state.persons[i] && state.persons[i].time;
+  const isToday = state.date === state.cfg.today;
+  const nowMin = bangkokMinutes();
+  const lead = state.cfg.minLead || 10;
   const totalFree = times.reduce((s, t) => s + (slots[t] || 0), 0);
   let html = '';
   groups.forEach(([label, a, z]) => {
@@ -841,10 +849,12 @@ function renderTimes() {
     html += '<div class="period">' + label + '</div><div class="times">';
     list.forEach((t) => {
       const ok = freeFor(t, i) > 0;
+      // วันนี้: รอบที่ใกล้เวลาเกินไปขึ้น "ปิดรับจอง" แยกจากรอบที่ "เต็ม"
+      const label = ok || t === mine ? 'ถึง ' + endTime(t) : (isToday && toMin(t) < nowMin + lead ? 'ปิดรับจอง' : 'เต็ม');
       const inGroup = state.persons.filter((p) => p.time === t).length;
-      const cls = 'time' + (t === mine ? ' sel' : inGroup ? ' grp' : '');
+      const cls = 'time' + (t === mine ? ' sel' : inGroup ? ' grp' : '') + (label === 'ปิดรับจอง' ? ' past' : '');
       const dots = n > 1 && inGroup ? '<span class="dots">' + '<i></i>'.repeat(inGroup) + '</span>' : '';
-      html += '<button type="button" class="' + cls + '" data-t="' + t + '"' + (ok || t === mine ? '' : ' disabled') + '><b>' + t + '</b><small>ถึง ' + endTime(t) + '</small>' + dots + '</button>';
+      html += '<button type="button" class="' + cls + '" data-t="' + t + '"' + (ok || t === mine ? '' : ' disabled') + '><b>' + t + '</b><small>' + label + '</small>' + dots + '</button>';
     });
     html += '</div>';
   });
@@ -875,12 +885,15 @@ function selectDate(v) {
   state.persons.forEach((p) => (p.time = null));
   state.calOffset = monthOffset(v);
   renderCal(); renderTimes(); renderBar();
-  if (Date.now() - availAt > 30000) refreshAvail();
+  if (Date.now() - availAt > 10000) refreshAvail();
 }
 
 async function refreshAvail() {
+  if (refreshAvail.busy) return;
+  refreshAvail.busy = true;
   availAt = Date.now();
   try { applyAvail(await call('getAvailabilityAll')); } catch (e) { availAt = 0; }
+  refreshAvail.busy = false;
 }
 
 /* ข้อมูลใหม่มาถึง: คงเวลาที่ลูกค้าเลือกไว้ ถ้ายังว่างอยู่ */
@@ -1080,7 +1093,7 @@ async function openPay(o) {
   if (o.id) { savePending(o); pay.booking = Promise.resolve(o); }
   $('#pay-cancel').disabled = !o.id;
   const p = state.cfg.payment;
-  $('#pay-code').innerHTML = o.id ? esc(o.id) : '<span class="dots" style="font-size:15px">กำลังจองคิว</span>';
+  $('#pay-code').innerHTML = o.id ? esc(o.id) : '<span class="ldots" style="font-size:15px">กำลังจองคิว</span>';
   $('#pay-amount').textContent = fmt(o.total);
   $('#pay-amount2').textContent = fmt(o.total) + '.00 บาท';
   $('#pay-bank').textContent = ' ' + p.bank;
@@ -1190,7 +1203,7 @@ async function sendSlip(slip) {
   const sync = $('#done-sync');
   stat.sending = true;
   sync.className = 'sync-line';
-  sync.innerHTML = '<span class="dots">กำลังส่งสลิปไปที่ร้าน</span><br>อย่าเพิ่งปิดหน้านี้สักครู่';
+  sync.innerHTML = '<span class="ldots">กำลังส่งสลิปไปที่ร้าน</span><br>อย่าเพิ่งปิดหน้านี้สักครู่';
   try {
     const booked = await pay.booking;
     const o = await call('uploadSlip', booked.id, booked.phone, slip);
@@ -1257,7 +1270,7 @@ function renderStatus() {
       : '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8C897D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
   const booking = o.status === 'booking';
   $('#done-title').textContent = ok ? 'ยืนยันคิวเรียบร้อย' : bad ? 'การจองไม่สำเร็จ' : booking ? 'กำลังจองคิว' : 'จองแล้ว รอร้านตรวจสลิป';
-  $('#done-code').innerHTML = o.id ? esc(o.id) : '<span class="dots" style="font-size:15px">กำลังจอง</span>';
+  $('#done-code').innerHTML = o.id ? esc(o.id) : '<span class="ldots" style="font-size:15px">กำลังจอง</span>';
   $('#done-note').textContent = ok
     ? (o.total ? 'ร้านได้รับเงินและยืนยันคิวแล้ว แล้วพบกันนะคะ' : 'ยืนยันคิวแล้ว แล้วพบกันนะคะ') + (o.free ? ' · กดใช้คูปองสระฟรีในแอป LINE ต่อหน้าพนักงานที่ร้าน' : '') + ' · อย่าลืมสแกน QR สะสมแต้มในบัตร LINE ที่ร้าน · หากต้องการยกเลิกหรือเลื่อนนัด กรุณาติดต่อร้าน'
     : bad ? (o.note || 'การจองนี้ถูกยกเลิก') + ' · หากโอนเงินแล้ว กรุณาติดต่อร้าน'
@@ -1428,7 +1441,7 @@ async function resumePending() {
 function defaultConfig() {
   return {
     isDefault: true, open: '06:00', close: '19:00', service: 45, maxPeople: 6, daysAhead: 30,
-    priceBase: 290, priceKeratin: 50, today: ymd(new Date()), closed: [], holdMin: 10,
+    priceBase: 290, priceKeratin: 50, today: ymd(new Date()), closed: [], holdMin: 10, minLead: 10,
     shopPhone: '0652914251', lineOa: '@007nvgwf',
     payment: { promptpay: '004999252396345', bank: 'กสิกรไทย', account: '239-3-71728-1', accountName: 'พัทธ์ธีรา ตรีวงษ์วัฒนา' },
     availability: null,
@@ -1476,8 +1489,8 @@ function start(c) {
 })();
 
 // เปิดหน้าทิ้งไว้ / สลับแอปกลับมา: อัปเดตเวลาว่างให้เป็นปัจจุบัน
-setInterval(() => { if (state.cfg && document.visibilityState === 'visible' && Date.now() - availAt > 60000) refreshAvail(); }, 20000);
-document.addEventListener('visibilitychange', () => { if (state.cfg && !document.hidden && Date.now() - availAt > 30000) refreshAvail(); });
+setInterval(() => { if (state.cfg && document.visibilityState === 'visible' && Date.now() - availAt > 20000) refreshAvail(); }, 5000);
+document.addEventListener('visibilitychange', () => { if (state.cfg && !document.hidden && Date.now() - availAt > 5000) refreshAvail(); });
 </script>
 </body>
 </html>
