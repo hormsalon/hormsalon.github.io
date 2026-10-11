@@ -686,6 +686,7 @@ function shampooText(b) {
   const a = [];
   if (b.moisture) a.push('Moisture × ' + b.moisture);
   if (b.keratin) a.push('Keratin × ' + b.keratin);
+  if (b.undecided) a.push('ยังไม่เลือกแชมพู × ' + b.undecided);
   return a.join('<br>');
 }
 const shampooName = (s) => (s === 'keratin' ? 'Keratin' : 'Moisture');
