@@ -146,7 +146,7 @@
 
   /* ฟอร์มในกล่อง */
   .fl { display: block; font-size: 13px; color: var(--muted); margin: 8px 0; }
-  .fl input, .abrow input, .abrow select, .frow select, .slotbox select, .row.sty input {
+  .fl input, .abrow input, .abrow select, .frow select, .slotbox select, .row.sty input, .row.promo input[data-pr-name] {
     display: block; width: 100%; font-family: inherit; font-size: 15px; padding: 9px 10px; border: 1px solid var(--line);
     border-radius: 10px; background: #fff; color: var(--ink); margin-top: 4px;
   }
@@ -202,6 +202,22 @@
   .bill.void { opacity: .5; }
   .bill.void .bh { text-decoration: line-through; }
   .row.sty { flex-wrap: wrap; }
+  .promo-box { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 10px 0; background: #fff; }
+  .promo-box select, .promo-box input { width: 100%; font-family: inherit; font-size: 15px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); margin-top: 6px; }
+  .promo-custom { display: flex; gap: 6px; }
+  .promo-custom input[type=number] { width: 90px; flex: 0 0 auto; }
+  .promo-custom select { width: 80px; flex: 0 0 auto; }
+  .persrow { padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+  .persrow .two { display: flex; gap: 6px; margin-top: 6px; }
+  .persrow .two select { flex: 1; width: auto; margin: 0; font-family: inherit; font-size: 14px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); }
+  .persrow .two select.need { border-color: var(--danger); }
+  .billcalc { font-size: 13.5px; margin: 10px 0 0; }
+  .billcalc div { display: flex; justify-content: space-between; padding: 2px 0; }
+  .billcalc .big { font-size: 16px; font-weight: 500; padding-top: 6px; }
+  .billcalc .refund { color: var(--danger); }
+  .row.promo { flex-wrap: wrap; }
+  .row.promo input[data-pr-name] { flex: 1 1 140px; width: auto; margin: 0; }
+  .row.promo select, .row.promo input[type=number] { width: 80px; margin: 0; font-family: inherit; font-size: 15px; padding: 9px 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
   .row.sty input[data-sty-name] { flex: 1 1 140px; width: auto; margin: 0; }
   .row.sty .pct { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; }
   .row.sty .pct input { width: 70px; margin: 0; text-align: right; }
@@ -263,6 +279,12 @@
         <div class="linkbox"><button class="btn ghost" id="btn-add-stylist">+ เพิ่มช่าง</button></div>
         <label class="remember" style="justify-content:flex-start;margin:12px 0"><input type="checkbox" id="free-full"> ลูกค้าใช้คูปองสระฟรี LINE: ช่างได้ค่าคอมจากราคาปกติ (ไม่ติ๊ก = ไม่ได้ค่าคอมครั้งฟรี)</label>
         <button class="btn" id="btn-save-stylists">บันทึกช่าง &amp; ค่าคอม</button>
+
+        <h2>โปรโมชัน / ส่วนลด</h2>
+        <p class="hint">ตั้งโปรที่ใช้บ่อยไว้ เช่น "รีวิว ลด 10%" ตอนกด "เสร็จแล้ว" หรือบันทึก walk-in เลือกโปรได้เลย · โปรที่หมดแล้วเอาติ๊ก "ใช้อยู่" ออก · ส่วนลดอื่นๆ เลือก "กำหนดเอง" ตอนบันทึกขายได้ · ค่าคอมช่างคิดจากยอดหลังหักส่วนลด</p>
+        <div class="panel" id="promos"></div>
+        <div class="linkbox"><button class="btn ghost" id="btn-add-promo">+ เพิ่มโปรโมชัน</button></div>
+        <button class="btn" id="btn-save-promos" style="margin-top:10px">บันทึกโปรโมชัน</button>
 
         <h2>สะสมแต้ม (บัตรสะสมแต้ม LINE)</h2>
         <div class="panel" style="padding:12px 14px;font-size:13.5px;line-height:1.7">
@@ -415,20 +437,23 @@ const Demo = (() => {
   bookings.push({ id: 'HM-REVIEW1', date: dates[1], time: '10:30', name: 'ลูกค้าใหม่', phone: '0891112222', people: 1, moisture: 0, keratin: 1, total: 340, status: 'รอตรวจสลิป', hasSlip: true });
   bookings.push({ id: 'HM-HOLD1', date: dates[2], time: '13:30', name: 'รอโอน', phone: '0893334444', people: 1, moisture: 1, keratin: 0, total: 290, status: 'รอชำระ' });
   const ACTIVE = ['ยืนยัน', 'รอตรวจสลิป', 'รอชำระ', 'เสร็จแล้ว'];
+  bookings.push({ id: 'HM-PHONE2', date: dates[0], time: '08:15', name: 'ยังไม่เลือก', phone: '0862223333', people: 2, moisture: 1, keratin: 0, undecided: 1, free: 0, total: 580, status: 'ยืนยัน', channel: 'โทรจอง', note: 'ชำระที่ร้าน' });
   bookings.push({ id: 'HM-PHONE1', date: dates[0], time: '06:45', name: 'โทรมา', phone: '0861234567', people: 2, moisture: 1, keratin: 1, free: 1, total: 340, status: 'ยืนยัน', channel: 'โทรจอง', note: 'ชำระที่ร้าน' });
   let stylists = [{ id: 'sdemo1', name: 'มินท์', pct: 10, active: true }, { id: 'sdemo2', name: 'ฝน', pct: 12, active: true }];
   let salesSettings = { freeCommissionFull: true };
   let sales = [];
+  let promos = [{ id: 'pdemo1', name: 'รีวิว ลด 10%', type: 'pct', value: 10, active: true }];
   const loyAdj = {};
   const SLOTS = []; for (let m = 360; m <= 1095; m += 45) SLOTS.push(pad(Math.floor(m / 60)) + ':' + pad(m % 60));
   function addSales(lines, ctx) {
     const g = 'S' + ctx.date.slice(2).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
     lines.forEach((l, i) => {
       const s = stylists.find((x) => x.id === l.stylistId);
-      const list = l.service === 'keratin' ? 340 : 290, amount = l.free ? list - 290 : list, base = l.free && salesSettings.freeCommissionFull ? list : amount;
+      const base = l.free && salesSettings.freeCommissionFull ? l.list : l.amount;
       sales.push({ id: g + '-' + (i + 1), date: ctx.date, time: ctx.time, bookingId: ctx.bookingId, name: ctx.name, phone: ctx.phone,
-        service: l.service === 'keratin' ? 'Keratin' : 'Moisture', list, free: !!l.free, amount, method: amount ? ctx.method : '-',
-        stylist: s.name, pct: s.pct, base, commission: Math.round(base * s.pct) / 100, status: 'ปกติ', note: '' });
+        service: l.service === 'keratin' ? 'Keratin' : 'Moisture', list: l.list, free: !!l.free, amount: l.amount, method: l.method,
+        stylist: s.name, pct: s.pct, base, commission: Math.round(base * s.pct) / 100, status: 'ปกติ', note: i === 0 ? (ctx.note || '') : '',
+        discount: l.discount, promo: l.promo, prepaid: l.prepaid || 0 });
     });
   }
   function loy(phone) {
@@ -451,7 +476,7 @@ const Demo = (() => {
   const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3);
   const overview = () => ({
     beds: BEDS, maxStaff: 3, weekly: weekly.slice(), line: line.slice(), review: review(),
-    stylists: stylists.slice(), salesSettings, loyaltyEvery: 10, prices: { base: 290, keratin: 50 }, slots: SLOTS, today: dates[0],
+    stylists: stylists.slice(), salesSettings, promos: promos.slice(), loyaltyEvery: 10, prices: { base: 290, keratin: 50 }, slots: SLOTS, today: dates[0],
     days: dates.map((d) => {
       const staff = staffFor(d), cap = Math.min(BEDS, staff);
       const act = bookings.filter((b) => b.date === d && ACTIVE.includes(b.status));
@@ -476,24 +501,36 @@ const Demo = (() => {
     adminRemoveRecipient: (pin, id) => { line = line.filter((r) => r.id !== id); return delay(overview()); },
     getAvailability: () => delay({ closed: false, capacity: 3, slots: Object.fromEntries(SLOTS.map((t, i) => [t, i % 4]))}),
     adminSaveStylists: (pin, list, set) => { stylists = list.map((x, i) => Object.assign({ id: x.id || 'snew' + i + Date.now() % 1000, active: true }, x, { pct: +x.pct })); salesSettings = set; return delay(overview()); },
+    adminSavePromos: (pin, list) => { promos = list.map((p, i) => Object.assign({ id: p.id || 'pnew' + i, active: true }, p, { value: +p.value })); return delay(overview()); },
     adminAddBooking: (pin, p) => {
       const g = {};
-      p.items.forEach((it) => { const r = g[it.time] = g[it.time] || { moisture: 0, keratin: 0 }; r[it.shampoo]++; });
+      p.items.forEach((it) => { const r = g[it.time] = g[it.time] || { moisture: 0, keratin: 0, undecided: 0 }; r[it.shampoo]++; });
       let freeLeft = p.useFree || 0;
-      Object.keys(g).sort().forEach((t) => { const r = g[t]; const f = Math.min(freeLeft, r.moisture + r.keratin); freeLeft -= f;
-        bookings.push({ id: 'HM-NEW' + bookings.length, date: p.date, time: t, name: p.name, phone: p.phone, people: r.moisture + r.keratin, moisture: r.moisture, keratin: r.keratin, free: f,
-          total: r.moisture * 290 + r.keratin * 340 - f * 290, status: 'ยืนยัน', channel: 'โทรจอง', note: 'ชำระที่ร้าน' }); });
+      Object.keys(g).sort().forEach((t) => { const r = g[t]; const n = r.moisture + r.keratin + r.undecided; const f = Math.min(freeLeft, n); freeLeft -= f;
+        bookings.push({ id: 'HM-NEW' + bookings.length, date: p.date, time: t, name: p.name, phone: p.phone, people: n, moisture: r.moisture, keratin: r.keratin, undecided: r.undecided, free: f,
+          total: (r.moisture + r.undecided) * 290 + r.keratin * 340 - f * 290, status: 'ยืนยัน', channel: 'โทรจอง', note: 'ชำระที่ร้าน' }); });
       return delay(overview());
     },
     adminCheckout: (pin, r) => {
       const b = bookings.find((x) => x.id === r.bookingId && x.time === r.time);
-      const persons = []; for (let i = 0; i < b.moisture; i++) persons.push('moisture'); for (let i = 0; i < b.keratin; i++) persons.push('keratin');
+      const online = (b.channel || 'ออนไลน์') === 'ออนไลน์';
+      const persons = personsOf(b);
       const bad = r.invalidCoupon || [];
-      addSales(persons.map((sh, i) => ({ service: sh, free: i < (b.free || 0) && bad.indexOf(i) === -1, stylistId: r.stylists[i] })), { date: b.date, time: b.time, bookingId: b.id, name: b.name, phone: b.phone, method: b.channel === 'โทรจอง' || bad.length ? r.method : 'โอน (จองออนไลน์)' });
+      const lines = persons.map((p, i) => ({ service: r.shampoos[i], free: p.free && bad.indexOf(i) === -1, stylistId: r.stylists[i],
+        prepaid: online ? (p.free ? priceOf(p.shampoo) - 290 : priceOf(p.shampoo)) : 0 }));
+      priceLines(lines, r.promo);
+      lines.forEach((l) => { l.method = r2(l.amount - l.prepaid) !== 0 ? r.method : l.prepaid > 0 ? 'โอน (จองออนไลน์)' : '-'; });
+      const shop = lines.reduce((n, l) => n + l.amount - l.prepaid, 0);
+      addSales(lines, { date: b.date, time: b.time, bookingId: b.id, name: b.name, phone: b.phone, note: shop < 0 ? 'คืนเงินลูกค้า ' + r2(-shop) + ' บาท' : '' });
       b.status = 'เสร็จแล้ว';
       return delay(overview());
     },
-    adminQuickSale: (pin, r) => { addSales(r.lines.map((l) => ({ service: l.shampoo, free: l.free, stylistId: l.stylistId })), { date: dates[0], time: new Date().toTimeString().slice(0, 5), bookingId: '', name: r.name || 'walk-in', phone: r.phone, method: r.method }); return delay(overview()); },
+    adminQuickSale: (pin, r) => {
+      const lines = priceLines(r.lines.map((l) => ({ service: l.shampoo, free: l.free, stylistId: l.stylistId, prepaid: 0 })), r.promo);
+      lines.forEach((l) => { l.method = l.amount ? r.method : '-'; });
+      addSales(lines, { date: dates[0], time: new Date().toTimeString().slice(0, 5), bookingId: '', name: r.name || 'walk-in', phone: r.phone });
+      return delay(overview());
+    },
     adminVoidSale: (pin, g, reason) => { sales.forEach((s) => { if (s.id.indexOf(g + '-') === 0) { s.status = 'ยกเลิก'; s.note = 'ยกเลิก: ' + reason; } }); const f = sales.find((s) => s.id.indexOf(g + '-') === 0); if (f && f.bookingId) bookings.forEach((b) => { if (b.id === f.bookingId && b.time === f.time) b.status = 'ยืนยัน'; }); return delay(true); },
     adminGetSales: (pin, from, to) => delay(sales.filter((s) => s.date >= from && s.date <= to)),
   };
@@ -566,7 +603,7 @@ function bookingsHTML(date) {
     const done = b.status === 'เสร็จแล้ว';
     const canDone = b.status === 'ยืนยัน' && date <= todayStr();
     const tags = (b.channel === 'โทรจอง' ? '<span class="st">โทรจอง</span>' : '') + (b.free ? '<span class="st ok">คูปองฟรี ' + b.free + '</span>' : '');
-    const sh = [b.moisture && `Moisture ×${b.moisture}`, b.keratin && `Keratin ×${b.keratin}`].filter(Boolean).join(', ');
+    const sh = [b.moisture && `Moisture ×${b.moisture}`, b.keratin && `Keratin ×${b.keratin}`, b.undecided && `ยังไม่เลือกแชมพู ×${b.undecided}`].filter(Boolean).join(', ');
     return `<div class="bk${cancelled ? ' cancelled' : ''}${done ? ' donebk' : ''}">
       <div class="tm">${esc(b.time)}</div>
       <div class="who">
@@ -630,7 +667,7 @@ function render() {
   if (state.pin && !useDemo) setTimeout(prefetchSlips, 300);
   if (state.open === null && state.data.days && state.data.days[0]) state.open = state.data.days[0].date;
   $('#review-wrap').style.display = (state.data.review || []).length ? 'block' : 'none';
-  renderReview(); renderDays(); renderWeekly(); renderLine(); renderStylists();
+  renderReview(); renderDays(); renderWeekly(); renderLine(); renderStylists(); renderPromos();
 }
 
 /* ---------- ดูสลิป (โหลดเฉพาะตอนกดดู ไม่เก็บไว้ในเครื่อง) ---------- */
@@ -898,12 +935,60 @@ function methodRadios(name) {
 function personsOf(b) {
   const out = [];
   for (let i = 0; i < b.moisture; i++) out.push({ shampoo: 'moisture' });
+  for (let i = 0; i < (b.undecided || 0); i++) out.push({ shampoo: 'undecided' });
   for (let i = 0; i < b.keratin; i++) out.push({ shampoo: 'keratin' });
   out.forEach((p, i) => { p.free = i < (b.free || 0); });
   return out;
 }
 
+/* ราคาแต่ละท่าน: ราคาปกติ → หักคูปองฟรี → หักโปร (เหมือนที่ระบบคิดจริง) */
+const r2 = (n) => Math.round(n * 100) / 100;
+function priceLines(lines, promo) {
+  lines.forEach((l) => { l.list = priceOf(l.service); l.gross = l.free ? l.list - priceOf('moisture') : l.list; l.discount = 0; });
+  if (promo) {
+    const tot = lines.reduce((n, l) => n + l.gross, 0);
+    if (promo.type === 'pct') lines.forEach((l) => { l.discount = r2(l.gross * promo.value / 100); });
+    else if (tot > 0) {
+      const off = Math.min(promo.value, tot); let left = off;
+      lines.forEach((l, i) => { const d = i === lines.length - 1 ? left : r2(off * l.gross / tot); l.discount = Math.min(l.gross, r2(d)); left = r2(left - l.discount); });
+    }
+  }
+  lines.forEach((l) => { l.amount = r2(l.gross - l.discount); l.promo = promo && l.discount ? promo.name : ''; });
+  return lines;
+}
+function promoPicker(prefix) {
+  const list = (state.data.promos || []).filter((p) => p.active !== false);
+  return '<div class="promo-box"><div class="muted">โปรโมชัน / ส่วนลด</div><select id="' + prefix + '-promo"><option value="">ไม่มีส่วนลด</option>'
+    + list.map((p) => '<option value="' + esc(p.id) + '">' + esc(p.name) + ' (ลด ' + p.value + (p.type === 'pct' ? '%' : ' บาท') + ')</option>').join('')
+    + '<option value="custom">กำหนดเอง…</option></select>'
+    + '<div class="promo-custom" id="' + prefix + '-custom" style="display:none"><input id="' + prefix + '-cname" placeholder="ชื่อ เช่น ลูกค้าประจำ" maxlength="40">'
+    + '<input id="' + prefix + '-cval" type="number" inputmode="decimal" min="0" step="1" placeholder="ลด"><select id="' + prefix + '-ctype"><option value="pct">%</option><option value="baht">บาท</option></select></div></div>';
+}
+function readPromo(prefix) {
+  const v = $('#' + prefix + '-promo').value;
+  if (!v) return null;
+  if (v === 'custom') {
+    const val = parseFloat($('#' + prefix + '-cval').value);
+    if (!(val > 0)) return null;
+    const type = $('#' + prefix + '-ctype').value;
+    return { name: $('#' + prefix + '-cname').value.trim() || ('ส่วนลด ' + val + (type === 'pct' ? '%' : ' บาท')), type: type, value: val };
+  }
+  const p = (state.data.promos || []).find((x) => x.id === v);
+  return p ? { name: p.name, type: p.type, value: p.value } : null;
+}
+function bindPromo(prefix, onChange) {
+  $('#' + prefix + '-promo').onchange = () => { $('#' + prefix + '-custom').style.display = $('#' + prefix + '-promo').value === 'custom' ? 'flex' : 'none'; onChange(); };
+  ['-cname', '-cval', '-ctype'].forEach((k) => { $('#' + prefix + k).oninput = onChange; $('#' + prefix + k).onchange = onChange; });
+}
+function shampooSelect(attrs, value) {
+  return '<select ' + attrs + (value === 'undecided' ? ' class="need"' : '') + '>'
+    + (value === 'undecided' ? '<option value="">เลือกแชมพู</option>' : '')
+    + '<option value="moisture"' + (value === 'moisture' ? ' selected' : '') + '>Moisture · ' + priceOf('moisture') + '</option>'
+    + '<option value="keratin"' + (value === 'keratin' ? ' selected' : '') + '>Keratin · ' + priceOf('keratin') + '</option></select>';
+}
+
 /* ---------- กล่องโต้ตอบ ---------- */
+
 function openDlg(html) { $('#dlg-box').onclick = null; $('#dlg-box').onchange = null; $('#dlg-box').innerHTML = html; $('#dlg').classList.add('show'); }
 function closeDlg() { $('#dlg').classList.remove('show'); $('#dlg-box').innerHTML = ''; }
 function dlgBusy(btn, text) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = text; }
@@ -923,45 +1008,65 @@ function openCheckout(id, time) {
   if (!b) return;
   const online = (b.channel || 'ออนไลน์') === 'ออนไลน์';
   const persons = personsOf(b);
+  const chosen = persons.map((p) => p.shampoo);
   const bad = {};
-  // เงินที่ต้องเก็บที่ร้าน: คิวออนไลน์จ่ายแล้วตอนจอง (ยกเว้นท่านที่คูปองไม่ถูกต้อง)
-  const dueOf = () => persons.reduce((s, p, i) => {
-    const invalid = p.free && bad[i];
-    if (online) return s + (invalid ? priceOf('moisture') : 0);
-    return s + (p.free && !invalid ? priceOf(p.shampoo) - priceOf('moisture') : priceOf(p.shampoo));
-  }, 0);
+  // ที่ลูกค้าโอนมาแล้วตอนจองออนไลน์ (ตามแชมพูที่จองไว้)
+  const prepaid = persons.map((p) => (online ? (p.free ? priceOf(p.shampoo) - priceOf('moisture') : priceOf(p.shampoo)) : 0));
   openDlg('<h3>ลูกค้าใช้บริการเสร็จ</h3>'
     + '<div class="s">' + esc(b.name) + ' · ' + dateLabel(b.date) + ' ' + esc(b.time) + ' · ' + esc(b.id) + '</div>'
-    + persons.map((p, i) => '<div class="frow"><span>ท่านที่ ' + (i + 1) + ' · ' + (p.shampoo === 'keratin' ? 'Keratin' : 'Moisture')
-      + (p.free ? '<br><span class="st ok">คูปองฟรี LINE</span> <label class="chk muted"><input type="checkbox" data-co-bad="' + i + '"> คูปองไม่ถูกต้อง (เก็บเงิน)</label>' : '')
-      + '</span>' + stylistSelect('data-co-sty="' + i + '"') + '</div>').join('')
+    + persons.map((p, i) => '<div class="persrow"><div>ท่านที่ ' + (i + 1)
+      + (p.shampoo === 'undecided' ? ' <span class="st wait">ยังไม่เลือกแชมพู</span>' : '')
+      + (p.free ? ' <span class="st ok">คูปองฟรี LINE</span> <label class="chk muted"><input type="checkbox" data-co-bad="' + i + '"> คูปองไม่ถูกต้อง (เก็บเงิน)</label>' : '') + '</div>'
+      + '<div class="two">' + shampooSelect('data-co-sh="' + i + '"', p.shampoo) + stylistSelect('data-co-sty="' + i + '"') + '</div></div>').join('')
     + (persons.some((p) => p.free) ? '<div class="muted" style="margin-top:8px">ให้ลูกค้ากดใช้คูปองสระฟรีในแอป LINE ต่อหน้าพนักงานก่อนบันทึก</div>' : '')
-    + (online ? '<div class="paid">ชำระแล้วตอนจอง (โอน) ' + baht(b.total) + ' บาท</div>' : '')
+    + promoPicker('co')
     + '<div id="co-due"></div>'
     + '<div class="muted" style="margin-top:8px">อย่าลืมให้ลูกค้าสแกน QR สะสมแต้มในบัตร LINE</div>'
     + '<div class="err" id="dlg-err"></div>'
     + '<div class="acts"><button class="btn ok" id="co-save">บันทึกยอดขาย</button><button class="btn ghost" data-dlg-close>ปิด</button></div>');
-  function renderDue() {
-    const due = dueOf();
-    const had = document.querySelector('input[name="co-method"]:checked');
-    $('#co-due').innerHTML = (online && !due) ? '' : '<div class="due">เก็บเงินที่ร้าน <b>' + baht(due) + '</b> บาท</div>' + (due ? methodRadios('co-method') : '');
-    if (had && due) { const r = document.querySelector('input[name="co-method"][value="' + had.value + '"]'); if (r) r.checked = true; }
+  function calc() {
+    if (chosen.some((c) => c === 'undecided' || !c)) return null;
+    const lines = persons.map((p, i) => ({ service: chosen[i], free: p.free && !bad[i], prepaid: prepaid[i] }));
+    priceLines(lines, readPromo('co'));
+    const total = r2(lines.reduce((n, l) => n + l.amount, 0));
+    const paid = r2(lines.reduce((n, l) => n + l.prepaid, 0));
+    const disc = r2(lines.reduce((n, l) => n + l.discount, 0));
+    return { lines, total, paid, disc, shop: r2(total - paid), needMethod: lines.some((l) => r2(l.amount - l.prepaid) !== 0) };
   }
-  renderDue();
+  function renderDue() {
+    const c = calc();
+    const had = document.querySelector('input[name="co-method"]:checked');
+    if (!c) { $('#co-due').innerHTML = '<div class="billcalc muted">เลือกแชมพูให้ครบทุกท่าน แล้วระบบจะคิดยอดให้</div>'; return; }
+    const row = (a, b2, cls) => '<div' + (cls ? ' class="' + cls + '"' : '') + '><span>' + a + '</span><span>' + b2 + '</span></div>';
+    $('#co-due').innerHTML = '<div class="billcalc">'
+      + row('ราคารวม', baht(r2(c.total + c.disc)) + ' บาท')
+      + (c.disc ? row('ส่วนลด', '−' + baht(c.disc) + ' บาท') : '')
+      + (c.paid ? row('โอนมาแล้วตอนจอง', '−' + baht(c.paid) + ' บาท') : '')
+      + (c.shop >= 0 ? row('เก็บเงินที่ร้าน', baht(c.shop) + ' บาท', 'big') : row('คืนเงินลูกค้า', baht(-c.shop) + ' บาท', 'big refund'))
+      + '</div>' + (c.needMethod ? methodRadios('co-method') : '');
+    if (had && c.needMethod) { const r = document.querySelector('input[name="co-method"][value="' + had.value + '"]'); if (r) r.checked = true; }
+  }
   $('#dlg-box').onchange = (e) => {
     const c = e.target.closest('[data-co-bad]');
     if (c) { bad[+c.dataset.coBad] = c.checked; renderDue(); }
+    const sh = e.target.closest('[data-co-sh]');
+    if (sh) { chosen[+sh.dataset.coSh] = sh.value; sh.classList.toggle('need', !sh.value); renderDue(); }
   };
+  bindPromo('co', renderDue);
+  renderDue();
   $('#co-save').onclick = async () => {
-    const stylists = [...document.querySelectorAll('[data-co-sty]')].map((s) => s.value);
+    const stylists = [...document.querySelectorAll('[data-co-sty]')].map((x) => x.value);
+    const c = calc();
+    if (!c) { $('#dlg-err').textContent = 'กรุณาเลือกแชมพูให้ครบทุกท่าน'; return; }
     if (stylists.some((v) => !v)) { $('#dlg-err').textContent = 'กรุณาเลือกช่างให้ครบทุกท่าน'; return; }
+    if ($('#co-promo').value === 'custom' && !readPromo('co')) { $('#dlg-err').textContent = 'กรุณาใส่จำนวนส่วนลด'; return; }
     const m = document.querySelector('input[name="co-method"]:checked');
-    if (dueOf() && !m) { $('#dlg-err').textContent = 'กรุณาเลือกช่องทางรับเงิน'; return; }
+    if (c.needMethod && !m) { $('#dlg-err').textContent = c.shop < 0 ? 'กรุณาเลือกช่องทางที่คืนเงินลูกค้า' : 'กรุณาเลือกช่องทางรับเงิน'; return; }
     const btn = $('#co-save'); dlgBusy(btn, 'กำลังบันทึก…');
     try {
       const invalidCoupon = Object.keys(bad).filter((k) => bad[k]).map(Number);
-      receive(await call('adminCheckout', state.pin, { bookingId: b.id, time: b.time, stylists: stylists, method: m ? m.value : 'เงินสด', invalidCoupon: invalidCoupon }));
-      closeDlg(); toast('บันทึกยอดขายแล้ว');
+      receive(await call('adminCheckout', state.pin, { bookingId: b.id, time: b.time, stylists: stylists, shampoos: chosen, promo: readPromo('co'), method: m ? m.value : 'เงินสด', invalidCoupon: invalidCoupon }));
+      closeDlg(); toast(c.shop < 0 ? 'บันทึกแล้ว · คืนเงินลูกค้า ' + baht(-c.shop) + ' บาท' : 'บันทึกยอดขายแล้ว');
       state.salesAt = 0;
     } catch (e) { $('#dlg-err').textContent = errMsg(e); dlgIdle(btn); }
   };
@@ -970,7 +1075,7 @@ function openCheckout(id, time) {
 /* ----- เพิ่มคิว (ลูกค้าโทรจอง) ----- */
 function openAddBooking() {
   const slots = state.data.slots || [];
-  const f = { rows: [{ time: '', moisture: 1, keratin: 0 }], avail: null, free: 0, useFree: 0 };
+  const f = { rows: [{ time: '', moisture: 1, keratin: 0, undecided: 0 }], avail: null, free: 0, useFree: 0 };
   const date0 = state.open && state.open >= todayStr() ? state.open : todayStr();
   openDlg('<h3>เพิ่มคิว (ลูกค้าโทรจอง)</h3><div class="s">ยืนยันทันที ชำระเงินที่ร้าน · ระบบกันรอบนี้ไม่ให้ลูกค้าออนไลน์จองซ้อน</div>'
     + '<label class="fl">ชื่อลูกค้า<input id="ab-name" maxlength="60"></label>'
@@ -980,7 +1085,7 @@ function openAddBooking() {
     + '<div id="ab-free"></div><div class="due" id="ab-total"></div>'
     + '<div class="err" id="dlg-err"></div>'
     + '<div class="acts"><button class="btn ok" id="ab-save">เพิ่มคิว</button><button class="btn ghost" data-dlg-close>ปิด</button></div>');
-  const people = () => f.rows.reduce((s, r) => s + r.moisture + r.keratin, 0);
+  const people = () => f.rows.reduce((s, r) => s + r.moisture + r.keratin + r.undecided, 0);
   function renderRows() {
     $('#ab-rows').innerHTML = f.rows.map((r, i) => '<div class="slotbox"><div class="top">'
       + '<select data-ab-time="' + i + '"><option value="">เลือกเวลา' + (f.rows.length > 1 ? ' (รอบที่ ' + (i + 1) + ')' : '') + '</option>' + slots.map((t) => {
@@ -990,15 +1095,18 @@ function openAddBooking() {
       + (f.rows.length > 1 ? '<button class="rm" data-ab-del="' + i + '">ลบ</button>' : '') + '</div>'
       + '<div class="shrow"><span>Moisture Shampoo · ' + priceOf('moisture') + '</span><span class="mini"><button data-ab-n="' + i + ':moisture:-1">−</button><b>' + r.moisture + '</b><button data-ab-n="' + i + ':moisture:1">+</button></span></div>'
       + '<div class="shrow"><span>Keratin Shampoo · ' + priceOf('keratin') + '</span><span class="mini"><button data-ab-n="' + i + ':keratin:-1">−</button><b>' + r.keratin + '</b><button data-ab-n="' + i + ':keratin:1">+</button></span></div>'
+      + '<div class="shrow"><span>ยังไม่เลือกแชมพู<br><small class="muted">เลือกตอนลูกค้ามาที่ร้าน</small></span><span class="mini"><button data-ab-n="' + i + ':undecided:-1">−</button><b>' + r.undecided + '</b><button data-ab-n="' + i + ':undecided:1">+</button></span></div>'
       + '</div>').join('')
       + (f.avail && f.avail.closed ? '<div class="warn">วันนี้ตั้งช่างเป็น 0 (ร้านหยุด)</div>' : '');
     f.useFree = Math.min(f.useFree, people());
     $('#ab-free').innerHTML = '<div class="' + (f.useFree ? 'freebox ' : 'slotbox ') + 'shrow"><span>ลูกค้าจะใช้คูปองสระฟรี LINE<br><small class="muted">ฟรีค่า Moisture ' + priceOf('moisture') + ' บาทต่อท่าน · ตรวจคูปองตอนลูกค้ามา</small></span><span class="mini"><button data-ab-free="-1">−</button><b>' + f.useFree + '</b><button data-ab-free="1">+</button></span></div>';
     const items = [];
-    f.rows.forEach((r) => { for (let k = 0; k < r.moisture; k++) items.push('moisture'); for (let k = 0; k < r.keratin; k++) items.push('keratin'); });
-    items.sort((a, b) => (a === 'keratin') - (b === 'keratin'));
+    f.rows.forEach((r) => { for (let k = 0; k < r.moisture; k++) items.push('moisture'); for (let k = 0; k < r.undecided; k++) items.push('undecided'); for (let k = 0; k < r.keratin; k++) items.push('keratin'); });
+    const rank = { moisture: 0, undecided: 1, keratin: 2 };
+    items.sort((a, b) => rank[a] - rank[b]);
     const total = items.reduce((s, sh, k) => s + priceOf(sh) - (k < f.useFree ? priceOf('moisture') : 0), 0);
-    $('#ab-total').innerHTML = people() + ' ท่าน' + (f.useFree ? ' · คูปองฟรี ' + f.useFree : '') + ' · เก็บเงินที่ร้าน <b>' + baht(total) + '</b> บาท';
+    const anyUndecided = items.indexOf('undecided') !== -1;
+    $('#ab-total').innerHTML = people() + ' ท่าน' + (f.useFree ? ' · คูปองฟรี ' + f.useFree : '') + ' · เก็บเงินที่ร้าน' + (anyUndecided ? 'ประมาณ' : '') + ' <b>' + baht(total) + '</b> บาท' + (anyUndecided ? '<br><small class="muted">ท่านที่ยังไม่เลือกแชมพูคิดราคา Moisture ไว้ก่อน ถ้าเลือก Keratin เพิ่มอีก ' + (priceOf('keratin') - priceOf('moisture')) + ' บาท</small>' : '');
   }
   async function loadAvail() {
     f.avail = null; renderRows();
@@ -1006,7 +1114,7 @@ function openAddBooking() {
     renderRows();
   }
   $('#ab-date').onchange = loadAvail;
-  $('#ab-addrow').onclick = () => { f.rows.push({ time: '', moisture: 1, keratin: 0 }); renderRows(); };
+  $('#ab-addrow').onclick = () => { f.rows.push({ time: '', moisture: 1, keratin: 0, undecided: 0 }); renderRows(); };
   $('#ab-rows').addEventListener('change', (e) => { const s = e.target.closest('[data-ab-time]'); if (s) f.rows[+s.dataset.abTime].time = s.value; });
   $('#dlg-box').onclick = (e) => {
     const n = e.target.closest('[data-ab-n]');
@@ -1014,7 +1122,7 @@ function openAddBooking() {
       const [i, k, d] = n.dataset.abN.split(':');
       const r = f.rows[+i];
       r[k] = Math.max(0, r[k] + +d);
-      if (r.moisture + r.keratin === 0) r[k] = 1;
+      if (r.moisture + r.keratin + r.undecided === 0) r[k] = 1;
       renderRows(); return;
     }
     const del = e.target.closest('[data-ab-del]');
@@ -1028,7 +1136,7 @@ function openAddBooking() {
     if (!/^0[0-9]{8,9}$/.test(phone)) { $('#dlg-err').textContent = 'กรุณาใส่เบอร์โทรให้ถูกต้อง'; return; }
     if (f.rows.some((r) => !r.time)) { $('#dlg-err').textContent = 'กรุณาเลือกเวลาให้ครบ'; return; }
     const items = [];
-    f.rows.forEach((r) => { for (let k = 0; k < r.moisture; k++) items.push({ shampoo: 'moisture', time: r.time }); for (let k = 0; k < r.keratin; k++) items.push({ shampoo: 'keratin', time: r.time }); });
+    f.rows.forEach((r) => { for (let k = 0; k < r.moisture; k++) items.push({ shampoo: 'moisture', time: r.time }); for (let k = 0; k < r.keratin; k++) items.push({ shampoo: 'keratin', time: r.time }); for (let k = 0; k < r.undecided; k++) items.push({ shampoo: 'undecided', time: r.time }); });
     const btn = $('#ab-save'); dlgBusy(btn, 'กำลังเพิ่มคิว…');
     try {
       receive(await call('adminAddBooking', state.pin, { name: name, phone: phone, date: $('#ab-date').value, items: items, useFree: f.useFree }));
@@ -1047,10 +1155,11 @@ function openWalkin() {
     + '<label class="fl">ชื่อลูกค้า (ไม่บังคับ)<input id="wk-name" maxlength="60"></label>'
     + '<label class="fl">เบอร์โทร (ไม่บังคับ)<input id="wk-phone" type="tel" inputmode="numeric" maxlength="12"></label>'
     + '<div id="wk-lines"></div><button class="linkish" id="wk-add">+ เพิ่มท่าน</button>'
-    + '<div class="due" id="wk-total"></div><div id="wk-method"></div><div class="muted">คูปองฟรี: ให้ลูกค้ากดใช้คูปองในแอป LINE ต่อหน้าพนักงาน · อย่าลืมให้ลูกค้าสแกน QR สะสมแต้ม</div>'
+    + promoPicker('wk') + '<div class="due" id="wk-total"></div><div id="wk-method"></div><div class="muted">คูปองฟรี: ให้ลูกค้ากดใช้คูปองในแอป LINE ต่อหน้าพนักงาน · อย่าลืมให้ลูกค้าสแกน QR สะสมแต้ม</div>'
     + '<div class="err" id="dlg-err"></div>'
     + '<div class="acts"><button class="btn ok" id="wk-save">บันทึกยอดขาย</button><button class="btn ghost" data-dlg-close>ปิด</button></div>');
-  function total() { return f.lines.reduce((s, l) => s + priceOf(l.shampoo) - (l.free ? priceOf('moisture') : 0), 0); }
+  function priced() { return priceLines(f.lines.map((l) => ({ service: l.shampoo, free: l.free })), readPromo('wk')); }
+  function total() { return r2(priced().reduce((s, l) => s + l.amount, 0)); }
   function render() {
     $('#wk-lines').innerHTML = f.lines.map((l, i) => '<div class="abrow">'
       + '<select data-wk-sh="' + i + '"><option value="moisture"' + (l.shampoo === 'moisture' ? ' selected' : '') + '>Moisture Shampoo · ' + priceOf('moisture') + '</option><option value="keratin"' + (l.shampoo === 'keratin' ? ' selected' : '') + '>Keratin Shampoo · ' + priceOf('keratin') + '</option></select>'
@@ -1058,10 +1167,12 @@ function openWalkin() {
       + '<label class="chk"><input type="checkbox" data-wk-free="' + i + '"' + (l.free ? ' checked' : '') + '> คูปองฟรี LINE</label>'
       + (f.lines.length > 1 ? '<button class="rm" data-wk-del="' + i + '">ลบ</button>' : '') + '</div>').join('');
     const t = total();
-    $('#wk-total').innerHTML = f.lines.length + ' ท่าน · เก็บเงิน <b>' + baht(t) + '</b> บาท';
+    const disc = r2(priced().reduce((s, l) => s + l.discount, 0));
+    $('#wk-total').innerHTML = f.lines.length + ' ท่าน' + (disc ? ' · ส่วนลด ' + baht(disc) : '') + ' · เก็บเงิน <b>' + baht(t) + '</b> บาท';
     if (t && !document.querySelector('input[name="wk-method"]')) $('#wk-method').innerHTML = methodRadios('wk-method');
     if (!t) $('#wk-method').innerHTML = '';
   }
+  bindPromo('wk', () => render());
   $('#wk-add').onclick = () => { f.lines.push({ shampoo: 'moisture', stylistId: '', free: false }); render(); };
   $('#wk-lines').addEventListener('change', (e) => {
     const t = e.target;
@@ -1082,7 +1193,7 @@ function openWalkin() {
     try {
       receive(await call('adminQuickSale', state.pin, {
         name: $('#wk-name').value.trim(), phone: $('#wk-phone').value.replace(/[^0-9]/g, ''), method: m ? m.value : 'เงินสด',
-        lines: f.lines.map((l) => ({ shampoo: l.shampoo, stylistId: l.stylistId, free: l.free })),
+        lines: f.lines.map((l) => ({ shampoo: l.shampoo, stylistId: l.stylistId, free: l.free })), promo: readPromo('wk'),
       }));
       closeDlg(); toast('บันทึกยอดขายแล้ว'); state.salesAt = 0;
       if (state.tab === 'sales') loadSales();
@@ -1123,14 +1234,17 @@ function renderSales() {
   const ok = all.filter((s) => s.status !== 'ยกเลิก');
   const sum = (arr, k) => arr.reduce((n, s) => n + (+s[k] || 0), 0);
   const by = (k) => ok.reduce((m, s) => { (m[s[k]] = m[s[k]] || []).push(s); return m; }, {});
-  const methods = by('method');
+  // เก็บที่ร้าน = ยอด - โอนตอนจอง (แยกตามช่องทางที่ร้าน) · โอนตอนจอง นับแยก
+  const shopOf = (s) => (+s.amount || 0) - (+s.prepaid || 0);
+  const shopBy = (m) => ok.filter((s) => s.method === m).reduce((n, s) => n + shopOf(s), 0);
+  const discTotal = sum(ok, 'discount');
   const card = (label, val, sub) => '<div class="card"><small>' + label + '</small><b>' + val + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
   let html = '<div class="cards">'
     + card('ลูกค้า', ok.length + ' ท่าน', ok.filter((s) => s.free).length ? 'ใช้คูปองฟรี ' + ok.filter((s) => s.free).length : '')
-    + card('ยอดขายรวม', baht(sum(ok, 'amount')) + ' ฿')
-    + card('เงินสด', baht(sum(methods['เงินสด'] || [], 'amount')) + ' ฿')
-    + card('โอน (ที่ร้าน)', baht(sum(methods['โอน'] || [], 'amount')) + ' ฿')
-    + card('โอน (จองออนไลน์)', baht(sum(methods['โอน (จองออนไลน์)'] || [], 'amount')) + ' ฿')
+    + card('ยอดขายรวม', baht(sum(ok, 'amount')) + ' ฿', discTotal ? 'หลังส่วนลด ' + baht(discTotal) + ' ฿' : '')
+    + card('เงินสด (ที่ร้าน)', baht(shopBy('เงินสด')) + ' ฿')
+    + card('โอน (ที่ร้าน)', baht(shopBy('โอน')) + ' ฿')
+    + card('โอน (ตอนจองออนไลน์)', baht(sum(ok, 'prepaid')) + ' ฿')
     + card('ค่าคอมรวม', baht(sum(ok, 'commission')) + ' ฿')
     + '</div>';
   const st = by('stylist');
@@ -1148,10 +1262,13 @@ function renderSales() {
   const keys = Object.keys(bills).sort((a, b) => (bills[b][0].date + bills[b][0].time).localeCompare(bills[a][0].date + bills[a][0].time));
   html += '<h3 class="sub-h">รายการขาย (' + keys.length + ' บิล)</h3><div class="panel">' + (keys.length ? keys.map((g) => {
     const L = bills[g], f = L[0], voided = f.status === 'ยกเลิก';
-    const paidLine = L.find((x) => x.method && x.method !== '-');
+    const shop = L.reduce((n, x) => n + (+x.amount || 0) - (+x.prepaid || 0), 0);
+    const pre = L.reduce((n, x) => n + (+x.prepaid || 0), 0);
+    const shopM = (L.find((x) => x.method === 'เงินสด' || x.method === 'โอน') || {}).method || '';
+    const payText = [pre ? 'โอนตอนจอง ' + baht(pre) : '', shop > 0 ? shopM + ' ' + baht(shop) : '', shop < 0 ? 'คืนเงิน (' + shopM + ') ' + baht(-shop) : ''].filter(Boolean).join(' · ') || 'ไม่มียอดเก็บเงิน (ฟรี)';
     return '<div class="bill' + (voided ? ' void' : '') + '"><div class="bh"><span>' + dateLabel(f.date) + ' ' + esc(f.time) + ' · ' + esc(f.name) + (f.bookingId || f.name === 'walk-in' ? '' : ' <span class="st">walk-in</span>') + '</span><b>' + baht(sum(L, 'amount')) + ' ฿</b></div>'
-      + L.map((s) => '<div class="bl">' + esc(s.service) + (s.free ? ' (คูปองฟรี)' : '') + ' · ' + esc(s.stylist) + ' · ' + baht(s.amount) + ' ฿ · คอม ' + baht(s.commission) + '</div>').join('')
-      + '<div class="bl muted">' + esc(paidLine ? paidLine.method : 'ไม่มียอดเก็บเงิน (ฟรี)') + (voided ? ' · ' + esc(f.note || 'ยกเลิกแล้ว') : '') + '</div>'
+      + L.map((s) => '<div class="bl">' + esc(s.service) + (s.free ? ' (คูปองฟรี)' : '') + ' · ' + esc(s.stylist) + ' · ' + baht(s.amount) + ' ฿' + (s.discount ? ' (' + esc(s.promo || 'ส่วนลด') + ' −' + baht(s.discount) + ')' : '') + ' · คอม ' + baht(s.commission) + '</div>').join('')
+      + '<div class="bl muted">' + esc(payText) + (voided ? ' · ' + esc(f.note || 'ยกเลิกแล้ว') : '') + '</div>'
       + (voided ? '' : '<button class="x" data-void="' + esc(g) + '">ยกเลิกบิล</button>') + '</div>';
   }).join('') : '<div class="row"><div class="s">ยังไม่มีรายการขายในช่วงนี้</div></div>') + '</div>';
   html += '<p class="hint" style="margin-top:12px">ยอดขายนับตามวันที่ลูกค้ามาใช้บริการ (กด "เสร็จแล้ว" ที่คิว หรือบันทึก walk-in) · ข้อมูลทั้งหมดอยู่ในแผ่นงาน Sales ของ Google Sheet</p>';
@@ -1192,7 +1309,40 @@ function bindSettings() {
   };
 }
 
+/* ---------- แท็บตั้งค่า: โปรโมชัน ---------- */
+state.promoDraft = null;
+function renderPromos() {
+  if (!state.promoDraft) state.promoDraft = (state.data.promos || []).map((p) => Object.assign({}, p));
+  const list = state.promoDraft;
+  $('#promos').innerHTML = list.length ? list.map((p, i) => '<div class="row promo">'
+    + '<input data-pr-name="' + i + '" value="' + esc(p.name) + '" placeholder="ชื่อโปร เช่น รีวิว" maxlength="40">'
+    + '<input data-pr-val="' + i + '" type="number" inputmode="decimal" min="0" step="1" value="' + (p.value || '') + '" placeholder="ลด">'
+    + '<select data-pr-type="' + i + '"><option value="pct"' + (p.type !== 'baht' ? ' selected' : '') + '>%</option><option value="baht"' + (p.type === 'baht' ? ' selected' : '') + '>บาท</option></select>'
+    + '<label class="chk"><input type="checkbox" data-pr-act="' + i + '"' + (p.active !== false ? ' checked' : '') + '> ใช้อยู่</label>'
+    + '</div>').join('') : '<div class="row"><div class="s">ยังไม่มีโปร กด "+ เพิ่มโปรโมชัน"</div></div>';
+}
+function bindPromos() {
+  const box = $('#promos');
+  const upd = (e) => {
+    const t = e.target, d = state.promoDraft;
+    if (t.dataset.prName) d[+t.dataset.prName].name = t.value;
+    if (t.dataset.prVal) d[+t.dataset.prVal].value = t.value;
+    if (t.dataset.prType) d[+t.dataset.prType].type = t.value;
+    if (t.dataset.prAct) d[+t.dataset.prAct].active = t.checked;
+  };
+  box.addEventListener('input', upd); box.addEventListener('change', upd);
+  $('#btn-add-promo').onclick = () => { state.promoDraft.push({ name: '', type: 'pct', value: 10, active: true }); renderPromos(); };
+  $('#btn-save-promos').onclick = async () => {
+    const list = state.promoDraft.filter((p) => String(p.name).trim());
+    const btn = $('#btn-save-promos'); dlgBusy(btn, 'กำลังบันทึก…');
+    try { const data = await call('adminSavePromos', state.pin, list); state.promoDraft = null; receive(data); toast('บันทึกโปรโมชันแล้ว'); } catch (e) { toast(errMsg(e)); }
+    dlgIdle(btn);
+  };
+}
+bindPromos();
+
 /* ---------- ปุ่มต่างๆ ของส่วนใหม่ ---------- */
+
 document.addEventListener('click', async (e) => {
   const tab = e.target.closest('[data-tab]');
   if (tab) { showTab(tab.dataset.tab); return; }
