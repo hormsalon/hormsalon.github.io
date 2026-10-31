@@ -208,14 +208,32 @@
   .promo-custom input[type=number] { width: 90px; flex: 0 0 auto; }
   .promo-custom select { width: 80px; flex: 0 0 auto; }
   .persrow { padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
-  .persrow .two { display: flex; gap: 6px; margin-top: 6px; }
+  .persrow .two { display: flex; gap: 6px; margin-top: 6px; align-items: flex-start; }
   .persrow .two select { flex: 1; width: auto; margin: 0; font-family: inherit; font-size: 14px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); }
   .persrow .two select.need { border-color: var(--danger); }
+  .sg { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .sg select { width: 100%; }
+  .sg .linkish { align-self: flex-start; padding: 0; font-size: 12.5px; }
+  .abrow .sg { flex: 1 1 140px; }
   .billcalc { font-size: 13.5px; margin: 10px 0 0; }
   .billcalc div { display: flex; justify-content: space-between; padding: 2px 0; }
   .billcalc .big { font-size: 16px; font-weight: 500; padding-top: 6px; }
   .billcalc .refund { color: var(--danger); }
   .row.promo { flex-wrap: wrap; }
+  .sw { display: flex; align-items: center; justify-content: space-between; padding: 13px 14px; border-bottom: 1px solid var(--soft); }
+  .sw:last-child { border-bottom: 0; }
+  .sw small { display: block; color: var(--muted); font-size: 12px; }
+  .sw .out { color: var(--danger); }
+  .tog { position: relative; width: 50px; height: 30px; flex: 0 0 auto; }
+  .tog input { opacity: 0; width: 0; height: 0; }
+  .tog span { position: absolute; inset: 0; background: #D9D6CC; border-radius: 99px; transition: background .2s; cursor: pointer; }
+  .tog span::before { content: ''; position: absolute; width: 24px; height: 24px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform .2s; }
+  .tog input:checked + span { background: #4F6B47; }
+  .tog input:checked + span::before { transform: translateX(20px); }
+  .hrow { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--soft); font-size: 14px; }
+  .hrow:last-child { border-bottom: 0; }
+  .hrow b { font-weight: 400; width: 76px; flex: 0 0 auto; }
+  .hrow input { flex: 1; min-width: 0; font-family: inherit; font-size: 15px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); }
   .row.promo input[data-pr-name] { flex: 1 1 140px; width: auto; margin: 0; }
   .row.promo select, .row.promo input[type=number] { width: 80px; margin: 0; font-family: inherit; font-size: 15px; padding: 9px 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
   .row.sty input[data-sty-name] { flex: 1 1 140px; width: auto; margin: 0; }
@@ -273,6 +291,15 @@
       </section>
 
       <section id="tab-set" style="display:none">
+        <h2>แชมพูที่เปิดให้จองออนไลน์</h2>
+        <p class="hint">ของหมดให้ปิดสวิตช์ ลูกค้าจะเห็นว่า "หมดชั่วคราว" และจองสูตรนั้นออนไลน์ไม่ได้ · ของมาแล้วเปิดกลับ · คิวที่ร้านเพิ่มเองยังเลือกได้ทุกสูตร</p>
+        <div class="panel" id="shampoos"></div>
+
+        <h2>เวลารับคิว</h2>
+        <p class="hint">ใส่เวลารอบแรก และเวลาเริ่มคิวสุดท้ายของแต่ละวัน · รอบเวลาห่างกัน 45 นาทีจากรอบแรก และมีคิวสุดท้ายตามที่ตั้งเสมอ · เปลี่ยนแล้วคิวที่จองไว้ก่อนหน้าไม่ถูกยกเลิก</p>
+        <div class="panel" id="hours"></div>
+        <button class="btn" id="btn-save-hours" style="margin-top:10px">บันทึกเวลารับคิว</button>
+
         <h2>ช่าง &amp; ค่าคอม</h2>
         <p class="hint">ค่าคอม = ยอดที่ช่างทำ × % · แก้ % ภายหลังไม่กระทบยอดที่บันทึกไปแล้ว · ช่างที่ออกแล้วให้เอาติ๊ก "ทำงานอยู่" ออก (ไม่ต้องลบ ประวัติจะได้ไม่หาย)</p>
         <div class="panel" id="stylists"></div>
@@ -444,15 +471,19 @@ const Demo = (() => {
   let sales = [];
   let promos = [{ id: 'pdemo1', name: 'รีวิว ลด 10%', type: 'pct', value: 10, active: true }];
   const loyAdj = {};
+  let hours = [['08:00', '19:30'], ['06:00', '18:30'], ['06:00', '18:30'], ['06:00', '18:30'], ['06:00', '18:30'], ['06:00', '18:30'], ['08:00', '19:30']];
+  let shampoos = { moisture: true, keratin: true };
+  const slotsFor = (d) => { const h = hours[new Date(d + 'T00:00').getDay()]; const out = []; for (let m = toMin(h[0]); m <= toMin(h[1]); m += 45) out.push(pad(Math.floor(m / 60)) + ':' + pad(m % 60)); if (out[out.length - 1] !== h[1]) out.push(h[1]); return out; };
   const SLOTS = []; for (let m = 360; m <= 1095; m += 45) SLOTS.push(pad(Math.floor(m / 60)) + ':' + pad(m % 60));
   function addSales(lines, ctx) {
     const g = 'S' + ctx.date.slice(2).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
     lines.forEach((l, i) => {
-      const s = stylists.find((x) => x.id === l.stylistId);
+      const ss = (l.stylistIds || []).map((id) => stylists.find((x) => x.id === id));
       const base = l.free && salesSettings.freeCommissionFull ? l.list : l.amount;
+      const split = ss.map((x) => ({ name: x.name, commission: Math.round(base / ss.length * x.pct) / 100 }));
       sales.push({ id: g + '-' + (i + 1), date: ctx.date, time: ctx.time, bookingId: ctx.bookingId, name: ctx.name, phone: ctx.phone,
         service: l.service === 'keratin' ? 'Keratin' : 'Moisture', list: l.list, free: !!l.free, amount: l.amount, method: l.method,
-        stylist: s.name, pct: s.pct, base, commission: Math.round(base * s.pct) / 100, status: 'ปกติ', note: i === 0 ? (ctx.note || '') : '',
+        stylist: ss.map((x) => x.name).join(' + '), pct: ss.length === 1 ? ss[0].pct : '', base, split, commission: split.reduce((n, x) => n + x.commission, 0), status: 'ปกติ', note: i === 0 ? (ctx.note || '') : '',
         discount: l.discount, promo: l.promo, prepaid: l.prepaid || 0 });
     });
   }
@@ -476,14 +507,14 @@ const Demo = (() => {
   const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3);
   const overview = () => ({
     beds: BEDS, maxStaff: 3, weekly: weekly.slice(), line: line.slice(), review: review(),
-    stylists: stylists.slice(), salesSettings, promos: promos.slice(), loyaltyEvery: 10, prices: { base: 290, keratin: 50 }, slots: SLOTS, today: dates[0],
+    stylists: stylists.slice(), salesSettings, promos: promos.slice(), hours: hours.map((h) => h.slice()), shampoos: Object.assign({}, shampoos), loyaltyEvery: 10, prices: { base: 290, keratin: 50 }, slots: SLOTS, today: dates[0],
     days: dates.map((d) => {
       const staff = staffFor(d), cap = Math.min(BEDS, staff);
       const act = bookings.filter((b) => b.date === d && ACTIVE.includes(b.status));
       const used = {};
       act.forEach((b) => { for (let x = toMin(b.time); x < toMin(b.time) + SERVICE; x += 5) used[x] = (used[x] || 0) + b.people; });
       const peak = Math.max(0, ...Object.values(used));
-      return { date: d, staff, isOverride: d in overrides, capacity: cap, maxQueue: cap * LANES,
+      return { date: d, staff, isOverride: d in overrides, capacity: cap, maxQueue: cap * slotsFor(d).length, hours: hours[new Date(d + 'T00:00').getDay()],
         booked: act.reduce((s, b) => s + b.people, 0), overbooked: peak > cap,
         bookings: bookings.filter((b) => b.date === d).sort((a, b) => a.time.localeCompare(b.time)) };
     }),
@@ -499,7 +530,9 @@ const Demo = (() => {
     adminRejectPayment: (pin, id, reason) => { setStatus(id, 'ยกเลิก', 'สลิปไม่ผ่าน: ' + reason); return delay(overview()); },
     adminCreateLinkCode: () => delay({ code: '482913', minutes: 15 }),
     adminRemoveRecipient: (pin, id) => { line = line.filter((r) => r.id !== id); return delay(overview()); },
-    getAvailability: () => delay({ closed: false, capacity: 3, slots: Object.fromEntries(SLOTS.map((t, i) => [t, i % 4]))}),
+    getAvailability: (d) => delay({ closed: false, capacity: 3, slots: Object.fromEntries(slotsFor(d).map((t, i) => [t, i % 4])) }),
+    adminSaveHours: (pin, h) => { hours = h.map((x) => x.slice()); return delay(overview()); },
+    adminSaveShampoos: (pin, s2) => { shampoos = Object.assign({}, s2); return delay(overview()); },
     adminSaveStylists: (pin, list, set) => { stylists = list.map((x, i) => Object.assign({ id: x.id || 'snew' + i + Date.now() % 1000, active: true }, x, { pct: +x.pct })); salesSettings = set; return delay(overview()); },
     adminSavePromos: (pin, list) => { promos = list.map((p, i) => Object.assign({ id: p.id || 'pnew' + i, active: true }, p, { value: +p.value })); return delay(overview()); },
     adminAddBooking: (pin, p) => {
@@ -516,7 +549,7 @@ const Demo = (() => {
       const online = (b.channel || 'ออนไลน์') === 'ออนไลน์';
       const persons = personsOf(b);
       const bad = r.invalidCoupon || [];
-      const lines = persons.map((p, i) => ({ service: r.shampoos[i], free: p.free && bad.indexOf(i) === -1, stylistId: r.stylists[i],
+      const lines = persons.map((p, i) => ({ service: r.shampoos[i], free: p.free && bad.indexOf(i) === -1, stylistIds: [].concat(r.stylists[i]),
         prepaid: online ? (p.free ? priceOf(p.shampoo) - 290 : priceOf(p.shampoo)) : 0 }));
       priceLines(lines, r.promo);
       lines.forEach((l) => { l.method = r2(l.amount - l.prepaid) !== 0 ? r.method : l.prepaid > 0 ? 'โอน (จองออนไลน์)' : '-'; });
@@ -526,7 +559,7 @@ const Demo = (() => {
       return delay(overview());
     },
     adminQuickSale: (pin, r) => {
-      const lines = priceLines(r.lines.map((l) => ({ service: l.shampoo, free: l.free, stylistId: l.stylistId, prepaid: 0 })), r.promo);
+      const lines = priceLines(r.lines.map((l) => ({ service: l.shampoo, free: l.free, stylistIds: l.stylistIds, prepaid: 0 })), r.promo);
       lines.forEach((l) => { l.method = l.amount ? r.method : '-'; });
       addSales(lines, { date: dates[0], time: new Date().toTimeString().slice(0, 5), bookingId: '', name: r.name || 'walk-in', phone: r.phone });
       return delay(overview());
@@ -579,7 +612,7 @@ function renderDays() {
     const closed = d.capacity === 0;
     const sub = closed
       ? 'ร้านหยุด · ไม่เปิดให้จอง'
-      : `รับพร้อมกัน ${d.capacity} คน · สูงสุด ${d.maxQueue} คิว · จองแล้ว ${d.booked}`;
+      : (d.hours ? `รับคิว ${d.hours[0]}–${d.hours[1]} · ` : '') + `รับพร้อมกัน ${d.capacity} คน · สูงสุด ${d.maxQueue} คิว · จองแล้ว ${d.booked}`;
     const open = state.open === d.date;
     html += `<div class="row${closed ? ' closed' : ''}${open ? ' open' : ''}" data-date="${d.date}">
       <div class="info" data-toggle="${d.date}">
@@ -667,7 +700,7 @@ function render() {
   if (state.pin && !useDemo) setTimeout(prefetchSlips, 300);
   if (state.open === null && state.data.days && state.data.days[0]) state.open = state.data.days[0].date;
   $('#review-wrap').style.display = (state.data.review || []).length ? 'block' : 'none';
-  renderReview(); renderDays(); renderWeekly(); renderLine(); renderStylists(); renderPromos();
+  renderReview(); renderDays(); renderWeekly(); renderLine(); renderStylists(); renderPromos(); renderShampoos(); renderHours();
 }
 
 /* ---------- ดูสลิป (โหลดเฉพาะตอนกดดู ไม่เก็บไว้ในเครื่อง) ---------- */
@@ -980,6 +1013,16 @@ function bindPromo(prefix, onChange) {
   $('#' + prefix + '-promo').onchange = () => { $('#' + prefix + '-custom').style.display = $('#' + prefix + '-promo').value === 'custom' ? 'flex' : 'none'; onChange(); };
   ['-cname', '-cval', '-ctype'].forEach((k) => { $('#' + prefix + k).oninput = onChange; $('#' + prefix + k).onchange = onChange; });
 }
+/* เลือกช่างได้หลายคนต่อลูกค้า 1 ท่าน (เช่น คนสระ + คนไดร์) — ค่าคอมแบ่งเท่ากัน */
+function styGroup(prefix, i, ids) {
+  ids = ids && ids.length ? ids : [''];
+  return '<div class="sg" data-sg="' + prefix + ':' + i + '">'
+    + ids.map((id, j) => stylistSelect('data-' + prefix + '-sty="' + i + ':' + j + '"').replace('value="' + id + '"', 'value="' + id + '" selected')).join('')
+    + (ids.length < 3 ? '<button type="button" class="linkish" data-sg-add="' + prefix + ':' + i + '">+ ช่างอีกคน (แบ่งค่าคอม)</button>' : '') + '</div>';
+}
+function styIds(prefix, i) {
+  return [...document.querySelectorAll('[data-' + prefix + '-sty^="' + i + ':"]')].map((x) => x.value).filter((v, k, a) => v && a.indexOf(v) === k);
+}
 function shampooSelect(attrs, value) {
   return '<select ' + attrs + (value === 'undecided' ? ' class="need"' : '') + '>'
     + (value === 'undecided' ? '<option value="">เลือกแชมพู</option>' : '')
@@ -1017,7 +1060,7 @@ function openCheckout(id, time) {
     + persons.map((p, i) => '<div class="persrow"><div>ท่านที่ ' + (i + 1)
       + (p.shampoo === 'undecided' ? ' <span class="st wait">ยังไม่เลือกแชมพู</span>' : '')
       + (p.free ? ' <span class="st ok">คูปองฟรี LINE</span> <label class="chk muted"><input type="checkbox" data-co-bad="' + i + '"> คูปองไม่ถูกต้อง (เก็บเงิน)</label>' : '') + '</div>'
-      + '<div class="two">' + shampooSelect('data-co-sh="' + i + '"', p.shampoo) + stylistSelect('data-co-sty="' + i + '"') + '</div></div>').join('')
+      + '<div class="two">' + shampooSelect('data-co-sh="' + i + '"', p.shampoo) + styGroup('co', i) + '</div></div>').join('')
     + (persons.some((p) => p.free) ? '<div class="muted" style="margin-top:8px">ให้ลูกค้ากดใช้คูปองสระฟรีในแอป LINE ต่อหน้าพนักงานก่อนบันทึก</div>' : '')
     + promoPicker('co')
     + '<div id="co-due"></div>'
@@ -1046,6 +1089,14 @@ function openCheckout(id, time) {
       + '</div>' + (c.needMethod ? methodRadios('co-method') : '');
     if (had && c.needMethod) { const r = document.querySelector('input[name="co-method"][value="' + had.value + '"]'); if (r) r.checked = true; }
   }
+  $('#dlg-box').onclick = (e) => {
+    const add = e.target.closest('[data-sg-add]');
+    if (!add) return;
+    const i = +add.dataset.sgAdd.split(':')[1];
+    const ids = [...document.querySelectorAll('[data-co-sty^="' + i + ':"]')].map((x) => x.value);
+    ids.push('');
+    add.parentElement.outerHTML = styGroup('co', i, ids);
+  };
   $('#dlg-box').onchange = (e) => {
     const c = e.target.closest('[data-co-bad]');
     if (c) { bad[+c.dataset.coBad] = c.checked; renderDue(); }
@@ -1055,10 +1106,10 @@ function openCheckout(id, time) {
   bindPromo('co', renderDue);
   renderDue();
   $('#co-save').onclick = async () => {
-    const stylists = [...document.querySelectorAll('[data-co-sty]')].map((x) => x.value);
+    const stylists = persons.map((p, i) => styIds('co', i));
     const c = calc();
     if (!c) { $('#dlg-err').textContent = 'กรุณาเลือกแชมพูให้ครบทุกท่าน'; return; }
-    if (stylists.some((v) => !v)) { $('#dlg-err').textContent = 'กรุณาเลือกช่างให้ครบทุกท่าน'; return; }
+    if (stylists.some((v) => !v.length)) { $('#dlg-err').textContent = 'กรุณาเลือกช่างให้ครบทุกท่าน'; return; }
     if ($('#co-promo').value === 'custom' && !readPromo('co')) { $('#dlg-err').textContent = 'กรุณาใส่จำนวนส่วนลด'; return; }
     const m = document.querySelector('input[name="co-method"]:checked');
     if (c.needMethod && !m) { $('#dlg-err').textContent = c.shop < 0 ? 'กรุณาเลือกช่องทางที่คืนเงินลูกค้า' : 'กรุณาเลือกช่องทางรับเงิน'; return; }
@@ -1088,13 +1139,13 @@ function openAddBooking() {
   const people = () => f.rows.reduce((s, r) => s + r.moisture + r.keratin + r.undecided, 0);
   function renderRows() {
     $('#ab-rows').innerHTML = f.rows.map((r, i) => '<div class="slotbox"><div class="top">'
-      + '<select data-ab-time="' + i + '"><option value="">เลือกเวลา' + (f.rows.length > 1 ? ' (รอบที่ ' + (i + 1) + ')' : '') + '</option>' + slots.map((t) => {
+      + '<select data-ab-time="' + i + '"><option value="">เลือกเวลา' + (f.rows.length > 1 ? ' (รอบที่ ' + (i + 1) + ')' : '') + '</option>' + (f.avail && f.avail.slots ? Object.keys(f.avail.slots).sort() : slots).map((t) => {
         const free = f.avail && f.avail.slots ? f.avail.slots[t] : null;
         return '<option value="' + t + '"' + (r.time === t ? ' selected' : '') + '>' + t + (free === null || free === undefined ? '' : ' (ว่าง ' + free + ')') + '</option>';
       }).join('') + '</select>'
       + (f.rows.length > 1 ? '<button class="rm" data-ab-del="' + i + '">ลบ</button>' : '') + '</div>'
-      + '<div class="shrow"><span>Moisture Shampoo · ' + priceOf('moisture') + '</span><span class="mini"><button data-ab-n="' + i + ':moisture:-1">−</button><b>' + r.moisture + '</b><button data-ab-n="' + i + ':moisture:1">+</button></span></div>'
-      + '<div class="shrow"><span>Keratin Shampoo · ' + priceOf('keratin') + '</span><span class="mini"><button data-ab-n="' + i + ':keratin:-1">−</button><b>' + r.keratin + '</b><button data-ab-n="' + i + ':keratin:1">+</button></span></div>'
+      + '<div class="shrow"><span>Moisture Shampoo · ' + priceOf('moisture') + outHint('moisture') + '</span><span class="mini"><button data-ab-n="' + i + ':moisture:-1">−</button><b>' + r.moisture + '</b><button data-ab-n="' + i + ':moisture:1">+</button></span></div>'
+      + '<div class="shrow"><span>Keratin Shampoo · ' + priceOf('keratin') + outHint('keratin') + '</span><span class="mini"><button data-ab-n="' + i + ':keratin:-1">−</button><b>' + r.keratin + '</b><button data-ab-n="' + i + ':keratin:1">+</button></span></div>'
       + '<div class="shrow"><span>ยังไม่เลือกแชมพู<br><small class="muted">เลือกตอนลูกค้ามาที่ร้าน</small></span><span class="mini"><button data-ab-n="' + i + ':undecided:-1">−</button><b>' + r.undecided + '</b><button data-ab-n="' + i + ':undecided:1">+</button></span></div>'
       + '</div>').join('')
       + (f.avail && f.avail.closed ? '<div class="warn">วันนี้ตั้งช่างเป็น 0 (ร้านหยุด)</div>' : '');
@@ -1150,7 +1201,7 @@ function openAddBooking() {
 /* ----- บันทึกขาย walk-in ----- */
 function openWalkin() {
   if (needStylists()) return;
-  const f = { lines: [{ shampoo: 'moisture', stylistId: '', free: false }], free: 0 };
+  const f = { lines: [{ shampoo: 'moisture', stylistIds: [''], free: false }], free: 0 };
   openDlg('<h3>บันทึกขาย (walk-in)</h3><div class="s">ลูกค้าที่ไม่ได้จอง · บันทึกเป็นยอดขายวันนี้ทันที</div>'
     + '<label class="fl">ชื่อลูกค้า (ไม่บังคับ)<input id="wk-name" maxlength="60"></label>'
     + '<label class="fl">เบอร์โทร (ไม่บังคับ)<input id="wk-phone" type="tel" inputmode="numeric" maxlength="12"></label>'
@@ -1163,7 +1214,7 @@ function openWalkin() {
   function render() {
     $('#wk-lines').innerHTML = f.lines.map((l, i) => '<div class="abrow">'
       + '<select data-wk-sh="' + i + '"><option value="moisture"' + (l.shampoo === 'moisture' ? ' selected' : '') + '>Moisture Shampoo · ' + priceOf('moisture') + '</option><option value="keratin"' + (l.shampoo === 'keratin' ? ' selected' : '') + '>Keratin Shampoo · ' + priceOf('keratin') + '</option></select>'
-      + stylistSelect('data-wk-sty="' + i + '"').replace('value="' + l.stylistId + '"', 'value="' + l.stylistId + '" selected')
+      + styGroup('wk', i, l.stylistIds)
       + '<label class="chk"><input type="checkbox" data-wk-free="' + i + '"' + (l.free ? ' checked' : '') + '> คูปองฟรี LINE</label>'
       + (f.lines.length > 1 ? '<button class="rm" data-wk-del="' + i + '">ลบ</button>' : '') + '</div>').join('');
     const t = total();
@@ -1173,27 +1224,29 @@ function openWalkin() {
     if (!t) $('#wk-method').innerHTML = '';
   }
   bindPromo('wk', () => render());
-  $('#wk-add').onclick = () => { f.lines.push({ shampoo: 'moisture', stylistId: '', free: false }); render(); };
+  $('#wk-add').onclick = () => { f.lines.push({ shampoo: 'moisture', stylistIds: [''], free: false }); render(); };
   $('#wk-lines').addEventListener('change', (e) => {
     const t = e.target;
     if (t.dataset.wkSh) f.lines[+t.dataset.wkSh].shampoo = t.value;
-    if (t.dataset.wkSty) f.lines[+t.dataset.wkSty].stylistId = t.value;
+    if (t.dataset.wkSty) { const [li, j] = t.dataset.wkSty.split(':'); f.lines[+li].stylistIds[+j] = t.value; }
     if (t.dataset.wkFree) f.lines[+t.dataset.wkFree].free = t.checked;
     render();
   });
   $('#wk-lines').addEventListener('click', (e) => {
     const d = e.target.closest('[data-wk-del]');
     if (d) { f.lines.splice(+d.dataset.wkDel, 1); render(); }
+    const add = e.target.closest('[data-sg-add]');
+    if (add) { f.lines[+add.dataset.sgAdd.split(':')[1]].stylistIds.push(''); render(); }
   });
   $('#wk-save').onclick = async () => {
-    if (f.lines.some((l) => !l.stylistId)) { $('#dlg-err').textContent = 'กรุณาเลือกช่างให้ครบทุกท่าน'; return; }
+    if (f.lines.some((l) => !l.stylistIds.some(Boolean))) { $('#dlg-err').textContent = 'กรุณาเลือกช่างให้ครบทุกท่าน'; return; }
     const m = document.querySelector('input[name="wk-method"]:checked');
     if (total() && !m) { $('#dlg-err').textContent = 'กรุณาเลือกช่องทางรับเงิน'; return; }
     const btn = $('#wk-save'); dlgBusy(btn, 'กำลังบันทึก…');
     try {
       receive(await call('adminQuickSale', state.pin, {
         name: $('#wk-name').value.trim(), phone: $('#wk-phone').value.replace(/[^0-9]/g, ''), method: m ? m.value : 'เงินสด',
-        lines: f.lines.map((l) => ({ shampoo: l.shampoo, stylistId: l.stylistId, free: l.free })), promo: readPromo('wk'),
+        lines: f.lines.map((l) => ({ shampoo: l.shampoo, stylistIds: l.stylistIds.filter((v, k, a) => v && a.indexOf(v) === k), free: l.free })), promo: readPromo('wk'),
       }));
       closeDlg(); toast('บันทึกยอดขายแล้ว'); state.salesAt = 0;
       if (state.tab === 'sales') loadSales();
@@ -1247,11 +1300,16 @@ function renderSales() {
     + card('โอน (ตอนจองออนไลน์)', baht(sum(ok, 'prepaid')) + ' ฿')
     + card('ค่าคอมรวม', baht(sum(ok, 'commission')) + ' ฿')
     + '</div>';
-  const st = by('stylist');
+  // ช่างหลายคนต่อท่าน: ยอดแบ่งเท่ากัน ค่าคอมตามที่บันทึกของแต่ละคน
+  const st = {};
+  ok.forEach((s) => {
+    const sh = s.split && s.split.length ? s.split : [{ name: s.stylist, commission: s.commission }];
+    sh.forEach((x) => { const a = st[x.name] = st[x.name] || { n: 0, amount: 0, commission: 0 }; a.n += 1; a.amount += (+s.amount || 0) / sh.length; a.commission += +x.commission || 0; });
+  });
   html += '<h3 class="sub-h">ค่าคอมช่าง</h3><div class="panel"><table class="tbl"><tr><th>ช่าง</th><th>ท่าน</th><th>ยอด</th><th>ค่าคอม</th></tr>'
-    + (Object.keys(st).length ? Object.keys(st).sort().map((n) => '<tr><td>' + esc(n) + '</td><td>' + st[n].length + '</td><td>' + baht(sum(st[n], 'amount')) + '</td><td><b>' + baht(sum(st[n], 'commission')) + '</b></td></tr>').join('')
+    + (Object.keys(st).length ? Object.keys(st).sort().map((n) => '<tr><td>' + esc(n) + '</td><td>' + st[n].n + '</td><td>' + baht(st[n].amount) + '</td><td><b>' + baht(st[n].commission) + '</b></td></tr>').join('')
       : '<tr><td colspan="4" class="muted">ยังไม่มีรายการ</td></tr>')
-    + '</table></div>';
+    + '</table></div><p class="hint" style="margin-top:6px">ลูกค้าที่มีช่างหลายคน (เช่น คนสระ + คนไดร์) นับให้ทุกคน และแบ่งยอดเท่ากัน</p>';
   const days = by('date');
   if (Object.keys(days).length > 1) {
     html += '<h3 class="sub-h">รายวัน</h3><div class="panel"><table class="tbl"><tr><th>วันที่</th><th>ท่าน</th><th>ยอดขาย</th></tr>'
@@ -1309,7 +1367,47 @@ function bindSettings() {
   };
 }
 
+/* ---------- แท็บตั้งค่า: แชมพู / เวลาเปิดปิด ---------- */
+function outHint(k) { return state.data.shampoos && state.data.shampoos[k] === false ? ' <span class="st bad">ปิดจองออนไลน์</span>' : ''; }
+function renderShampoos() {
+  const s = state.data.shampoos || { moisture: true, keratin: true };
+  const row = (k, name) => '<div class="sw"><div>' + name + '<small class="' + (s[k] ? '' : 'out') + '">' + (s[k] ? 'เปิดให้จอง' : 'หมดชั่วคราว · ลูกค้าจองไม่ได้') + '</small></div>'
+    + '<label class="tog"><input type="checkbox" data-sham="' + k + '"' + (s[k] ? ' checked' : '') + '><span></span></label></div>';
+  $('#shampoos').innerHTML = row('moisture', 'Moisture Shampoo') + row('keratin', 'Keratin Shampoo');
+}
+state.hoursDraft = null;
+function renderHours() {
+  if (!state.hoursDraft) state.hoursDraft = (state.data.hours || []).map((h) => h.slice());
+  const order = [1, 2, 3, 4, 5, 6, 0];
+  $('#hours').innerHTML = state.hoursDraft.length ? '<div class="hrow muted"><b></b><span style="flex:1">รอบแรก</span><span style="flex:1">คิวสุดท้าย (เวลาเริ่ม)</span></div>' + order.map((d) => '<div class="hrow"><b>วัน' + DOW_FULL[d] + '</b>'
+    + '<input type="time" step="900" data-hr="' + d + ':0" value="' + state.hoursDraft[d][0] + '"> – '
+    + '<input type="time" step="900" data-hr="' + d + ':1" value="' + state.hoursDraft[d][1] + '"></div>').join('') : '';
+}
+function bindShopSettings() {
+  $('#shampoos').addEventListener('change', async (e) => {
+    const t = e.target.closest('[data-sham]');
+    if (!t) return;
+    const s = Object.assign({ moisture: true, keratin: true }, state.data.shampoos);
+    s[t.dataset.sham] = t.checked;
+    state.data.shampoos = s; renderShampoos();
+    enqueue(async () => { if (await send('adminSaveShampoos', s)) toast(t.checked ? 'เปิดให้จองแล้ว' : 'ปิดจองออนไลน์แล้ว (หมดชั่วคราว)'); });
+  });
+  $('#hours').addEventListener('change', (e) => {
+    const t = e.target.closest('[data-hr]');
+    if (!t) return;
+    const [d, i] = t.dataset.hr.split(':');
+    state.hoursDraft[+d][+i] = t.value;
+  });
+  $('#btn-save-hours').onclick = async () => {
+    const btn = $('#btn-save-hours'); dlgBusy(btn, 'กำลังบันทึก…');
+    try { const data = await call('adminSaveHours', state.pin, state.hoursDraft); state.hoursDraft = null; receive(data); toast('บันทึกเวลารับคิวแล้ว'); } catch (e) { toast(errMsg(e)); }
+    dlgIdle(btn);
+  };
+}
+bindShopSettings();
+
 /* ---------- แท็บตั้งค่า: โปรโมชัน ---------- */
+
 state.promoDraft = null;
 function renderPromos() {
   if (!state.promoDraft) state.promoDraft = (state.data.promos || []).map((p) => Object.assign({}, p));
