@@ -299,6 +299,10 @@
         <p class="hint">ของหมดให้ปิดสวิตช์ ลูกค้าจะเห็นว่า "หมดชั่วคราว" และจองสูตรนั้นออนไลน์ไม่ได้ · ของมาแล้วเปิดกลับ · คิวที่ร้านเพิ่มเองยังเลือกได้ทุกสูตร</p>
         <div class="panel" id="shampoos"></div>
 
+        <h2>เมนูเสริมที่เปิดให้จองออนไลน์</h2>
+        <p class="hint">ของหมดให้ปิดสวิตช์ ลูกค้าจะเห็นว่า "หมดชั่วคราว" และเลือกเมนูนั้นตอนจองออนไลน์ไม่ได้ · ที่ร้านยังเพิ่มเองได้</p>
+        <div class="panel" id="addons-sw"></div>
+
         <h2>เวลารับคิว</h2>
         <p class="hint">ใส่เวลารอบแรก และเวลาเริ่มคิวสุดท้ายของแต่ละวัน · รอบเวลาห่างกัน 45 นาทีจากรอบแรก และมีคิวสุดท้ายตามที่ตั้งเสมอ · เปลี่ยนแล้วคิวที่จองไว้ก่อนหน้าไม่ถูกยกเลิก</p>
         <div class="panel" id="hours"></div>
@@ -465,7 +469,7 @@ const Demo = (() => {
   });
   // ตัวอย่างการจองที่รอตรวจสลิป (2 ท่าน แยก 2 รอบ)
   bookings.push({ id: 'HM-REVIEW1', date: dates[1], time: '09:45', name: 'ลูกค้าใหม่', phone: '0891112222', people: 1, moisture: 1, keratin: 0, total: 290, status: 'รอตรวจสลิป', hasSlip: true });
-  bookings.push({ id: 'HM-ADDON1', date: dates[0], time: '10:30', name: 'แอดออน', phone: '0897776666', people: 2, moisture: 1, keratin: 1, total: 830, status: 'ยืนยัน', addons: [['scrub'], ['fino', 'eyemask']] });
+  bookings.push({ id: 'HM-ADDON1', date: dates[0], time: '10:30', name: 'แอดออน', phone: '0897776666', people: 2, moisture: 1, keratin: 1, total: 830, status: 'ยืนยัน', addons: [['scrub_cokki'], ['fino', 'eyemask']] });
   bookings.push({ id: 'HM-REVIEW1', date: dates[1], time: '10:30', name: 'ลูกค้าใหม่', phone: '0891112222', people: 1, moisture: 0, keratin: 1, total: 340, status: 'รอตรวจสลิป', hasSlip: true });
   bookings.push({ id: 'HM-HOLD1', date: dates[2], time: '13:30', name: 'รอโอน', phone: '0893334444', people: 1, moisture: 1, keratin: 0, total: 290, status: 'รอชำระ' });
   const ACTIVE = ['ยืนยัน', 'รอตรวจสลิป', 'รอชำระ', 'เสร็จแล้ว'];
@@ -478,14 +482,14 @@ const Demo = (() => {
   const loyAdj = {};
   let hours = [['08:00', '19:15'], ['06:00', '18:45'], ['06:00', '18:45'], ['06:00', '18:45'], ['06:00', '18:45'], ['06:00', '18:45'], ['08:00', '19:15']];
   let shampoos = { moisture: true, keratin: true };
-  const ADDONS = [{ id: 'scrub', name: 'สครับผม', price: 100 }, { id: 'treatment', name: 'ทรีทเมนต์เคราติน', price: 100 }, { id: 'fino', name: 'มาส์กผม Fino', price: 50 }, { id: 'farger', name: 'มาส์กผม Farger', price: 50 }, { id: 'eyemask', name: 'แผ่นมาส์กตา', price: 50 }];
+  const ADDONS = [{ id: 'extension', name: 'สระ ไดร์ สำหรับผมต่อ', price: 100 }, { id: 'scrub_cokki', name: 'สครับหนังศีรษะ Cökki', price: 100, group: 'scrub' }, { id: 'scrub_yves', name: 'สครับหนังศีรษะ Yves Rocher', price: 100, group: 'scrub' }, { id: 'treatment', name: 'ทรีทเมนต์เคราติน', price: 100 }, { id: 'farger', name: 'มาส์กผม Farger', price: 50 }, { id: 'fino', name: 'มาส์กผม Fino ญี่ปุ่น', price: 50 }, { id: 'eyemask', name: 'แผ่นอุ่นปิดประคบดวงตา', price: 50 }, { id: 'scrub', name: 'สครับผม', price: 100, hidden: true }];
   const slotsFor = (d) => { const h = hours[new Date(d + 'T00:00').getDay()]; const out = []; for (let m = toMin(h[0]); m <= toMin(h[1]); m += 45) out.push(pad(Math.floor(m / 60)) + ':' + pad(m % 60)); if (out[out.length - 1] !== h[1]) out.push(h[1]); return out; };
   const SLOTS = []; for (let m = 360; m <= 1095; m += 45) SLOTS.push(pad(Math.floor(m / 60)) + ':' + pad(m % 60));
   function addSales(lines, ctx) {
     const g = 'S' + ctx.date.slice(2).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
     lines.forEach((l, i) => {
       const ss = (l.stylistIds || []).map((id) => stylists.find((x) => x.id === id));
-      const noCom = (l.addons || []).filter((id) => id !== 'scrub').reduce((n, id) => n + addonPrice([id]), 0);
+      const noCom = (l.addons || []).filter((id) => !/^(scrub|extension)/.test(id)).reduce((n, id) => n + addonPrice([id]), 0);
       const base = l.free && salesSettings.freeCommissionFull ? l.list - noCom : l.gross > 0 ? r2(l.amount * (l.gross - noCom) / l.gross) : 0;
       const split = ss.map((x) => ({ name: x.name, commission: Math.round(base / ss.length * x.pct) / 100 }));
       sales.push({ id: g + '-' + (i + 1), date: ctx.date, time: ctx.time, bookingId: ctx.bookingId, name: ctx.name, phone: ctx.phone,
@@ -539,6 +543,7 @@ const Demo = (() => {
     adminRemoveRecipient: (pin, id) => { line = line.filter((r) => r.id !== id); return delay(overview()); },
     getAvailability: (d) => delay({ closed: false, capacity: 3, slots: Object.fromEntries(slotsFor(d).map((t, i) => [t, i % 4])) }),
     adminSaveHours: (pin, h) => { hours = h.map((x) => x.slice()); return delay(overview()); },
+    adminSaveAddons: (pin, on) => { ADDONS.forEach((a) => { a.on = on[a.id] !== false; }); return delay(overview()); },
     adminSaveShampoos: (pin, s2) => { shampoos = Object.assign({}, s2); return delay(overview()); },
     adminSaveStylists: (pin, list, set) => { stylists = list.map((x, i) => Object.assign({ id: x.id || 'snew' + i + Date.now() % 1000, active: true }, x, { pct: +x.pct })); salesSettings = set; return delay(overview()); },
     adminSavePromos: (pin, list) => { promos = list.map((p, i) => Object.assign({ id: p.id || 'pnew' + i, active: true }, p, { value: +p.value })); return delay(overview()); },
@@ -708,7 +713,7 @@ function render() {
   if (state.pin && !useDemo) setTimeout(prefetchSlips, 300);
   if (state.open === null && state.data.days && state.data.days[0]) state.open = state.data.days[0].date;
   $('#review-wrap').style.display = (state.data.review || []).length ? 'block' : 'none';
-  renderReview(); renderDays(); renderWeekly(); renderLine(); renderStylists(); renderPromos(); renderShampoos(); renderHours();
+  renderReview(); renderDays(); renderWeekly(); renderLine(); renderStylists(); renderPromos(); renderShampoos(); renderAddonSwitches(); renderHours();
 }
 
 /* ---------- ดูสลิป (โหลดเฉพาะตอนกดดู ไม่เก็บไว้ในเครื่อง) ---------- */
@@ -985,13 +990,24 @@ function personsOf(b) {
 /* ---------- เมนูเสริม (Add-on) ---------- */
 function addonMenu() { return (state.data && state.data.addons) || []; }
 function addonPrice(ids) { return (ids || []).reduce((n, id) => n + ((addonMenu().find((a) => a.id === id) || {}).price || 0), 0); }
+// เมนูที่เลือกได้ตอนนี้ (ไม่รวมเมนูเก่าที่ซ่อนไว้)
+function addonList() { return addonMenu().filter((a) => !a.hidden); }
+function addonGroup(id) { return (addonMenu().find((a) => a.id === id) || {}).group || ''; }
 function addonNames(ids) { return (ids || []).map((id) => (addonMenu().find((a) => a.id === id) || { name: id }).name).join(' + '); }
 // ปุ่มเลือกเมนูเสริมของท่านที่ i (data-<prefix>-ad="i:id")
 function addonChips(prefix, i, ids) {
-  return '<div class="adchips">' + addonMenu().map((a) => { const on = (ids || []).indexOf(a.id) !== -1;
-    return '<button type="button" class="' + (on ? 'on' : '') + '" data-' + prefix + '-ad="' + i + ':' + a.id + '">' + (on ? '✓ ' : '+ ') + esc(a.name) + ' ' + a.price + '</button>'; }).join('') + '</div>';
+  return '<div class="adchips">' + addonList().map((a) => { const on = (ids || []).indexOf(a.id) !== -1;
+    return '<button type="button" class="' + (on ? 'on' : '') + '" data-' + prefix + '-ad="' + i + ':' + a.id + '">' + (on ? '✓ ' : '+ ') + esc(a.name) + ' ' + a.price + (a.on === false ? ' (ของหมด)' : '') + '</button>'; }).join('') + '</div>';
 }
-function toggleAddon(list, id) { const k = list.indexOf(id); if (k === -1) list.push(id); else list.splice(k, 1); const order = addonMenu().map((a) => a.id); list.sort((a, b) => order.indexOf(a) - order.indexOf(b)); }
+function toggleAddon(list, id) {
+  const k = list.indexOf(id);
+  if (k !== -1) list.splice(k, 1);
+  else {
+    // สูตรในกลุ่มเดียวกัน (เช่น สครับ 2 สูตร) เลือกได้ 1 สูตร
+    const g = addonGroup(id);
+    if (g) for (let j = list.length - 1; j >= 0; j--) if (addonGroup(list[j]) === g) list.splice(j, 1);
+    list.push(id);
+  } const order = addonMenu().map((a) => a.id); list.sort((a, b) => order.indexOf(a) - order.indexOf(b)); }
 
 /* ราคาแต่ละท่าน: ราคาปกติ → หักคูปองฟรี → หักโปร (เหมือนที่ระบบคิดจริง) */
 const r2 = (n) => Math.round(n * 100) / 100;
@@ -1169,7 +1185,7 @@ function openAddBooking() {
       + '<div class="shrow"><span>Moisture Shampoo · ' + priceOf('moisture') + outHint('moisture') + '</span><span class="mini"><button data-ab-n="' + i + ':moisture:-1">−</button><b>' + r.moisture + '</b><button data-ab-n="' + i + ':moisture:1">+</button></span></div>'
       + '<div class="shrow"><span>Keratin Shampoo · ' + priceOf('keratin') + outHint('keratin') + '</span><span class="mini"><button data-ab-n="' + i + ':keratin:-1">−</button><b>' + r.keratin + '</b><button data-ab-n="' + i + ':keratin:1">+</button></span></div>'
       + '<div class="shrow"><span>ยังไม่เลือกแชมพู<br><small class="muted">เลือกตอนลูกค้ามาที่ร้าน</small></span><span class="mini"><button data-ab-n="' + i + ':undecided:-1">−</button><b>' + r.undecided + '</b><button data-ab-n="' + i + ':undecided:1">+</button></span></div>'
-      + (addonMenu().length ? '<div class="muted" style="margin:8px 0 0 4px">เมนูเสริม (กี่ท่านในรอบนี้)</div>' + addonMenu().map((a) => '<div class="shrow"><span>' + esc(a.name) + ' · +' + a.price + '</span><span class="mini"><button data-ab-ad="' + i + ':' + a.id + ':-1">−</button><b>' + (r.ad[a.id] || 0) + '</b><button data-ab-ad="' + i + ':' + a.id + ':1">+</button></span></div>').join('') : '')
+      + (addonList().length ? '<div class="muted" style="margin:8px 0 0 4px">เมนูเสริม (กี่ท่านในรอบนี้)</div>' + addonList().map((a) => '<div class="shrow"><span>' + esc(a.name) + ' · +' + a.price + '</span><span class="mini"><button data-ab-ad="' + i + ':' + a.id + ':-1">−</button><b>' + (r.ad[a.id] || 0) + '</b><button data-ab-ad="' + i + ':' + a.id + ':1">+</button></span></div>').join('') : '')
       + '</div>').join('')
       + (f.avail && f.avail.closed ? '<div class="warn">วันนี้ตั้งช่างเป็น 0 (ร้านหยุด)</div>' : '');
     f.useFree = Math.min(f.useFree, people());
@@ -1204,7 +1220,9 @@ function openAddBooking() {
     const ad = e.target.closest('[data-ab-ad]');
     if (ad) {
       const [i, id, d] = ad.dataset.abAd.split(':'), r = f.rows[+i];
-      r.ad[id] = Math.max(0, Math.min(r.moisture + r.keratin + r.undecided, (r.ad[id] || 0) + +d));
+      // กลุ่มเดียวกัน (สครับ 2 สูตร) รวมกันได้ไม่เกินจำนวนท่าน
+      const g = addonGroup(id), others = g ? addonList().filter((a) => a.group === g && a.id !== id).reduce((n, a) => n + (r.ad[a.id] || 0), 0) : 0;
+      r.ad[id] = Math.max(0, Math.min(r.moisture + r.keratin + r.undecided - others, (r.ad[id] || 0) + +d));
       renderRows(); return;
     }
     const del = e.target.closest('[data-ab-del]');
@@ -1224,7 +1242,13 @@ function openAddBooking() {
       for (let k = 0; k < r.moisture; k++) row.push({ shampoo: 'moisture', time: r.time });
       for (let k = 0; k < r.undecided; k++) row.push({ shampoo: 'undecided', time: r.time });
       for (let k = 0; k < r.keratin; k++) row.push({ shampoo: 'keratin', time: r.time });
-      row.forEach((it, k) => { it.addons = addonMenu().filter((a) => k < (r.ad[a.id] || 0)).map((a) => a.id); });
+      row.forEach((it) => { it.addons = []; });
+      const used = {}; // กลุ่ม → ท่านถัดไปที่ยังไม่ได้สูตรในกลุ่มนี้
+      addonList().forEach((a) => {
+        const start = a.group ? (used[a.group] || 0) : 0;
+        for (let k = start; k < start + (r.ad[a.id] || 0) && k < row.length; k++) row[k].addons.push(a.id);
+        if (a.group) used[a.group] = start + (r.ad[a.id] || 0);
+      });
       items.push(...row);
     });
     const btn = $('#ab-save'); dlgBusy(btn, 'กำลังเพิ่มคิว…');
@@ -1423,6 +1447,10 @@ function renderShampoos() {
     + '<label class="tog"><input type="checkbox" data-sham="' + k + '"' + (s[k] ? ' checked' : '') + '><span></span></label></div>';
   $('#shampoos').innerHTML = row('moisture', 'Moisture Shampoo') + row('keratin', 'Keratin Shampoo');
 }
+function renderAddonSwitches() {
+  $('#addons-sw').innerHTML = addonList().map((a) => '<div class="sw"><div>' + esc(a.name) + ' · ' + a.price + '<small class="' + (a.on !== false ? '' : 'out') + '">' + (a.on !== false ? 'เปิดให้เลือก' : 'หมดชั่วคราว · ลูกค้าเลือกออนไลน์ไม่ได้') + '</small></div>'
+    + '<label class="tog"><input type="checkbox" data-adsw="' + a.id + '"' + (a.on !== false ? ' checked' : '') + '><span></span></label></div>').join('');
+}
 state.hoursDraft = null;
 function renderHours() {
   if (!state.hoursDraft) state.hoursDraft = (state.data.hours || []).map((h) => h.slice());
@@ -1439,6 +1467,14 @@ function bindShopSettings() {
     s[t.dataset.sham] = t.checked;
     state.data.shampoos = s; renderShampoos();
     enqueue(async () => { if (await send('adminSaveShampoos', s)) toast(t.checked ? 'เปิดให้จองแล้ว' : 'ปิดจองออนไลน์แล้ว (หมดชั่วคราว)'); });
+  });
+  $('#addons-sw').addEventListener('change', (e) => {
+    const t = e.target.closest('[data-adsw]');
+    if (!t) return;
+    (state.data.addons || []).forEach((a) => { if (a.id === t.dataset.adsw) a.on = t.checked; });
+    const on = {}; (state.data.addons || []).forEach((a) => { on[a.id] = a.on !== false; });
+    renderAddonSwitches();
+    enqueue(async () => { if (await send('adminSaveAddons', on)) toast(t.checked ? 'เปิดให้เลือกแล้ว' : 'ปิดแล้ว (หมดชั่วคราว)'); });
   });
   $('#hours').addEventListener('change', (e) => {
     const t = e.target.closest('[data-hr]');
