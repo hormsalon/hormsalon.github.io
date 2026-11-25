@@ -704,8 +704,8 @@ const Demo = (() => {
         out[pad(Math.floor(m / 60)) + ':' + pad(m % 60)] = free;
       }
       if (date === ymdOf(new Date(now.getTime() + 6 * 864e5))) Object.keys(out).forEach((k) => (out[k] = 0));
-      const close = toMin(hh[2]), out60 = {};
-      Object.keys(out).forEach((k) => { out60[k] = toMin(k) + 105 > close ? 0 : out[k]; });
+      const out60 = {};
+      Object.keys(out).forEach((k) => { out60[k] = out[k]; });
       return { closed: false, capacity: 3, slots: out, slots60: out60 };
   }
   const api = {
@@ -835,7 +835,7 @@ function rebuildPersons() {
 function freeFor(t, idx) {
   if (!state.avail || state.avail.closed) return 0;
   const used = state.persons.filter((p, j) => j !== idx && p.time === t).length;
-  // เมนู 1 ชั่วโมงใช้ที่ว่างตลอด 60 นาที และต้องเสร็จก่อนปิดร้าน
+  // RELAX ใช้ที่ว่างตลอดเวลาที่กันเตียง (ระบบคำนวณให้ใน slots60)
   const p = state.persons[idx];
   const map = p && p.min === 60 && state.avail.slots60 ? state.avail.slots60 : state.avail.slots;
   return (map[t] || 0) - used;
