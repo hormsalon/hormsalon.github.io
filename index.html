@@ -76,11 +76,27 @@
     transition: border-color .2s;
   }
   .svc.on { border-color: var(--greige); }
+.svc.hide { display: none; }
+.svc { padding: 12px 14px; margin-bottom: 8px; }
+.svc .name { font-size: 14.5px; }
+.svc .desc { font-size: 12px; margin-top: 0; }
+.svc > .price { margin: 0; font-weight: 500; font-size: 15px; white-space: nowrap; }
+.durtabs { display: flex; gap: 6px; background: var(--soft); border-radius: 14px; padding: 4px; margin-bottom: 8px; }
+.durtabs button { flex: 1; border: 0; background: transparent; border-radius: 11px; padding: 8px 6px; font-family: inherit; color: var(--muted); cursor: pointer; line-height: 1.3; }
+.durtabs button b { display: block; font-weight: 500; font-size: 14px; }
+.durtabs button small { font-size: 12px; }
+.durtabs button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(59,58,53,.12); }
+.durdesc { font-size: 12.5px; color: var(--muted); margin: 0 2px 10px; }
   .svc.out { opacity: .55; }
   .svc.out .tag.outtag { background: #F3E3E0; color: var(--danger); }
   /* เมนูเสริม */
   .addons { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; }
-  .addons .ah { font-weight: 500; font-size: 15px; }
+  .addons .ah { font-weight: 500; font-size: 15px; display: flex; align-items: center; gap: 6px; cursor: pointer; background: none; border: 0; padding: 0; width: 100%; font-family: inherit; color: var(--ink); text-align: left; }
+  .addons .ah .cnt { margin-left: auto; font-weight: 400; font-size: 12.5px; color: var(--cream); background: var(--ink); border-radius: 99px; padding: 1px 9px; }
+  .addons .ah .chev { margin-left: auto; color: var(--muted); font-weight: 300; transition: transform .2s; }
+  .addons .ah .cnt + .chev { margin-left: 4px; }
+  .addons.open .ah .chev { transform: rotate(180deg); }
+  .addons .teaser { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
   .addons .ah small { font-weight: 300; color: var(--muted); font-size: 12.5px; margin-left: 4px; }
   .addons .adrow { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--soft); }
   .addons .ah + .adrow { margin-top: 8px; }
@@ -325,24 +341,69 @@
 
   <main>
     <section>
-      <div class="step"><span class="no">01</span><h2>เลือกแชมพู &amp; จำนวนท่าน</h2></div>
-      <div class="svc on" id="svc-moisture">
+      <div class="step"><span class="no">01</span><h2>เลือกบริการ &amp; จำนวนท่าน</h2></div>
+      <div class="durtabs" id="durtabs">
+        <button type="button" class="on" data-dur="45"><b>สระ ไดร์ ปกติ</b></button>
+        <button type="button" data-dur="60"><b>RELAX</b><small>สระผมผ่อนคลาย 1 ชั่วโมง</small></button>
+      </div>
+      <div class="durdesc" id="durdesc"></div>
+      <div class="svc on" data-svc="moisture:45">
         <div class="info">
           <div class="name">Moisture Shampoo</div>
-          <div class="desc">สระ ไดร์ ด้วยแชมพูสูตรเพิ่มความชุ่มชื้น เหมาะกับผมทุกสภาพ</div>
-          <div class="price"><span id="p-base">290</span> บาท / ท่าน</div>
+          <div class="desc">เพิ่มความชุ่มชื้น เหมาะกับผมทุกสภาพ</div>
         </div>
-        <div class="stepper" data-key="moisture">
+        <div class="price"><span data-price="moisture:45"></span>.-</div>
+        <div class="stepper" data-key="moisture:45">
           <button type="button" data-d="-1" aria-label="ลด">−</button><span>1</span><button type="button" data-d="1" aria-label="เพิ่ม">+</button>
         </div>
       </div>
-      <div class="svc" id="svc-keratin">
+      <div class="svc" data-svc="keratin:45">
         <div class="info">
-          <div class="name">Keratin Shampoo <span class="tag">+<span id="p-add">50</span></span></div>
-          <div class="desc">สำหรับผมแห้งเสียมาก ต้องการบำรุงเป็นพิเศษ</div>
-          <div class="price"><span id="p-ker">340</span> บาท / ท่าน</div>
+          <div class="name">Keratin Shampoo</div>
+          <div class="desc">สำหรับผมแห้งเสีย ต้องการบำรุงพิเศษ</div>
         </div>
-        <div class="stepper" data-key="keratin">
+        <div class="price"><span data-price="keratin:45"></span>.-</div>
+        <div class="stepper" data-key="keratin:45">
+          <button type="button" data-d="-1" aria-label="ลด">−</button><span>0</span><button type="button" data-d="1" aria-label="เพิ่ม">+</button>
+        </div>
+      </div>
+      <div class="svc" data-svc="kerastase:45">
+        <div class="info">
+          <div class="name">Kerastase</div>
+          <div class="desc">Chronologiste · สระ 4 รอบ นวด 1 รอบ</div>
+        </div>
+        <div class="price"><span data-price="kerastase:45"></span>.-</div>
+        <div class="stepper" data-key="kerastase:45">
+          <button type="button" data-d="-1" aria-label="ลด">−</button><span>0</span><button type="button" data-d="1" aria-label="เพิ่ม">+</button>
+        </div>
+      </div>
+      <div class="svc hide" data-svc="moisture:60">
+        <div class="info">
+          <div class="name">Moisture Shampoo</div>
+          <div class="desc">เพิ่มความชุ่มชื้น เหมาะกับผมทุกสภาพ</div>
+        </div>
+        <div class="price"><span data-price="moisture:60"></span>.-</div>
+        <div class="stepper" data-key="moisture:60">
+          <button type="button" data-d="-1" aria-label="ลด">−</button><span>0</span><button type="button" data-d="1" aria-label="เพิ่ม">+</button>
+        </div>
+      </div>
+      <div class="svc hide" data-svc="keratin:60">
+        <div class="info">
+          <div class="name">Keratin Shampoo</div>
+          <div class="desc">สำหรับผมแห้งเสีย ต้องการบำรุงพิเศษ</div>
+        </div>
+        <div class="price"><span data-price="keratin:60"></span>.-</div>
+        <div class="stepper" data-key="keratin:60">
+          <button type="button" data-d="-1" aria-label="ลด">−</button><span>0</span><button type="button" data-d="1" aria-label="เพิ่ม">+</button>
+        </div>
+      </div>
+      <div class="svc hide" data-svc="kerastase:60">
+        <div class="info">
+          <div class="name">Kerastase</div>
+          <div class="desc">Chronologiste · สระ 4 รอบ นวด 1 รอบ</div>
+        </div>
+        <div class="price"><span data-price="kerastase:60"></span>.-</div>
+        <div class="stepper" data-key="kerastase:60">
           <button type="button" data-d="-1" aria-label="ลด">−</button><span>0</span><button type="button" data-d="1" aria-label="เพิ่ม">+</button>
         </div>
       </div>
@@ -514,7 +575,9 @@ const ST_PENDING = 'รอชำระ', ST_REVIEW = 'รอตรวจสล�
 
 const $ = (s) => document.querySelector(s);
 // persons = แต่ละท่านในการจองนี้ { shampoo, time } — เลือกเวลาของแต่ละท่านได้
-const state = { moisture: 1, keratin: 0, date: null, avail: null, cfg: null, persons: [{ shampoo: 'moisture', time: null, addons: [] }], active: 0 };
+// qty = จำนวนท่านต่อบริการ 'สูตร:นาที' · persons = แต่ละท่าน { shampoo, min, time, addons }
+const SVC_KEYS = ['moisture:45', 'keratin:45', 'kerastase:45', 'moisture:60', 'keratin:60', 'kerastase:60'];
+const state = { dur: 45, adOpen: false, qty: { 'moisture:45': 1 }, date: null, avail: null, cfg: null, persons: [{ shampoo: 'moisture', min: 45, time: null, addons: [] }], active: 0 };
 const MON_FULL = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
 state.calOffset = 0;   // เดือนที่แสดงในปฏิทิน (0 = เดือนนี้)
 state.availAll = null; // เวลาว่างทุกวัน โหลดครั้งเดียวตอนเปิดหน้า
@@ -593,8 +656,9 @@ function call(fn, ...args) {
 
 /* โหมดตัวอย่าง: ใช้เมื่อเปิดไฟล์นี้ในเครื่อง (localhost) โดยไม่ผ่าน Apps Script */
 const Demo = (() => {
-  const cfg = { step: 45, service: 45, maxPeople: 6, shampoos: { moisture: true, keratin: true },
-    hours: [['08:00', '19:15'], ['06:00', '18:45'], ['06:00', '18:45'], ['06:00', '18:45'], ['06:00', '18:45'], ['06:00', '18:45'], ['08:00', '19:15']],
+  const cfg = { step: 45, service: 45, maxPeople: 6, shampoos: { moisture: true, keratin: true, kerastase: true },
+    prices: { 45: { moisture: 290, keratin: 340, kerastase: 450 }, 60: { moisture: 590, keratin: 690, kerastase: 750 } },
+    hours: [['08:00', '19:15', '20:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['08:00', '19:15', '20:00']],
     daysAhead: 30, minLead: 30, priceBase: 290, priceKeratin: 50, holdMin: 10, addons: [{ id: 'extension', name: 'สระ ไดร์ สำหรับผมต่อ', price: 100, desc: 'ดูแลผมต่อเป็นพิเศษ สระไดร์อย่างทะนุถนอม' }, { id: 'scrub_cokki', name: 'สครับหนังศีรษะ Cökki', price: 100, group: 'scrub', groupName: 'สครับหนังศีรษะ', label: 'Cökki', desc: 'เลือกได้ 2 สูตร' }, { id: 'scrub_yves', name: 'สครับหนังศีรษะ Yves Rocher', price: 100, group: 'scrub', groupName: 'สครับหนังศีรษะ', label: 'Yves Rocher', desc: 'เลือกได้ 2 สูตร' }, { id: 'treatment', name: 'ทรีทเมนต์เคราติน', price: 100, desc: 'สำหรับผมแห้งเสียมาก ต้องการบำรุงเป็นพิเศษ' }, { id: 'farger', name: 'มาส์กผม Farger', price: 50, desc: 'สำหรับผมที่ต้องการบำรุงให้ผมนุ่ม ปิดเกล็ดผม ผมไม่พันกัน' }, { id: 'fino', name: 'มาส์กผม Fino ญี่ปุ่น', price: 50, desc: 'สำหรับผมที่ต้องการบำรุงให้นุ่มลื่น' }, { id: 'eyemask', name: 'แผ่นอุ่นปิดประคบดวงตา', price: 50, desc: 'ผ่อนคลายดวงตาระหว่างสระ' }],
     shopPhone: '0652914251', lineOa: '@007nvgwf',
     payment: { promptpay: '004999252396345', bank: 'กสิกรไทย', account: '239-3-71728-1', accountName: 'พัทธ์ธีรา ตรีวงษ์วัฒนา' } };
@@ -640,20 +704,23 @@ const Demo = (() => {
         out[pad(Math.floor(m / 60)) + ':' + pad(m % 60)] = free;
       }
       if (date === ymdOf(new Date(now.getTime() + 6 * 864e5))) Object.keys(out).forEach((k) => (out[k] = 0));
-      return { closed: false, capacity: 3, slots: out };
+      const close = toMin(hh[2]), out60 = {};
+      Object.keys(out).forEach((k) => { out60[k] = toMin(k) + 105 > close ? 0 : out[k]; });
+      return { closed: false, capacity: 3, slots: out, slots60: out60 };
   }
   const api = {
     createBooking: (p) => {
       const g = {};
       p.items.forEach((it) => {
-        const s = g[it.time] = g[it.time] || { time: it.time, people: 0, moisture: 0, keratin: 0 };
-        s.people++; s[it.shampoo]++;
+        const s = g[it.time] = g[it.time] || { time: it.time, people: 0, moisture: 0, keratin: 0, kerastase: 0, long: 0 };
+        s.people++; s[it.shampoo]++; if (+it.min === 60) s.long++;
       });
       const slots = Object.keys(g).sort().map((k) => g[k]);
       const keratin = p.items.filter((i) => i.shampoo === 'keratin').length;
       const o = view({ id: 'HM' + p.date.slice(2).replace(/-/g, '') + '-DEMO', date: p.date, time: slots[0].time,
         name: p.name, phone: p.phone, slots: slots, people: p.items.length, moisture: p.items.length - keratin, keratin: keratin,
-        total: p.items.length * cfg.priceBase + keratin * cfg.priceKeratin - (p.useFree || 0) * cfg.priceBase + p.items.reduce((n, it) => n + (it.addons || []).reduce((m, id) => m + cfg.addons.find((a) => a.id === id).price, 0), 0),
+        services: servicesOf(p.items.map((it) => ({ shampoo: it.shampoo, min: +it.min }))),
+        total: p.items.reduce((n, it) => n + cfg.prices[it.min][it.shampoo], 0) - (p.useFree || 0) * cfg.priceBase + p.items.reduce((n, it) => n + (it.addons || []).reduce((m, id) => m + cfg.addons.find((a) => a.id === id).price, 0), 0),
         addons: cfg.addons.map((a) => ({ id: a.id, name: a.name, price: a.price, count: p.items.filter((it) => (it.addons || []).indexOf(a.id) !== -1).length })).filter((a) => a.count),
         free: p.useFree || 0, status: ST_PENDING,
         expiresAt: Date.now() + cfg.holdMin * 60000, note: '' });
@@ -687,7 +754,11 @@ const Demo = (() => {
 const people = () => state.persons.length;
 const addonMenu = () => (state.cfg && state.cfg.addons) || [];
 const addonPrice = (ids) => (ids || []).reduce((n, id) => n + ((addonMenu().find((a) => a.id === id) || {}).price || 0), 0);
-const total = () => people() * state.cfg.priceBase + state.keratin * state.cfg.priceKeratin + state.persons.reduce((n, p) => n + addonPrice(p.addons), 0);
+const PRICES_DEFAULT = { 45: { moisture: 290, keratin: 340, kerastase: 450 }, 60: { moisture: 590, keratin: 690, kerastase: 750 } };
+const priceTable = () => (state.cfg && state.cfg.prices) || PRICES_DEFAULT;
+const priceOf = (sh, min) => (priceTable()[min] || priceTable()[45])[sh] || 0;
+const qty = (k) => state.qty[k] || 0;
+const total = () => state.persons.reduce((n, p) => n + priceOf(p.shampoo, p.min) + addonPrice(p.addons), 0);
 /* สรุปเมนูเสริมทั้งการจอง [{ id, name, price, count }] (รูปแบบเดียวกับที่ระบบส่งกลับมา) */
 function addonSummary(persons) {
   return addonMenu().map((a) => ({ id: a.id, name: a.name, price: a.price, count: persons.filter((p) => (p.addons || []).indexOf(a.id) !== -1).length })).filter((a) => a.count);
@@ -699,15 +770,17 @@ function parseDate(s) { const [y, m, d] = s.split('-').map(Number); return new D
 function ymd(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
 function thaiDate(s) { const d = parseDate(s); return 'วัน' + DOW_FULL[d.getDay()] + 'ที่ ' + d.getDate() + ' ' + MON[d.getMonth()] + ' ' + (d.getFullYear() + 543); }
 // เวลาจบของรอบ = เวลาเริ่ม + เวลาที่ใช้ต่อคิว (เช่น 10:30 → 11:15)
-function endTime(t) {
-  const m = toMin(t) + ((state.cfg && state.cfg.service) || 45);
+// เวลาที่ลูกค้าเสร็จ (รวมไดร์): ปกติ 45 นาที · RELAX 1 ชั่วโมง 45 นาที
+const blockOf = (min) => ((state.cfg && state.cfg.blockMin) || { 45: 45, 60: 105 })[min || 45] || min || 45;
+function endTime(t, min) {
+  const m = toMin(t) + blockOf(min);
   return pad2(Math.floor(m / 60)) + ':' + pad2(m % 60);
 }
 function bangkokMinutes() {
   const p = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
   return toMin(p);
 }
-function timeRange(t) { return t + ' – ' + endTime(t) + ' น.'; }
+function timeRange(t, min) { return t + ' – ' + endTime(t, min) + ' น.'; }
 function fmtPhone(p) { return p.length === 10 ? p.slice(0, 3) + '-' + p.slice(3, 6) + '-' + p.slice(6) : p; }
 // ไม่เขียน entity หรือเครื่องหมายคำพูดใน regex ตรงๆ เพราะ Apps Script ประมวลผลสคริปต์แล้วโค้ดพัง
 const ESC_MAP = { 38: 'amp', 60: 'lt', 62: 'gt', 34: 'quot', 39: '#39' };
@@ -718,21 +791,28 @@ function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.style.display = 'block';
   clearTimeout(toast.t); toast.t = setTimeout(() => (t.style.display = 'none'), 3200);
 }
+const SH_NAME = { moisture: 'Moisture', keratin: 'Keratin', kerastase: 'Kerastase', undecided: 'ยังไม่เลือกแชมพู' };
+const svcName = (sh, min) => (+min === 60 ? 'RELAX ' : '') + SH_NAME[sh];
+/* สรุปบริการ [{ name, count }] (รูปแบบเดียวกับที่ระบบส่งกลับมา) */
+function servicesOf(persons) {
+  return SVC_KEYS.map((k) => { const [sh, min] = k.split(':'); return { shampoo: sh, min: +min, name: svcName(sh, +min), count: persons.filter((p) => p.shampoo === sh && p.min === +min).length }; }).filter((x) => x.count);
+}
 function shampooText(b) {
+  if (b.services && b.services.length) return b.services.map((x) => esc(x.name) + ' × ' + x.count).join('<br>');
   const a = [];
   if (b.moisture) a.push('Moisture × ' + b.moisture);
   if (b.keratin) a.push('Keratin × ' + b.keratin);
   if (b.undecided) a.push('ยังไม่เลือกแชมพู × ' + b.undecided);
   return a.join('<br>');
 }
-const shampooName = (s) => (s === 'keratin' ? 'Keratin' : 'Moisture');
+const shampooName = (s) => SH_NAME[s] || 'Moisture';
 
 /* รวมท่านที่เวลาเดียวกันเป็นรอบเดียว (รูปแบบเดียวกับที่ระบบส่งกลับมา) */
 function slotsOf(persons) {
   const g = {};
   persons.forEach((p) => {
-    const s = g[p.time] = g[p.time] || { time: p.time, people: 0, moisture: 0, keratin: 0 };
-    s.people++; s[p.shampoo]++;
+    const s = g[p.time] = g[p.time] || { time: p.time, people: 0, moisture: 0, keratin: 0, kerastase: 0, long: 0 };
+    s.people++; s[p.shampoo]++; if (p.min === 60) s.long++;
   });
   return Object.keys(g).sort().map((k) => g[k]);
 }
@@ -741,8 +821,7 @@ function slotsOf(persons) {
 function rebuildPersons() {
   const old = state.persons;
   const list = [];
-  for (let i = 0; i < state.moisture; i++) list.push({ shampoo: 'moisture', time: null, addons: [] });
-  for (let i = 0; i < state.keratin; i++) list.push({ shampoo: 'keratin', time: null, addons: [] });
+  SVC_KEYS.forEach((k) => { const [sh, min] = k.split(':'); for (let i = 0; i < qty(k); i++) list.push({ shampoo: sh, min: +min, time: null, addons: [] }); });
   // คงเวลาและเมนูเสริมเดิมไว้ตามลำดับ
   list.forEach((p, i) => { if (old[i]) { p.time = old[i].time; p.addons = (old[i].addons || []).slice(); } });
   state.persons = list;
@@ -756,7 +835,10 @@ function rebuildPersons() {
 function freeFor(t, idx) {
   if (!state.avail || state.avail.closed) return 0;
   const used = state.persons.filter((p, j) => j !== idx && p.time === t).length;
-  return (state.avail.slots[t] || 0) - used;
+  // เมนู 1 ชั่วโมงใช้ที่ว่างตลอด 60 นาที และต้องเสร็จก่อนปิดร้าน
+  const p = state.persons[idx];
+  const map = p && p.min === 60 && state.avail.slots60 ? state.avail.slots60 : state.avail.slots;
+  return (map[t] || 0) - used;
 }
 
 /* ใส่เวลาให้ท่านที่ยังไม่ได้เลือก: รอบเดียวกันก่อน ถ้าเต็มต่อรอบถัดไป */
@@ -784,21 +866,25 @@ function pickTime(t) {
 /* ---------- Render ---------- */
 function shampooOn(k) { return !(state.cfg && state.cfg.shampoos && state.cfg.shampoos[k] === false); }
 function renderSteppers() {
-  document.querySelectorAll('.stepper').forEach((el) => {
+  document.querySelectorAll('.stepper[data-key]').forEach((el) => {
     const k = el.dataset.key;
-    const on = shampooOn(k);
-    el.querySelector('span').textContent = state[k];
+    const on = shampooOn(k.split(':')[0]);
+    el.querySelector('span').textContent = qty(k);
     const [minus, plus] = el.querySelectorAll('button');
-    minus.disabled = state[k] === 0 || people() === 1;
+    minus.disabled = qty(k) === 0 || people() === 1;
     plus.disabled = !on || people() >= state.cfg.maxPeople;
-    const card = $('#svc-' + k);
-    card.classList.toggle('on', state[k] > 0);
+    const card = el.closest('.svc');
+    card.classList.toggle('on', qty(k) > 0);
     card.classList.toggle('out', !on);
     const name = card.querySelector('.name');
     let tag = name.querySelector('.outtag');
     if (!on && !tag) { tag = document.createElement('span'); tag.className = 'tag outtag'; tag.textContent = 'หมดชั่วคราว'; name.appendChild(tag); }
     if (on && tag) tag.remove();
   });
+  // แสดงเฉพาะเมนูของเวลาที่เลือก (45 นาที / 1 ชั่วโมง)
+  document.querySelectorAll('.svc[data-svc]').forEach((c) => c.classList.toggle('hide', +c.dataset.svc.split(':')[1] !== state.dur));
+  document.querySelectorAll('#durtabs [data-dur]').forEach((b) => b.classList.toggle('on', +b.dataset.dur === state.dur));
+  $('#durdesc').textContent = state.dur === 60 ? 'สระผม พร้อมนวดหนังศีรษะ เพื่อความผ่อนคลาย สำหรับคนที่อยากพักผ่อนยาวๆ 1 ชั่วโมง' : '';
   renderAddons();
 }
 
@@ -837,7 +923,11 @@ function renderAddons() {
     if (a.on === false) return '<button type="button" class="opt" disabled>' + esc(label) + ' · หมด</button>';
     return '<button type="button" class="opt' + (on ? ' on' : '') + '" data-ad="' + i + ':' + a.id + '">' + (on ? '✓ ' + esc(onLabel || label) : esc(label)) + '</button>';
   };
-  box.innerHTML = '<div class="ah">เมนูเสริม<small>เลือกเพิ่มได้ตามใจ ไม่บังคับ</small></div>' + addonRows().map((r) => {
+  const picked = state.persons.reduce((n, p) => n + (p.addons || []).length, 0);
+  box.classList.toggle('open', state.adOpen);
+  const head = '<button type="button" class="ah" data-adtoggle>เมนูเสริม<small>ไม่บังคับ</small>' + (picked ? '<span class="cnt">เลือก ' + picked + '</span>' : '') + '<span class="chev">▾</span></button>';
+  if (!state.adOpen) { box.innerHTML = head + '<div class="teaser">สครับหนังศีรษะ · ทรีทเมนต์ · มาส์กผม · แผ่นอุ่นตา · ผมต่อ — แตะเพื่อเลือก</div>'; return; }
+  box.innerHTML = head + addonRows().map((r) => {
     const allOff = r.opts.every((a) => a.on === false);
     let pick = '';
     if (allOff) pick = '<div class="adout">หมดชั่วคราว</div>';
@@ -849,6 +939,7 @@ function renderAddons() {
   }).join('');
 }
 $('#addons').addEventListener('click', (e) => {
+  if (e.target.closest('[data-adtoggle]')) { state.adOpen = !state.adOpen; renderAddons(); return; }
   const b = e.target.closest('[data-ad]'); if (!b) return;
   const [i, id] = b.dataset.ad.split(':'); const p = state.persons[+i]; if (!p) return;
   const list = p.addons || (p.addons = []);
@@ -865,15 +956,13 @@ $('#addons').addEventListener('click', (e) => {
 
 /* แชมพูที่หมด: เอาออกจากการเลือก ถ้าเหลือ 0 ท่าน ย้ายไปสูตรที่ยังมี */
 function applyShampoos() {
-  const mOn = shampooOn('moisture'), kOn = shampooOn('keratin');
-  if (!mOn) state.moisture = 0;
-  if (!kOn) state.keratin = 0;
-  if (state.moisture + state.keratin === 0) { if (mOn) state.moisture = 1; else if (kOn) state.keratin = 1; }
-  if (state.moisture + state.keratin === 0) state.moisture = 1; // ปิดทั้งคู่: ให้หน้าแสดงได้ แต่ปุ่มจองถูกปิด
+  const mOn = SVC_KEYS.some((k) => shampooOn(k.split(':')[0])), kOn = mOn;
+  SVC_KEYS.forEach((k) => { if (!shampooOn(k.split(':')[0])) delete state.qty[k]; });
+  if (!SVC_KEYS.some((k) => qty(k))) { const k = SVC_KEYS.find((x) => +x.split(':')[1] === state.dur && shampooOn(x.split(':')[0])) || 'moisture:' + state.dur; state.qty[k] = 1; } // ปิดทุกสูตร: ให้หน้าแสดงได้ แต่ปุ่มจองถูกปิด
   rebuildPersons();
   let note = $('#shop-note');
   const both = !mOn && !kOn;
-  if (both && !note) { note = document.createElement('div'); note.id = 'shop-note'; note.className = 'shop-note'; note.textContent = 'ขออภัย ปิดรับจองออนไลน์ชั่วคราว กรุณาโทรหรือแชท LINE ร้าน'; $('#svc-moisture').parentElement.insertBefore(note, $('#svc-moisture')); }
+  if (both && !note) { note = document.createElement('div'); note.id = 'shop-note'; note.className = 'shop-note'; note.textContent = 'ขออภัย ปิดรับจองออนไลน์ชั่วคราว กรุณาโทรหรือแชท LINE ร้าน'; $('#durtabs').parentElement.insertBefore(note, $('#durtabs')); }
   if (!both && note) note.remove();
 }
 
@@ -950,8 +1039,8 @@ function renderWho() {
   if (n < 2 || !state.avail || state.avail.closed) { box.style.display = 'none'; return; }
   box.style.display = 'flex';
   box.innerHTML = state.persons.map((p, i) => '<button type="button" class="pchip' + (i === state.active ? ' on' : '') + (p.time ? '' : ' unset') + '" data-p="' + i + '">'
-    + '<b>ท่านที่ ' + (i + 1) + ' · ' + shampooName(p.shampoo) + '</b>'
-    + '<small>' + (p.time ? timeRange(p.time) : 'ยังไม่เลือกเวลา') + '</small></button>').join('');
+    + '<b>ท่านที่ ' + (i + 1) + ' · ' + svcName(p.shampoo, p.min) + '</b>'
+    + '<small>' + (p.time ? timeRange(p.time, p.min) : 'ยังไม่เลือกเวลา') + '</small></button>').join('');
   box.querySelectorAll('.pchip').forEach((b) => (b.onclick = () => { state.active = +b.dataset.p; renderTimes(); }));
   const chip = box.querySelector('.pchip.on');
   if (chip && chip.scrollIntoView) chip.scrollIntoView({ block: 'nearest', inline: 'nearest' });
@@ -962,7 +1051,7 @@ function renderTimes() {
   const n = people();
   $('#time-hint').innerHTML = n > 1
     ? 'แตะเวลาครั้งเดียว ระบบจัดให้ทุกท่าน (รอบไหนเต็มจะต่อรอบถัดไปให้) · แตะ "ท่านที่…" เพื่อเปลี่ยนเวลาเฉพาะท่าน'
-    : 'ใช้เวลาประมาณ ' + ((state.cfg && state.cfg.service) || 45) + ' นาที';
+    : 'ใช้เวลาประมาณ ' + (state.persons[0] && state.persons[0].min === 60 ? '1 ชั่วโมง 45 นาที (รวมไดร์)' : ((state.cfg && state.cfg.service) || 45) + ' นาที');
   renderWho();
   if (!state.date) { box.innerHTML = '<div class="time-state">' + (state.cfg && state.cfg.isDefault ? 'กำลังโหลดเวลาว่าง…' : 'กรุณาเลือกวัน') + '</div>'; return; }
   if (!state.avail) { box.innerHTML = '<div class="time-state">กำลังโหลดเวลาว่าง…</div>'; return; }
@@ -984,7 +1073,7 @@ function renderTimes() {
     list.forEach((t) => {
       const ok = freeFor(t, i) > 0;
       // วันนี้: รอบที่ใกล้เวลาเกินไปขึ้น "ปิดรับจอง" แยกจากรอบที่ "เต็ม"
-      const label = ok || t === mine ? 'ถึง ' + endTime(t) : (isToday && toMin(t) < nowMin + lead ? 'ปิดรับจอง' : 'เต็ม');
+      const label = ok || t === mine ? 'ถึง ' + endTime(t, state.persons[i] && state.persons[i].min) : (isToday && toMin(t) < nowMin + lead ? 'ปิดรับจอง' : 'เต็ม');
       const inGroup = state.persons.filter((p) => p.time === t).length;
       const cls = 'time' + (t === mine ? ' sel' : inGroup ? ' grp' : '') + (label === 'ปิดรับจอง' ? ' past' : '');
       const dots = n > 1 && inGroup ? '<span class="dots">' + '<i></i>'.repeat(inGroup) + '</span>' : '';
@@ -1004,12 +1093,12 @@ function renderBar() {
   if (state.date) { const d = parseDate(state.date); parts.push(d.getDate() + ' ' + MON[d.getMonth()]); }
   if (ready) {
     const s = slotsOf(state.persons);
-    parts.push(s.length === 1 ? timeRange(s[0].time) : s[0].time + ' (แยก ' + s.length + ' รอบ)');
+    parts.push(s.length === 1 ? timeRange(s[0].time, s[0].long ? 60 : 45) : s[0].time + ' (แยก ' + s.length + ' รอบ)');
   }
   const missing = state.persons.filter((p) => !p.time).length;
   $('#sum-text').textContent = ready ? parts.join(' · ')
     : state.date && people() > 1 && missing < people() ? 'เลือกเวลาอีก ' + missing + ' ท่าน' : 'เลือกวันและเวลา';
-  $('#btn-next').disabled = !ready || (!shampooOn('moisture') && !shampooOn('keratin'));
+  $('#btn-next').disabled = !ready || !['moisture', 'keratin', 'kerastase'].some(shampooOn);
 }
 
 /* เลือกวัน: ใช้เวลาว่างที่โหลดไว้แล้ว ขึ้นทันที แล้วค่อยเช็กข้อมูลล่าสุดเบื้องหลัง */
@@ -1060,7 +1149,7 @@ function validate() {
 }
 
 function slotLines(slots) {
-  return slots.map((s) => timeRange(s.time) + (slots.length > 1 || s.people > 1 ? ' · ' + s.people + ' ท่าน' : '')).join('<br>');
+  return slots.map((s) => timeRange(s.time, s.long ? 60 : 45) + (slots.length > 1 || s.people > 1 ? ' · ' + s.people + ' ท่าน' : '')).join('<br>');
 }
 
 function summaryRows(b) {
@@ -1070,7 +1159,7 @@ function summaryRows(b) {
     row('เวลา', slotLines(b.slots)),
     row('ชื่อ', esc(b.name)),
     row('เบอร์ติดต่อ', fmtPhone(b.phone)),
-    row('บริการ', 'สระ ไดร์ ' + b.people + ' ท่าน<br>' + shampooText(b)),
+    row('บริการ', b.people + ' ท่าน<br>' + shampooText(b)),
     (b.addons || []).length ? row('เมนูเสริม', b.addons.map((a) => esc(a.name) + (a.count > 1 ? ' × ' + a.count : '') + ' (+' + fmt(a.price * a.count) + ')').join('<br>')) : '',
     b.free ? row('คูปองฟรี (LINE)', b.free + ' ท่าน · กดใช้ที่ร้าน') : '',
     row('ยอดชำระ', fmt(b.total) + ' บาท', 'total'),
@@ -1082,7 +1171,7 @@ function lineText(b) {
     'จองคิว HORM SALON',
     'รหัส: ' + b.id,
     thaiDate(b.date),
-  ].concat(b.slots.map((s) => 'เวลา ' + timeRange(s.time) + ' (' + s.people + ' ท่าน)')).concat([
+  ].concat(b.slots.map((s) => 'เวลา ' + timeRange(s.time, s.long ? 60 : 45) + ' (' + s.people + ' ท่าน)')).concat([
     'ชื่อ: ' + b.name,
     'เบอร์: ' + fmtPhone(b.phone),
   ]).concat((b.addons || []).length ? ['เมนูเสริม: ' + b.addons.map((a) => a.name + (a.count > 1 ? ' × ' + a.count : '')).join(', ')] : []).concat([
@@ -1096,20 +1185,22 @@ const loy = { use: 0 };
 const totalWithFree = (n) => total() - n * state.cfg.priceBase;
 function draftOrder(c) {
   return { date: state.date, name: c.name, phone: c.phone, slots: slotsOf(state.persons), free: loy.use,
-    people: people(), moisture: state.moisture, keratin: state.keratin, addons: addonSummary(state.persons), total: totalWithFree(loy.use) };
+    people: people(), services: servicesOf(state.persons), addons: addonSummary(state.persons), total: totalWithFree(loy.use) };
 }
 function lineCardLink() {
   return 'https:' + '/' + '/line.me/R/ti/p/' + encodeURIComponent(state.cfg.lineOa);
 }
 function renderConfirm(c) {
-  loy.use = Math.min(loy.use, people());
+  // คูปองสระฟรีใช้ได้เฉพาะเมนู 45 นาที
+  const shortN = state.persons.filter((p) => p.min !== 60).length;
+  loy.use = Math.min(loy.use, shortN);
   const d = draftOrder(c);
   $('#confirm-rows').innerHTML = summaryRows(d);
   const box = $('#loybox');
-  box.style.display = 'block';
+  box.style.display = shortN ? 'block' : 'none';
   box.className = 'loybox' + (loy.use ? ' has' : '');
   box.innerHTML = '<div class="use" style="margin-top:0"><span>จะใช้คูปองสระฟรี (บัตรสะสมแต้ม LINE) ไหม?</span>'
-    + '<div class="stepper"><button type="button" data-loy="-1"' + (loy.use <= 0 ? ' disabled' : '') + '>−</button><span>' + loy.use + '</span><button type="button" data-loy="1"' + (loy.use >= people() ? ' disabled' : '') + '>+</button></div></div>'
+    + '<div class="stepper"><button type="button" data-loy="-1"' + (loy.use <= 0 ? ' disabled' : '') + '>−</button><span>' + loy.use + '</span><button type="button" data-loy="1"' + (loy.use >= shortN ? ' disabled' : '') + '>+</button></div></div>'
     + (loy.use
       ? '<small>ใช้คูปองฟรี ' + loy.use + ' ท่าน (สูตร Moisture) · <b>ยังไม่ต้องกดใช้คูปองตอนนี้</b> กดใช้ในแอป LINE ต่อหน้าพนักงานที่ร้าน · หากไม่มีคูปองชำระที่ร้านตามราคาปกติ</small>'
       : '<small>สะสมแต้มกับบัตรสะสมแต้ม LINE ของร้าน · ครบ 10 ครั้งสระฟรี 1 ครั้ง · <a href="' + lineCardLink() + '" target="_blank" rel="noopener">แอดเพื่อน LINE ร้าน</a> แล้วสแกน QR สะสมแต้มที่ร้าน</small>');
@@ -1120,7 +1211,7 @@ function renderConfirm(c) {
 $('#loybox').addEventListener('click', (e) => {
   const b = e.target.closest('[data-loy]');
   if (!b || b.disabled) return;
-  loy.use = Math.max(0, Math.min(people(), loy.use + +b.dataset.loy));
+  loy.use = Math.max(0, Math.min(state.persons.filter((p) => p.min !== 60).length, loy.use + +b.dataset.loy));
   const c = validate(); if (c) renderConfirm(c);
 });
 
@@ -1138,7 +1229,7 @@ $('#btn-confirm').onclick = () => {
   const draft = Object.assign(draftOrder(c), { id: '', status: 'booking', expiresAt: Date.now() + state.cfg.holdMin * 60000 });
   const booking = call('createBooking', {
     name: c.name, phone: c.phone, date: state.date,
-    items: state.persons.map((p) => ({ shampoo: p.shampoo, time: p.time, addons: p.addons || [] })), useFree: loy.use,
+    items: state.persons.map((p) => ({ shampoo: p.shampoo, min: p.min, time: p.time, addons: p.addons || [] })), useFree: loy.use,
   });
   $('#ov-confirm').classList.remove('show');
   loy.use = 0;
@@ -1436,10 +1527,22 @@ $('#btn-new').onclick = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-document.querySelectorAll('.stepper button').forEach((b) => {
+/* สลับ 45 นาที / 1 ชั่วโมง: ย้ายจำนวนท่านทั้งหมดไปเวลาที่เลือก (สูตรแชมพูเดิม) */
+$('#durtabs').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-dur]'); if (!b) return;
+  const dur = +b.dataset.dur; if (dur === state.dur) return;
+  const q = {};
+  Object.keys(state.qty).forEach((k) => { const sh = k.split(':')[0]; q[sh + ':' + dur] = (q[sh + ':' + dur] || 0) + state.qty[k]; });
+  state.dur = dur; state.qty = q;
+  rebuildPersons();
+  state.persons.forEach((p, i) => { p.min = dur; if (p.time && state.avail && freeFor(p.time, i) <= 0) p.time = null; });
+  const n = state.persons.findIndex((p) => !p.time); if (n !== -1) state.active = n;
+  renderSteppers(); renderCal(); renderTimes(); renderBar();
+});
+document.querySelectorAll('.stepper[data-key] button').forEach((b) => {
   b.onclick = () => {
     const k = b.parentElement.dataset.key;
-    state[k] = Math.max(0, state[k] + +b.dataset.d);
+    state.qty[k] = Math.max(0, qty(k) + +b.dataset.d);
     rebuildPersons();
     renderSteppers(); renderCal(); renderTimes(); renderBar();
   };
@@ -1526,7 +1629,7 @@ $('#m-list').addEventListener('click', async (e) => {
   const btn = e.target.closest('[data-mcancel]');
   if (!btn) return;
   const b = manage.list.find((x) => x.id === btn.dataset.mcancel);
-  if (!confirm('ยืนยันยกเลิกการจอง ' + thaiDate(b.date) + ' เวลา ' + timeRange(b.time) + '?')) return;
+  if (!confirm('ยืนยันยกเลิกการจอง ' + thaiDate(b.date) + ' เวลา ' + timeRange(b.time, b.long ? 60 : 45) + '?')) return;
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>กำลังยกเลิก…';
   try {
     const updated = await call('cancelBookingByCustomer', b.id, manage.phone);
@@ -1577,22 +1680,23 @@ async function resumePending() {
 function defaultConfig() {
   return {
     isDefault: true, open: '06:00', close: '19:00', service: 45, maxPeople: 6, daysAhead: 30,
-    priceBase: 290, priceKeratin: 50, today: ymd(new Date()), closed: [], holdMin: 10, minLead: 10,
+    priceBase: 290, priceKeratin: 50, prices: PRICES_DEFAULT, blockMin: { 45: 45, 60: 105 }, today: ymd(new Date()), closed: [], holdMin: 10, minLead: 10,
     addons: [{ id: 'extension', name: 'สระ ไดร์ สำหรับผมต่อ', price: 100, desc: 'ดูแลผมต่อเป็นพิเศษ สระไดร์อย่างทะนุถนอม' }, { id: 'scrub_cokki', name: 'สครับหนังศีรษะ Cökki', price: 100, group: 'scrub', groupName: 'สครับหนังศีรษะ', label: 'Cökki', desc: 'เลือกได้ 2 สูตร' }, { id: 'scrub_yves', name: 'สครับหนังศีรษะ Yves Rocher', price: 100, group: 'scrub', groupName: 'สครับหนังศีรษะ', label: 'Yves Rocher', desc: 'เลือกได้ 2 สูตร' }, { id: 'treatment', name: 'ทรีทเมนต์เคราติน', price: 100, desc: 'สำหรับผมแห้งเสียมาก ต้องการบำรุงเป็นพิเศษ' }, { id: 'farger', name: 'มาส์กผม Farger', price: 50, desc: 'สำหรับผมที่ต้องการบำรุงให้ผมนุ่ม ปิดเกล็ดผม ผมไม่พันกัน' }, { id: 'fino', name: 'มาส์กผม Fino ญี่ปุ่น', price: 50, desc: 'สำหรับผมที่ต้องการบำรุงให้นุ่มลื่น' }, { id: 'eyemask', name: 'แผ่นอุ่นปิดประคบดวงตา', price: 50, desc: 'ผ่อนคลายดวงตาระหว่างสระ' }],
-    hours: [['08:00', '19:15'], ['06:00', '18:45'], ['06:00', '18:45'], ['06:00', '18:45'], ['06:00', '18:45'], ['06:00', '18:45'], ['08:00', '19:15']],
-    shampoos: { moisture: true, keratin: true },
+    hours: [['08:00', '19:15', '20:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['08:00', '19:15', '20:00']],
+    shampoos: { moisture: true, keratin: true, kerastase: true },
     shopPhone: '0652914251', lineOa: '@007nvgwf',
     payment: { promptpay: '004999252396345', bank: 'กสิกรไทย', account: '239-3-71728-1', accountName: 'พัทธ์ธีรา ตรีวงษ์วัฒนา' },
     availability: null,
   };
 }
+function renderPrices() {
+  document.querySelectorAll('[data-price]').forEach((el) => { const [sh, min] = el.dataset.price.split(':'); el.textContent = fmt(priceOf(sh, +min)); });
+}
 function start(c) {
   state.cfg = c;
   state.availAll = c.availability || null;
   availAt = Date.now();
-  $('#p-base').textContent = fmt(c.priceBase);
-  $('#p-add').textContent = fmt(c.priceKeratin);
-  $('#p-ker').textContent = fmt(c.priceBase + c.priceKeratin);
+  renderPrices();
   setupContacts(c);
   applyShampoos();
   renderSteppers();
@@ -1614,7 +1718,8 @@ function start(c) {
     if (state.cfg) {
       const wasDefault = state.cfg.isDefault;
       state.cfg = c;
-      if (wasDefault) { $('#p-base').textContent = fmt(c.priceBase); $('#p-add').textContent = fmt(c.priceKeratin); $('#p-ker').textContent = fmt(c.priceBase + c.priceKeratin); setupContacts(c); }
+      if (wasDefault) setupContacts(c);
+      renderPrices();
       applyShampoos(); renderSteppers();
       applyAvail(c.availability);
       // ยังไม่ได้เลือกวัน หรือวันที่เลือกเต็ม/หยุด (และยังไม่ได้เลือกเวลา) → ไปวันแรกที่ว่าง
