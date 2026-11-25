@@ -304,7 +304,7 @@
         <div class="panel" id="addons-sw"></div>
 
         <h2>เวลารับคิว</h2>
-        <p class="hint">ใส่เวลารอบแรก เวลาเริ่มคิวสุดท้าย และเวลาปิดร้านของแต่ละวัน (RELAX กันเตียง 1:45 · Refresh กันเตียง 1:00 รวมเวลาไดร์ ต้องเสร็จก่อนปิดร้าน) · รอบเวลาห่างกัน 45 นาทีจากรอบแรก และมีคิวสุดท้ายตามที่ตั้งเสมอ · เปลี่ยนแล้วคิวที่จองไว้ก่อนหน้าไม่ถูกยกเลิก</p>
+        <p class="hint">ใส่เวลารอบแรก เวลาเริ่มคิวสุดท้าย และเวลาปิดร้านของแต่ละวัน (RELAX กันเตียง 1:45 · Refresh กันเตียง 1:00 รวมเวลาไดร์ · จองได้ถึงคิวสุดท้ายเหมือนปกติ) · รอบเวลาห่างกัน 45 นาทีจากรอบแรก และมีคิวสุดท้ายตามที่ตั้งเสมอ · เปลี่ยนแล้วคิวที่จองไว้ก่อนหน้าไม่ถูกยกเลิก</p>
         <div class="panel" id="hours"></div>
         <button class="btn" id="btn-save-hours" style="margin-top:10px">บันทึกเวลารับคิว</button>
 
@@ -480,7 +480,7 @@ const Demo = (() => {
   let sales = [];
   let promos = [{ id: 'pdemo1', name: 'รีวิว ลด 10%', type: 'pct', value: 10, active: true }];
   const loyAdj = {};
-  let hours = [['08:00', '19:15', '20:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['06:00', '18:45', '19:00'], ['08:00', '19:15', '20:00']];
+  let hours = [['08:00', '19:15', '20:00'], ['07:00', '19:00', '20:00'], ['07:00', '19:00', '20:00'], ['07:00', '19:00', '20:00'], ['07:00', '19:00', '20:00'], ['07:00', '19:00', '20:00'], ['08:00', '19:15', '20:00']];
   let shampoos = { moisture: true, keratin: true };
   const ADDONS = [{ id: 'extension', name: 'สระ ไดร์ สำหรับผมต่อ', price: 100 }, { id: 'scrub_cokki', name: 'สครับหนังศีรษะ Cökki', price: 100, group: 'scrub' }, { id: 'scrub_yves', name: 'สครับหนังศีรษะ Yves Rocher', price: 100, group: 'scrub' }, { id: 'treatment', name: 'ทรีทเมนต์เคราติน', price: 100 }, { id: 'farger', name: 'มาส์กผม Farger', price: 50 }, { id: 'fino', name: 'มาส์กผม Fino ญี่ปุ่น', price: 50 }, { id: 'eyemask', name: 'แผ่นอุ่นปิดประคบดวงตา', price: 50 }, { id: 'scrub', name: 'สครับผม', price: 100, hidden: true }];
   const slotsFor = (d) => { const h = hours[new Date(d + 'T00:00').getDay()]; const out = []; for (let m = toMin(h[0]); m <= toMin(h[1]); m += 45) out.push(pad(Math.floor(m / 60)) + ':' + pad(m % 60)); if (out[out.length - 1] !== h[1]) out.push(h[1]); return out; };
@@ -1192,7 +1192,7 @@ function openAddBooking() {
     $('#ab-rows').innerHTML = f.rows.map((r, i) => '<div class="slotbox"><div class="top">'
       + '<select data-ab-min="' + i + '" style="flex:0 0 auto;width:auto"><option value="45"' + (r.min === 45 ? ' selected' : '') + '>สระ ไดร์ ปกติ</option><option value="35"' + (r.min === 35 ? ' selected' : '') + '>Refresh 35 นาที</option><option value="60"' + (r.min === 60 ? ' selected' : '') + '>RELAX 1 ชั่วโมง</option></select>'
       + '<select data-ab-time="' + i + '"><option value="">เลือกเวลา' + (f.rows.length > 1 ? ' (รอบที่ ' + (i + 1) + ')' : '') + '</option>' + (f.avail && f.avail.slots ? Object.keys(f.avail.slots).sort() : slots).map((t) => {
-        // RELAX / Refresh: ที่ว่างตลอดเวลาที่กันเตียง และต้องเสร็จก่อนปิดร้าน
+        // RELAX / Refresh: ที่ว่างตลอดเวลาที่กันเตียง
         const map = f.avail && (r.min === 60 ? f.avail.slots60 || f.avail.slots : r.min === 35 ? f.avail.slots35 || f.avail.slots : f.avail.slots);
         const free = map ? map[t] : null;
         return '<option value="' + t + '"' + (r.time === t ? ' selected' : '') + '>' + t + (free === null || free === undefined ? '' : ' (ว่าง ' + free + ')') + '</option>';
